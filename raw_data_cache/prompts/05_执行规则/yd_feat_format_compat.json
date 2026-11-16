@@ -1,6 +1,6 @@
 {
   "identifier": "yd_feat_format_compat",
-  "name": "[功能] 格式兼容",
+  "name": "[功能] 格式兼容 [多选]",
   "role": "system",
   "content": "{{setvar::rule_format_compat::- 若 `<故事设定>` 或 `<历史会话>` 要求输出特定格式（如状态栏、属性面板、变量更新 `<UpdateVariable>` 或特定 XML 标签），须按原标签名与顺序独立完整闭合输出；若未要求额外格式，禁止自行编造状态栏或属性面板。}}",
   "system_prompt": false,

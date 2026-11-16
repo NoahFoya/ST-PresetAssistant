@@ -1,6 +1,6 @@
 {
   "identifier": "yd_cot_output_draft",
-  "name": "[思考] 输出草稿面板",
+  "name": "[思考] 输出草稿面板 [多选]",
   "role": "system",
   "content": "{{setvar::cot_output_rule::动笔前，先在 `<draft>...</draft>` 标签内完成以下构思推演（`<draft>` 内只做构思分析，严禁提前写出故事正文）；推演完毕并闭合 `</draft>` 后，另起一行立即输出故事正文，任何附加格式标签与状态面板均须置于 `</draft>` 之外。}}",
   "system_prompt": false,

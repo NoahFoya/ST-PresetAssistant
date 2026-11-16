@@ -54,23 +54,12 @@
     { key: "assistant", label: "助手设置" },
   ];
 
-  const PANEL_SECTIONS = [
-    { key: "core", title: "核心规则", mode: "multi", ids: ["main"], prefix: "yd_core_" },
-    { key: "style", title: "文风", mode: "radio", prefix: "yd_style_" },
-    { key: "pov", title: "叙事视角", mode: "radio", prefix: "yd_pov_" },
-    { key: "pace", title: "剧情节奏", mode: "radio", prefix: "yd_pace_" },
-    { key: "focus", title: "描写侧重", mode: "radio", prefix: "yd_focus_" },
-    { key: "nsfw_bias", title: "NSFW 倾向", mode: "mutex_toggle", prefix: "yd_nsfw_bias_" },
-    { key: "nsfw_detail", title: "NSFW 细化", mode: "multi", prefix: "yd_nsfw_detail_" },
-    { key: "length", title: "目标篇幅", mode: "radio", prefix: "yd_length_" },
-    { key: "feat", title: "功能开关", mode: "multi", ids: ["yd_feat_inline_comment", "yd_feat_action_options", "yd_feat_anti_repeat", "yd_feat_format_compat"] },
-    { key: "cot", title: "思考与草稿", mode: "multi", ids: ["yd_cot_unified", "yd_cot_output_draft", "yd_prefill_draft"] },
-  ];
+  const SCAFFOLD_IDS = {
+    yd_top_user_guide: true,
+    yd_output_format_and_note: true,
+  };
 
-  const REGEX_SECTIONS = [
-    { key: "display", title: "显示美化", prefixes: ["[思考]", "[批注]", "[选择]", "[正文]"] },
-    { key: "clean", title: "发送净化", prefixes: ["[清理]"] },
-  ];
+  const REGEX_BEAUTIFY_PREFIX = "[美化]";
 
   function normalizeHex(hex) {
     const raw = String(hex || "").trim();
@@ -105,48 +94,82 @@
     return String((p && (p.id || p.identifier)) || "").trim();
   }
 
-  function stripOptionLabel(name) {
-    return String(name || "")
-      .replace(/^\[[^\]]+\]\s*/u, "")
-      .trim();
+  function parsePromptEntry(p) {
+    const rawName = String((p && p.name) || getPromptId(p)).trim();
+    const modeMatch = rawName.match(/^(.*?)\s*\[(单选|多选)\]\s*$/);
+    const selectType = modeMatch && modeMatch[2] === "单选" ? "single" : "multi";
+    const bodyName = (modeMatch ? modeMatch[1] : rawName).trim();
+    const grpMatch = bodyName.match(/^\[([^\]]+)\]\s*(.+)$/);
+    if (grpMatch) {
+      return {
+        group: grpMatch[1].trim(),
+        label: grpMatch[2].trim(),
+        selectType: selectType,
+        isOther: false,
+      };
+    }
+    return {
+      group: "其他设置",
+      label: bodyName || getPromptId(p),
+      selectType: selectType,
+      isOther: true,
+    };
   }
 
-  function cleanCustomPersonaLabel(rawName) {
-    const s = String(rawName || "").trim();
-    const stripped = s
-      .replace(/^\[(?:AI)?人设\]\s*|^(?:AI|助手)人设\s*[：:]\s*/iu, "")
-      .trim();
-    return stripped || s || "自定义";
+  function isInternalScaffoldPrompt(p) {
+    if (!p || p.marker) return true;
+    const pid = getPromptId(p);
+    if (SCAFFOLD_IDS[pid]) return true;
+    const rawName = String(p.name || "").trim();
+    if (!rawName || /^<[^>]+>$/.test(rawName)) return true;
+    if (/^\[(?:说明|输出汇总模板)\]/.test(rawName)) return true;
+    return false;
+  }
+
+  function stripOptionLabel(name) {
+    return parsePromptEntry({ name: name }).label;
   }
 
   function formatRegexLabel(name) {
     const s = String(name || "").trim();
+    if (s.indexOf(REGEX_BEAUTIFY_PREFIX) === 0) {
+      return s.slice(REGEX_BEAUTIFY_PREFIX.length).trim() || s;
+    }
     return s.replace(/^\[([^\]]+)\]\s*/, "$1：") || s;
   }
 
-  function collectSectionItems(prompts, sec) {
+  function buildPresetSections(prompts) {
     const safePrompts = Array.isArray(prompts) ? prompts : [];
-    const items = [];
-    const seen = {};
-    if (Array.isArray(sec.ids)) {
-      sec.ids.forEach(function (tid) {
-        const found = safePrompts.find(function (p) { return getPromptId(p) === tid; });
-        if (found && !seen[tid]) {
-          seen[tid] = true;
-          items.push(found);
-        }
-      });
+    const groupMap = {};
+    const groupOrder = [];
+    const otherItems = [];
+
+    safePrompts.forEach(function (p) {
+      if (isInternalScaffoldPrompt(p)) return;
+      const pid = getPromptId(p);
+      if (!pid) return;
+      const parsed = parsePromptEntry(p);
+      const entry = {
+        prompt: p,
+        id: pid,
+        label: parsed.label,
+        selectType: parsed.selectType,
+      };
+      if (parsed.isOther) {
+        otherItems.push(entry);
+        return;
+      }
+      if (!groupMap[parsed.group]) {
+        groupMap[parsed.group] = { key: parsed.group, title: parsed.group, items: [] };
+        groupOrder.push(groupMap[parsed.group]);
+      }
+      groupMap[parsed.group].items.push(entry);
+    });
+
+    if (otherItems.length > 0) {
+      groupOrder.push({ key: "其他设置", title: "其他设置", items: otherItems });
     }
-    if (sec.prefix) {
-      safePrompts.forEach(function (p) {
-        const pid = getPromptId(p);
-        if (pid && pid.indexOf(sec.prefix) === 0 && !seen[pid]) {
-          seen[pid] = true;
-          items.push(p);
-        }
-      });
-    }
-    return items;
+    return groupOrder;
   }
 
   function normalizeRegexEntry(raw) {
@@ -194,23 +217,23 @@
 
   function classifyRegexSections(regexList) {
     const safeList = Array.isArray(regexList) ? regexList : [];
-    const groups = [];
-    const matched = {};
+    const beautifyItems = [];
+    const otherItems = [];
 
-    REGEX_SECTIONS.forEach(function (sec) {
-      const items = safeList.filter(function (rx) {
-        const hit = sec.prefixes.some(function (pref) { return rx.name.indexOf(pref) === 0; });
-        if (hit) matched[rx.id || rx.name] = true;
-        return hit;
-      });
-      if (items.length > 0) {
-        groups.push({ key: sec.key, title: sec.title, items: items });
+    safeList.forEach(function (rx) {
+      if (String(rx.name || "").trim().indexOf(REGEX_BEAUTIFY_PREFIX) === 0) {
+        beautifyItems.push(rx);
+      } else {
+        otherItems.push(rx);
       }
     });
 
-    const extra = safeList.filter(function (rx) { return !matched[rx.id || rx.name]; });
-    if (extra.length > 0) {
-      groups.push({ key: "other", title: "其他正则", items: extra });
+    const groups = [];
+    if (beautifyItems.length > 0) {
+      groups.push({ key: "beautify", title: "美化设置", items: beautifyItems });
+    }
+    if (otherItems.length > 0) {
+      groups.push({ key: "other", title: "其他设置", items: otherItems });
     }
     return groups;
   }
@@ -240,30 +263,23 @@
     const list = [];
     const safePrompts = Array.isArray(prompts) ? prompts : [];
 
-    ["yd_persona_lilith", "yd_persona_lingyin"].forEach(function (bid) {
-      const exists = safePrompts.some(function (p) { return getPromptId(p) === bid; });
-      if (exists) list.push(Object.assign({}, BUILTIN_PERSONAS[bid]));
-    });
-
     safePrompts.forEach(function (p) {
+      if (isInternalScaffoldPrompt(p)) return;
       const pid = getPromptId(p);
-      const pname = String((p && p.name) || "");
-      if (!pid || BUILTIN_PERSONAS[pid]) return;
-      if (pid.indexOf("yd_persona_") === 0 || /^\[(?:AI)?人设\]|^AI人设\s*[：:]/i.test(pname)) {
+      if (!pid) return;
+      const parsed = parsePromptEntry(p);
+      const isPersona = parsed.group === "AI人设" || parsed.group === "人设" || pid.indexOf("yd_persona_") === 0;
+      if (!isPersona) return;
+      if (BUILTIN_PERSONAS[pid]) {
+        list.push(Object.assign({}, BUILTIN_PERSONAS[pid], { label: parsed.label || BUILTIN_PERSONAS[pid].label }));
+      } else {
         list.push({
           id: pid,
           key: "custom:" + pid,
-          label: cleanCustomPersonaLabel(pname),
+          label: parsed.label,
           themeKey: "custom",
         });
       }
-    });
-
-    list.push({
-      id: null,
-      key: "none",
-      label: "不启用",
-      themeKey: "none",
     });
 
     return list;
@@ -278,10 +294,10 @@
       const found = safePrompts.find(function (p) { return getPromptId(p) === item.id; });
       if (found && found.enabled) return item;
     }
-    return candidates.find(function (c) { return c.key === "none"; }) || {
+    return {
       id: null,
       key: "none",
-      label: "不启用",
+      label: "",
       themeKey: "none",
     };
   }
@@ -386,52 +402,30 @@
     return buildThemeFromHex(boundHex || fallbackHex, pKey);
   }
 
-  function applyPersonaSelection(prompts, targetKey) {
-    const personas = discoverPersonas(prompts);
-    const target = personas.find(function (p) { return p.key === targetKey; }) ||
-      personas.find(function (p) { return p.key === "none"; });
-
-    const allPersonaIds = {};
-    personas.forEach(function (item) {
-      if (item.id) allPersonaIds[item.id] = true;
-    });
-
-    (prompts || []).forEach(function (p) {
-      const pid = getPromptId(p);
-      if (allPersonaIds[pid]) {
-        p.enabled = Boolean(target && target.id && pid === target.id);
-      }
-    });
-
-    return target;
-  }
-
-  function applySectionToggle(prompts, sec, targetId) {
+  function applyDynamicToggle(prompts, sec, targetId) {
     const safePrompts = Array.isArray(prompts) ? prompts : [];
     const target = safePrompts.find(function (p) { return getPromptId(p) === targetId; });
     if (!target) return false;
 
-    if (sec.mode === "radio") {
-      safePrompts.forEach(function (p) {
-        if (getPromptId(p).indexOf(sec.prefix) === 0) {
-          p.enabled = getPromptId(p) === targetId;
-        }
-      });
-      return true;
-    }
+    const targetMeta = parsePromptEntry(target);
+    const nextState = !target.enabled;
 
-    if (sec.mode === "mutex_toggle") {
-      const nextState = !target.enabled;
+    if (targetMeta.selectType === "single" && sec && Array.isArray(sec.items)) {
+      const singleIds = {};
+      sec.items.forEach(function (item) {
+        if (item.selectType === "single") singleIds[item.id] = true;
+      });
       safePrompts.forEach(function (p) {
-        if (getPromptId(p).indexOf(sec.prefix) === 0) {
-          p.enabled = getPromptId(p) === targetId ? nextState : false;
+        const pid = getPromptId(p);
+        if (singleIds[pid]) {
+          p.enabled = pid === targetId ? nextState : false;
         }
       });
       return nextState;
     }
 
-    target.enabled = !target.enabled;
-    return target.enabled;
+    target.enabled = nextState;
+    return nextState;
   }
 
   function clampNumber(val, min, max) {
@@ -491,14 +485,14 @@
     GITHUB_CHANGELOG_URL: GITHUB_CHANGELOG_URL,
     GITHUB_PACKAGE_URLS: GITHUB_PACKAGE_URLS,
     PANEL_TABS: PANEL_TABS,
-    PANEL_SECTIONS: PANEL_SECTIONS,
-    REGEX_SECTIONS: REGEX_SECTIONS,
     normalizeHex: normalizeHex,
     buildThemeFromHex: buildThemeFromHex,
     getPromptId: getPromptId,
+    parsePromptEntry: parsePromptEntry,
+    isInternalScaffoldPrompt: isInternalScaffoldPrompt,
+    buildPresetSections: buildPresetSections,
     stripOptionLabel: stripOptionLabel,
     formatRegexLabel: formatRegexLabel,
-    collectSectionItems: collectSectionItems,
     normalizeRegexEntry: normalizeRegexEntry,
     mergePresetRegexes: mergePresetRegexes,
     classifyRegexSections: classifyRegexSections,
@@ -512,8 +506,7 @@
     readPresetThemes: readPresetThemes,
     writePresetThemeBinding: writePresetThemeBinding,
     getPersonaTheme: getPersonaTheme,
-    applyPersonaSelection: applyPersonaSelection,
-    applySectionToggle: applySectionToggle,
+    applyDynamicToggle: applyDynamicToggle,
     computePillPosition: computePillPosition,
     posToRatio: posToRatio,
     computeDrawerPosition: computeDrawerPosition,
@@ -647,7 +640,7 @@
       `#${ROOT_EL_ID} .yd-pill-label { font-weight: 600; font-size: 12.5px; color: var(--yd-accent); white-space: nowrap; }`,
       `#${ROOT_EL_ID} .yd-pill-sub { font-size: 12px; opacity: 0.9; white-space: nowrap; }`,
       `#${ROOT_EL_ID} .yd-drawer {`,
-      `  position: fixed; width: min(344px, calc(100vw - 16px)); max-height: 78vh;`,
+      `  position: fixed; width: min(344px, calc(100vw - 16px)); height: min(460px, calc(100vh - 24px));`,
       `  display: none; flex-direction: column; border-radius: 10px; overflow: hidden;`,
       `  background: var(--yd-bg); color: var(--yd-fg);`,
       `  border: 1.5px solid var(--yd-accent-border);`,
@@ -680,7 +673,13 @@
       `#${ROOT_EL_ID} .yd-muted { font-size: 11.5px; opacity: 0.78; line-height: 1.45; }`,
       `#${ROOT_EL_ID} .yd-link-btn { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; border: 1px solid var(--yd-accent-border); background: var(--yd-accent-soft); color: var(--yd-accent); border-radius: 6px; padding: 4px 9px; font-size: 11.5px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.14s ease; }`,
       `#${ROOT_EL_ID} .yd-link-btn:hover { background: var(--yd-accent); color: #fff; border-color: var(--yd-accent); }`,
-      `#${ROOT_EL_ID} .yd-body { padding: 10px 11px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }`,
+      `#${ROOT_EL_ID} .yd-body { flex: 1; min-height: 0; padding: 10px 11px; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 10px; scrollbar-gutter: stable; }`,
+      `@supports (-moz-appearance: none) { #${ROOT_EL_ID} .yd-body { scrollbar-width: thin; scrollbar-color: var(--yd-accent-border) transparent; } }`,
+      `#${ROOT_EL_ID} .yd-body::-webkit-scrollbar { width: 5px; }`,
+      `#${ROOT_EL_ID} .yd-body::-webkit-scrollbar-track { background: transparent; margin: 6px 0; }`,
+      `#${ROOT_EL_ID} .yd-body::-webkit-scrollbar-thumb { background: var(--yd-accent-border); border-radius: 999px; }`,
+      `#${ROOT_EL_ID} .yd-body::-webkit-scrollbar-thumb:hover { background: var(--yd-accent); }`,
+      `#${ROOT_EL_ID} .yd-body::-webkit-scrollbar-button { display: none; height: 0; width: 0; }`,
       `#${ROOT_EL_ID} .yd-sec { display: flex; flex-direction: column; gap: 6px; }`,
       `#${ROOT_EL_ID} .yd-sec-title { font-size: 11.5px; font-weight: 700; color: var(--yd-accent); letter-spacing: 0.03em; }`,
       `#${ROOT_EL_ID} .yd-chips { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }`,
@@ -802,7 +801,7 @@
         if (state.activeTab === tab.key) return;
         state.activeTab = tab.key;
         savePanelState(state);
-        renderFromPreset();
+        renderFromPreset({ preserveScroll: false, reposition: false });
       });
       tabButtons[tab.key] = tbtn;
       tabsBar.appendChild(tbtn);
@@ -839,9 +838,8 @@
       rootEl.style.left = pos.left + "px";
       rootEl.style.top = pos.top + "px";
       if (state.open) {
-        const dRect = drawer.getBoundingClientRect();
-        const dw = dRect.width > 0 ? dRect.width : Math.min(344, vw - 16);
-        const dh = dRect.height > 0 ? dRect.height : Math.min(500, vh * 0.78);
+        const dw = Math.min(344, vw - 16);
+        const dh = Math.min(460, vh - 24);
         const dpos = computeDrawerPosition(pos.left, pos.top, pm.w, pm.h, vw, vh, dw, dh);
         drawer.style.left = dpos.left + "px";
         drawer.style.top = dpos.top + "px";
@@ -877,7 +875,7 @@
         verBadge.title = "当前已是最新版本 (" + formatVerTag(curVer) + ") · 点击前往 GitHub 查看更新日志";
       }
       if (state.open && state.activeTab === "assistant") {
-        renderFromPreset();
+        renderFromPreset({ preserveScroll: true, reposition: false });
       }
     }
 
@@ -928,7 +926,7 @@
           updaterFn(preset);
           return preset;
         }, { render: "debounced" });
-        await renderFromPreset();
+        await renderFromPreset({ preserveScroll: true, reposition: false });
         if (toastMsg) showToast(toastMsg);
       } catch (err) {
         showToast("更新失败：" + (err && err.message ? err.message : String(err)));
@@ -978,7 +976,7 @@
             return preset;
           }, { render: "debounced" });
         }
-        await renderFromPreset();
+        await renderFromPreset({ preserveScroll: true, reposition: false });
       } catch (err) {
         showToast("正则切换失败：" + (err && err.message ? err.message : String(err)));
       } finally {
@@ -986,37 +984,29 @@
       }
     }
 
-    function renderPresetTab(prompts, personas, activePersona) {
-      renderSection("AI人设", function (wrap) {
-        personas.forEach(function (persona) {
-          const btn = hd.createElement("button");
-          btn.type = "button";
-          btn.className = "yd-chip" + (persona.key === activePersona.key ? " is-active" : "");
-          btn.setAttribute("data-yd-persona-key", persona.key);
-          btn.textContent = persona.label;
-          btn.addEventListener("click", function () {
-            mutatePreset(function (p) {
-              applyPersonaSelection(p.prompts || [], persona.key);
-            });
-          });
-          wrap.appendChild(btn);
+    function renderPresetTab(prompts) {
+      const sections = buildPresetSections(prompts);
+      if (!sections.length) {
+        renderSection("预设条目", function (wrap) {
+          const empty = hd.createElement("div");
+          empty.className = "yd-muted";
+          empty.textContent = "当前预设未检测到可管理的条目。";
+          wrap.appendChild(empty);
         });
-      });
+        return;
+      }
 
-      PANEL_SECTIONS.forEach(function (sec) {
-        const items = collectSectionItems(prompts, sec);
-        if (!items.length) return;
+      sections.forEach(function (sec) {
         renderSection(sec.title, function (wrap) {
-          items.forEach(function (item) {
-            const iid = getPromptId(item);
+          sec.items.forEach(function (item) {
             const btn = hd.createElement("button");
             btn.type = "button";
-            btn.className = "yd-chip" + (item.enabled ? " is-active" : "");
-            btn.setAttribute("data-yd-item-id", iid);
-            btn.textContent = stripOptionLabel(item.name || iid);
+            btn.className = "yd-chip" + (item.prompt.enabled ? " is-active" : "");
+            btn.setAttribute("data-yd-item-id", item.id);
+            btn.textContent = item.label;
             btn.addEventListener("click", function () {
               mutatePreset(function (p) {
-                applySectionToggle(p.prompts || [], sec, iid);
+                applyDynamicToggle(p.prompts || [], sec, item.id);
               });
             });
             wrap.appendChild(btn);
@@ -1065,7 +1055,7 @@
     }
 
     function renderAssistantTab(activePersona, theme, mergedThemes, baseVerLabel) {
-      renderSection("主题配色（绑定：" + activePersona.label + "）", function (wrap) {
+      renderSection("主题配色", function (wrap) {
         const isPresetColor = COLOR_SWATCHES.some(function (sw) { return sw.hex === theme.accent; });
         function saveAndApplyColor(chosenHex) {
           const nextThemes = Object.assign({}, mergedThemes);
@@ -1120,7 +1110,7 @@
           state.yRatio = 0.24;
           savePanelState(state);
           applyRelativePosition();
-          renderFromPreset();
+          renderFromPreset({ preserveScroll: true, reposition: false });
           showToast("已恢复默认悬浮球位置");
         });
         row.appendChild(coord);
@@ -1156,7 +1146,10 @@
       }, "yd-sec");
     }
 
-    async function renderFromPreset() {
+    async function renderFromPreset(opts) {
+      const options = opts || {};
+      const preserveScroll = options.preserveScroll !== false;
+      const shouldReposition = options.reposition !== false;
       syncHostColors();
       const api = resolvePresetApi();
       if (!api) return;
@@ -1180,8 +1173,10 @@
       const theme = getPersonaTheme(activePersona, mergedThemes);
       applyThemeColors(theme);
       pillSub.textContent = activePersona.label;
+      pillSub.style.display = activePersona.label ? "" : "none";
 
       syncTabButtons();
+      const prevScrollTop = preserveScroll ? body.scrollTop : 0;
       body.innerHTML = "";
 
       if (state.activeTab === "regex") {
@@ -1189,10 +1184,17 @@
       } else if (state.activeTab === "assistant") {
         renderAssistantTab(activePersona, theme, mergedThemes, baseVerLabel);
       } else {
-        renderPresetTab(prompts, personas, activePersona);
+        renderPresetTab(prompts);
       }
 
-      applyRelativePosition();
+      if (preserveScroll) {
+        body.scrollTop = prevScrollTop;
+      } else {
+        body.scrollTop = 0;
+      }
+      if (shouldReposition) {
+        applyRelativePosition();
+      }
     }
 
     let isDragging = false;
@@ -1242,7 +1244,7 @@
         state.open = true;
         rootEl.classList.add("is-open");
         savePanelState(state);
-        renderFromPreset();
+        renderFromPreset({ preserveScroll: false, reposition: true });
       }
       try { pill.releasePointerCapture(ev.pointerId); } catch (e) {}
     }

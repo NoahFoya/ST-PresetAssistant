@@ -1,6 +1,6 @@
 {
   "identifier": "yd_focus_environment",
-  "name": "[侧重] 环境烘托",
+  "name": "[侧重] 环境烘托 [单选]",
   "role": "system",
   "content": "{{setvar::focus::## 描写侧重\n- 重点刻画现场的空间格局、光影明暗、冷暖质感、声响气味与器物陈设，营造具象可感的场景氛围。\n- 景物与环境描写须紧扣当下人物处境与情绪基调，做到情景互衬，不写脱离人物互动的孤立空景。}}",
   "system_prompt": false,

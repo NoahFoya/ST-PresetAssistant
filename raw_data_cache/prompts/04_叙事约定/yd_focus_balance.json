@@ -1,6 +1,6 @@
 {
   "identifier": "yd_focus_balance",
-  "name": "[侧重] 均衡全面",
+  "name": "[侧重] 均衡全面 [单选]",
   "role": "system",
   "content": "{{setvar::focus::## 描写侧重\n- 统筹调度对话、动作神态、心理暗流与环境氛围，使各项描写服务于当下剧情与人物状态，既不单调枯燥，也不离题堆砌。}}",
   "system_prompt": false,

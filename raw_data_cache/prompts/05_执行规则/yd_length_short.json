@@ -1,6 +1,6 @@
 {
   "identifier": "yd_length_short",
-  "name": "[篇幅] 短篇 (400-800字)",
+  "name": "[篇幅] 短篇 (400-800字) [单选]",
   "role": "system",
   "content": "{{setvar::target_length::- 正文篇幅控制在 400~800 字之间，省去外围景物铺垫与次要枝节，笔墨集中在当前最核心的一组对话交锋或动作往来上。}}{{setvar::length_comment_hint::1~2 串}}",
   "system_prompt": false,
