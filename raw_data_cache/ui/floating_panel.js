@@ -54,11 +54,6 @@
     { key: "assistant", label: "助手设置" },
   ];
 
-  const SCAFFOLD_IDS = {
-    yd_top_user_guide: true,
-    yd_output_format_and_note: true,
-  };
-
   const REGEX_BEAUTIFY_PREFIX = "[美化]";
 
   function normalizeHex(hex) {
@@ -95,39 +90,24 @@
   }
 
   function parsePromptEntry(p) {
-    const rawName = String((p && p.name) || getPromptId(p)).trim();
-    const modeMatch = rawName.match(/^(.*?)\s*\[(单选|多选)\]\s*$/);
-    const selectType = modeMatch && modeMatch[2] === "单选" ? "single" : "multi";
-    const bodyName = (modeMatch ? modeMatch[1] : rawName).trim();
-    const grpMatch = bodyName.match(/^\[([^\]]+)\]\s*(.+)$/);
-    if (grpMatch) {
-      return {
-        group: grpMatch[1].trim(),
-        label: grpMatch[2].trim(),
-        selectType: selectType,
-        isOther: false,
-      };
-    }
+    if (!p || p.marker) return null;
+    const rawName = String((p && p.name) || "").trim();
+    const match = rawName.match(/^\[([^\]]+)\]\s*(.+?)\s*\[(单选|多选)\]\s*$/);
+    if (!match) return null;
     return {
-      group: "其他设置",
-      label: bodyName || getPromptId(p),
-      selectType: selectType,
-      isOther: true,
+      group: match[1].trim(),
+      label: match[2].trim(),
+      selectType: match[3] === "单选" ? "single" : "multi",
     };
   }
 
-  function isInternalScaffoldPrompt(p) {
-    if (!p || p.marker) return true;
-    const pid = getPromptId(p);
-    if (SCAFFOLD_IDS[pid]) return true;
-    const rawName = String(p.name || "").trim();
-    if (!rawName || /^<[^>]+>$/.test(rawName)) return true;
-    if (/^\[(?:说明|输出汇总模板)\]/.test(rawName)) return true;
-    return false;
-  }
-
   function stripOptionLabel(name) {
-    return parsePromptEntry({ name: name }).label;
+    const parsed = parsePromptEntry({ name: name });
+    if (parsed) return parsed.label;
+    return String(name || "")
+      .replace(/^\[[^\]]+\]\s*/, "")
+      .replace(/\s*\[(单选|多选)\]\s*$/, "")
+      .trim();
   }
 
   function formatRegexLabel(name) {
@@ -142,33 +122,24 @@
     const safePrompts = Array.isArray(prompts) ? prompts : [];
     const groupMap = {};
     const groupOrder = [];
-    const otherItems = [];
 
     safePrompts.forEach(function (p) {
-      if (isInternalScaffoldPrompt(p)) return;
       const pid = getPromptId(p);
       if (!pid) return;
       const parsed = parsePromptEntry(p);
-      const entry = {
-        prompt: p,
-        id: pid,
-        label: parsed.label,
-        selectType: parsed.selectType,
-      };
-      if (parsed.isOther) {
-        otherItems.push(entry);
-        return;
-      }
+      if (!parsed) return;
       if (!groupMap[parsed.group]) {
         groupMap[parsed.group] = { key: parsed.group, title: parsed.group, items: [] };
         groupOrder.push(groupMap[parsed.group]);
       }
-      groupMap[parsed.group].items.push(entry);
+      groupMap[parsed.group].items.push({
+        prompt: p,
+        id: pid,
+        label: parsed.label,
+        selectType: parsed.selectType,
+      });
     });
 
-    if (otherItems.length > 0) {
-      groupOrder.push({ key: "其他设置", title: "其他设置", items: otherItems });
-    }
     return groupOrder;
   }
 
@@ -264,12 +235,10 @@
     const safePrompts = Array.isArray(prompts) ? prompts : [];
 
     safePrompts.forEach(function (p) {
-      if (isInternalScaffoldPrompt(p)) return;
       const pid = getPromptId(p);
       if (!pid) return;
       const parsed = parsePromptEntry(p);
-      const isPersona = parsed.group === "AI人设" || parsed.group === "人设" || pid.indexOf("yd_persona_") === 0;
-      if (!isPersona) return;
+      if (!parsed || parsed.group !== "AI人设") return;
       if (BUILTIN_PERSONAS[pid]) {
         list.push(Object.assign({}, BUILTIN_PERSONAS[pid], { label: parsed.label || BUILTIN_PERSONAS[pid].label }));
       } else {
@@ -489,7 +458,6 @@
     buildThemeFromHex: buildThemeFromHex,
     getPromptId: getPromptId,
     parsePromptEntry: parsePromptEntry,
-    isInternalScaffoldPrompt: isInternalScaffoldPrompt,
     buildPresetSections: buildPresetSections,
     stripOptionLabel: stripOptionLabel,
     formatRegexLabel: formatRegexLabel,

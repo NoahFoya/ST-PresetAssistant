@@ -1,8 +1,8 @@
 {
   "identifier": "yd_prefill_draft",
-  "name": "[思考] 预填充草稿 (Prefill) [多选]",
+  "name": "[思考] 预填充思考 [多选]",
   "role": "assistant",
-  "content": "<draft>\n",
+  "content": "<构思>\n",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

@@ -516,14 +516,14 @@
     return { mesId: mesId, blockIdx: blockIdx, adapter: adapter };
   }
 
-  function maskDraftBlocks(text) {
-    return text.replace(/<draft\b[^>]*>[\s\S]*?<\/draft>|```draft[ \t]*\r?\n[\s\S]*?\r?\n```(?=[ \t]*(?:\r?\n|$))/gi, function (m) {
+  function maskThinkBlocks(text) {
+    return text.replace(/<构思(?=[\s>])[^>]*>[\s\S]*?<\/构思>/gi, function (m) {
       return m.replace(/[^\r\n]/g, " ");
     });
   }
 
   function findCommentBlocksInMessage(msgText) {
-    const masked = maskDraftBlocks(msgText);
+    const masked = maskThinkBlocks(msgText);
     const re = /(?:^|\n)([ \t]*※[ \t]*[^：\r\n:]{1,24}[：:][^\r\n]*(?:\r?\n[ \t]*※[ \t]*[^：\r\n:]{1,24}[：:][^\r\n]*)*)(?=[ \t]*(?:\r?\n|$))/g;
     const ranges = [];
     let match;
