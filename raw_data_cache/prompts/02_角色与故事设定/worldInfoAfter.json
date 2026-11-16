@@ -1,0 +1,10 @@
+{
+  "identifier": "worldInfoAfter",
+  "name": "🌠 后世界书 (故事进展、补充语料)",
+  "role": "system",
+  "content": "",
+  "system_prompt": true,
+  "marker": true,
+  "forbid_overrides": false,
+  "enabled": true
+}

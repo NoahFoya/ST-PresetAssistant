@@ -1,0 +1,10 @@
+{
+  "identifier": "worldInfoBefore",
+  "name": "🌠 前世界书 (规则、世界背景)",
+  "role": "system",
+  "content": "",
+  "system_prompt": true,
+  "marker": true,
+  "forbid_overrides": false,
+  "enabled": true
+}

@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_nsfw_bias_neutral",
+  "name": "[NSFW倾向] 无倾向",
+  "role": "system",
+  "content": "{{setvar::vocab::## NSFW 倾向（无倾向）\n- 描写亲密接触时，身体部位、体液与接触动作一律使用直白准确的词汇，禁止使用“欢愉的海洋、神秘花园、那处、合二为一”等含糊隐喻代称，禁止使用“疯狂地、无情地”等空洞副词。\n- 平衡写清双方的真切触感与感官交互：皮肤相贴的温度与阻力、受力下陷的软肉、衣料阻隔到彻底褪去的层次感、紧绷包裹与节奏轻重快慢，不偏向单一视角凝视。\n- 双方的生理反应、呼吸节奏与发出的声音，必须完全忠于各自的性格特质与当前关系阶段，展现真实自然的身体对抗或温存配合，不用极端猎奇或贬损字眼。}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": false,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

@@ -1,0 +1,10 @@
+{
+  "identifier": "charDescription",
+  "name": "🌠 角色卡 (描述)",
+  "role": "system",
+  "content": "",
+  "system_prompt": true,
+  "marker": true,
+  "forbid_overrides": false,
+  "enabled": true
+}

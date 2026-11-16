@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_exec_rules_open",
+  "name": "<执行规则>",
+  "role": "system",
+  "content": "{{setvar::target_length::- 依据当前场景互动需要自然把控正文篇幅。}}{{setvar::length_comment_hint::2~4 串}}{{setvar::rule_format_compat::}}{{setvar::rule_anti_repeat::}}{{setvar::rule_inline_comment::}}{{setvar::rule_action_options::}}{{setvar::output_spec::}}{{setvar::cot_output_rule::动笔前先按以下要点在内部完成构思推演，自检一次即可，不输出额外推演标签，直接开始写正文。}}{{setvar::cot_section::}}{{setvar::cot_addons::}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": true,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

@@ -1,0 +1,462 @@
+```html
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+  :root {
+    --SmartThemeBodyColor: #3b342c;
+    --SmartThemeEmColor: #b85d7e;
+    --SmartThemeBorderColor: rgba(130, 82, 104, 0.22);
+    --mainFontFamily: "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--SmartThemeBodyColor);
+    font-family: var(--mainFontFamily);
+    font-size: 14px;
+    line-height: 1.55;
+    overflow-x: hidden;
+  }
+  .ll-opt-card {
+    margin: 4px 0;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--SmartThemeBodyColor) 3.8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 15%, transparent);
+    border-left: 3px solid color-mix(in srgb, var(--SmartThemeEmColor) 82%, transparent);
+    overflow: hidden;
+    box-shadow: 0 1px 4px color-mix(in srgb, var(--SmartThemeBodyColor) 5%, transparent);
+  }
+  .ll-opt-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 12px;
+    background: color-mix(in srgb, var(--SmartThemeEmColor) 7.5%, transparent);
+    border-bottom: 1px dashed color-mix(in srgb, var(--SmartThemeBodyColor) 15%, transparent);
+  }
+  .ll-opt-card.is-collapsed .ll-opt-head {
+    border-bottom: none;
+  }
+  .ll-opt-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+  }
+  .ll-opt-title {
+    font-size: 0.94em;
+    font-weight: 600;
+    color: var(--SmartThemeEmColor);
+    letter-spacing: 0.04em;
+  }
+  .ll-opt-count {
+    font-size: 0.75em;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--SmartThemeEmColor) 14%, transparent);
+    color: var(--SmartThemeEmColor);
+    border: 1px solid color-mix(in srgb, var(--SmartThemeEmColor) 28%, transparent);
+  }
+  .ll-opt-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+  }
+  .ll-opt-modes {
+    display: inline-flex;
+    padding: 2px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--SmartThemeBodyColor) 5%, transparent);
+    border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 14%, transparent);
+    gap: 2px;
+  }
+  .ll-mode-btn {
+    background: transparent;
+    border: none;
+    color: color-mix(in srgb, var(--SmartThemeBodyColor) 68%, transparent);
+    font-size: 0.78em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.16s ease;
+  }
+  .ll-mode-btn:hover {
+    color: var(--SmartThemeBodyColor);
+    background: color-mix(in srgb, var(--SmartThemeEmColor) 10%, transparent);
+  }
+  .ll-mode-btn.active {
+    background: color-mix(in srgb, var(--SmartThemeEmColor) 20%, transparent);
+    color: var(--SmartThemeBodyColor);
+    font-weight: 600;
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--SmartThemeBodyColor) 8%, transparent);
+  }
+  .ll-collapse-btn {
+    background: transparent;
+    border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 16%, transparent);
+    color: color-mix(in srgb, var(--SmartThemeBodyColor) 68%, transparent);
+    border-radius: 5px;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.8em;
+    transition: all 0.16s ease;
+  }
+  .ll-collapse-btn:hover {
+    border-color: color-mix(in srgb, var(--SmartThemeEmColor) 55%, transparent);
+    color: var(--SmartThemeEmColor);
+  }
+  .ll-opt-body {
+    padding: 10px 12px 11px 12px;
+  }
+  .ll-opt-card.is-collapsed .ll-opt-body {
+    display: none;
+  }
+  .ll-opt-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+  }
+  .ll-opt-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    width: 100%;
+    text-align: left;
+    background: color-mix(in srgb, var(--SmartThemeBodyColor) 2.5%, transparent);
+    border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 14%, transparent);
+    border-radius: 6px;
+    padding: 9px 11px;
+    color: color-mix(in srgb, var(--SmartThemeBodyColor) 92%, transparent);
+    font-size: 0.91em;
+    line-height: 1.56;
+    cursor: pointer;
+    transition: all 0.16s ease;
+    outline: none;
+    font-family: inherit;
+  }
+  .ll-opt-item:hover {
+    background: color-mix(in srgb, var(--SmartThemeEmColor) 11%, transparent);
+    border-color: color-mix(in srgb, var(--SmartThemeEmColor) 58%, transparent);
+    transform: translateY(-1px);
+  }
+  .ll-opt-item:active {
+    transform: translateY(0);
+  }
+  .ll-opt-item.is-picked {
+    border-color: color-mix(in srgb, var(--SmartThemeEmColor) 75%, transparent);
+    background: color-mix(in srgb, var(--SmartThemeEmColor) 14%, transparent);
+  }
+  .ll-opt-item-top {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .ll-opt-badge {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--SmartThemeEmColor) 18%, transparent);
+    color: var(--SmartThemeEmColor);
+    font-size: 0.82em;
+    font-weight: 700;
+  }
+  .ll-opt-label {
+    font-weight: 600;
+    font-size: 0.9em;
+    color: var(--SmartThemeEmColor);
+    word-break: break-word;
+  }
+  .ll-opt-desc {
+    width: 100%;
+    word-break: break-word;
+    color: color-mix(in srgb, var(--SmartThemeBodyColor) 90%, transparent);
+  }
+  .ll-opt-fallback {
+    display: none;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 0.91em;
+    line-height: 1.65;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px dashed color-mix(in srgb, var(--SmartThemeBodyColor) 20%, transparent);
+    color: color-mix(in srgb, var(--SmartThemeBodyColor) 88%, transparent);
+  }
+  .ll-opt-toast {
+    margin-top: 8px;
+    font-size: 0.8em;
+    color: var(--SmartThemeEmColor);
+    display: none;
+    word-break: break-word;
+  }
+  .ll-opt-toast.show {
+    display: block;
+  }
+  @media (max-width: 620px) {
+    .ll-opt-list {
+      grid-template-columns: 1fr;
+    }
+    .ll-opt-head {
+      padding: 7px 10px;
+    }
+    .ll-opt-body {
+      padding: 9px 10px 10px 10px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="ll-opt-card" id="ll-opt-card" data-ll-card="options">
+  <div class="ll-opt-head">
+    <div class="ll-opt-title-wrap">
+      <span class="ll-opt-title">🧭 行动方向建议</span>
+      <span class="ll-opt-count" id="ll-opt-count"></span>
+    </div>
+    <div class="ll-opt-controls">
+      <div class="ll-opt-modes" role="group" aria-label="输入模式">
+        <button type="button" class="ll-mode-btn active" data-mode="fill" title="填入并覆盖当前输入框内容">填入</button>
+        <button type="button" class="ll-mode-btn" data-mode="send" title="覆盖输入框内容后立即发送">发送</button>
+      </div>
+      <button type="button" class="ll-collapse-btn" id="ll-collapse-btn" aria-expanded="true" title="展开 / 收起">▾</button>
+    </div>
+  </div>
+  <div class="ll-opt-body" id="ll-opt-body">
+    <div class="ll-opt-list" id="ll-opt-list"></div>
+    <div class="ll-opt-fallback" id="ll-opt-fallback"></div>
+    <div class="ll-opt-toast" id="ll-opt-toast"></div>
+  </div>
+  <textarea class="ll-opt-raw" id="ll-opt-raw" style="display:none;" readonly>$1</textarea>
+</div>
+<script>
+(function () {
+  function getHostDoc() {
+    try {
+      if (window.parent && window.parent !== window && window.parent.document) {
+        return window.parent.document;
+      }
+    } catch (e) {}
+    return document;
+  }
+
+  function syncHostTheme() {
+    try {
+      const hostDoc = getHostDoc();
+      if (hostDoc === document) return;
+      const rootStyle = window.parent.getComputedStyle(hostDoc.documentElement);
+      const bodyStyle = hostDoc.body ? window.parent.getComputedStyle(hostDoc.body) : rootStyle;
+      ["--SmartThemeBodyColor", "--SmartThemeEmColor", "--SmartThemeBorderColor", "--mainFontFamily"].forEach(function (name) {
+        const val = bodyStyle.getPropertyValue(name).trim() || rootStyle.getPropertyValue(name).trim();
+        if (val) document.documentElement.style.setProperty(name, val);
+      });
+      if (!bodyStyle.getPropertyValue("--SmartThemeBodyColor").trim() && !rootStyle.getPropertyValue("--SmartThemeBodyColor").trim() && bodyStyle.color) {
+        document.documentElement.style.setProperty("--SmartThemeBodyColor", bodyStyle.color);
+      }
+      if (!bodyStyle.getPropertyValue("--mainFontFamily").trim() && !rootStyle.getPropertyValue("--mainFontFamily").trim() && bodyStyle.fontFamily) {
+        document.documentElement.style.setProperty("--mainFontFamily", bodyStyle.fontFamily);
+      }
+    } catch (e) {}
+  }
+
+  const cardEl = document.getElementById("ll-opt-card");
+  const rawEl = document.getElementById("ll-opt-raw");
+  const listEl = document.getElementById("ll-opt-list");
+  const countEl = document.getElementById("ll-opt-count");
+  const fallbackEl = document.getElementById("ll-opt-fallback");
+  const toastEl = document.getElementById("ll-opt-toast");
+  const collapseBtn = document.getElementById("ll-collapse-btn");
+
+  function notifyFrameResize() {
+    try {
+      if (window.frameElement && window.parent && window.parent !== window) {
+        const target = cardEl || document.body;
+        const h = target ? Math.ceil(target.getBoundingClientRect().height) + 8 : document.documentElement.scrollHeight;
+        window.frameElement.style.height = Math.max(h, 36) + "px";
+      }
+    } catch (e) {}
+  }
+
+  syncHostTheme();
+  try {
+    const hostDoc = getHostDoc();
+    if (hostDoc !== document && typeof MutationObserver !== "undefined" && hostDoc.body) {
+      new MutationObserver(syncHostTheme).observe(hostDoc.body, { attributes: true, attributeFilter: ["data-theme", "class", "style"] });
+      new MutationObserver(syncHostTheme).observe(hostDoc.documentElement, { attributes: true, attributeFilter: ["data-theme", "class", "style"] });
+    }
+  } catch (e) {}
+
+  let mode = "fill";
+  let toastTimer = null;
+
+  function showToast(msg) {
+    if (!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    notifyFrameResize();
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove("show");
+      notifyFrameResize();
+    }, 2400);
+  }
+
+  document.querySelectorAll(".ll-mode-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".ll-mode-btn").forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      mode = btn.getAttribute("data-mode") || "fill";
+    });
+  });
+
+  if (collapseBtn && cardEl) {
+    collapseBtn.addEventListener("click", function () {
+      const collapsed = cardEl.classList.toggle("is-collapsed");
+      collapseBtn.textContent = collapsed ? "▸" : "▾";
+      collapseBtn.setAttribute("aria-expanded", String(!collapsed));
+      notifyFrameResize();
+    });
+  }
+
+  let rawText = "";
+  if (rawEl) {
+    rawText = typeof rawEl.value === "string" ? rawEl.value : (rawEl.textContent || "");
+    if (/<(?:br|\/(?:p|div|li))>/i.test(rawText)) {
+      const normalized = rawText.replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|li)>/gi, "\n");
+      const tmp = document.createElement("div");
+      tmp.innerHTML = normalized;
+      rawText = tmp.textContent || "";
+    }
+  }
+  rawText = rawText.trim();
+
+  function parseOptionLines(text) {
+    if (!text) return [];
+    const rawLines = text.split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean);
+    const items = [];
+    const prefixRe = /^(?:([A-Za-z0-9]+)\s*[.、:：)\]]|[-*•·])\s*(.+)$/;
+    const titleRe = /^(?:\[([^\]\n]+)\]|【([^】\n]+)】)\s*[：:.\-—]*\s*(.*)$/;
+    const colonTitleRe = /^([^：:\n，。！？“"‘']{1,12})[：:]\s*(.+)$/;
+
+    rawLines.forEach(function (line) {
+      const pm = line.match(prefixRe);
+      if (pm || items.length === 0) {
+        const badge = pm && pm[1] ? pm[1].toUpperCase() : String.fromCharCode(65 + items.length);
+        const body = pm ? pm[2].trim() : line;
+        let title = "";
+        let desc = body;
+        const tm = body.match(titleRe);
+        if (tm) {
+          title = (tm[1] || tm[2] || "").trim();
+          desc = (tm[3] || "").trim();
+        } else {
+          const cm = body.match(colonTitleRe);
+          if (cm && !/^[“"‘']/.test(cm[1].trim())) {
+            title = cm[1].trim();
+            desc = cm[2].trim();
+          }
+        }
+        items.push({ badge: badge, title: title, desc: desc || title || body });
+      } else {
+        items[items.length - 1].desc += "\n" + line;
+      }
+    });
+    return items;
+  }
+
+  const parsedItems = parseOptionLines(rawText);
+  if (countEl) {
+    countEl.textContent = parsedItems.length ? parsedItems.length + " 项" : "原文";
+  }
+
+  if (parsedItems.length > 0) {
+    parsedItems.forEach(function (item) {
+      const fillText = item.desc || item.title;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "ll-opt-item";
+
+      const topRow = document.createElement("div");
+      topRow.className = "ll-opt-item-top";
+
+      const badgeEl = document.createElement("span");
+      badgeEl.className = "ll-opt-badge";
+      badgeEl.textContent = item.badge;
+      topRow.appendChild(badgeEl);
+
+      if (item.title) {
+        const labelEl = document.createElement("span");
+        labelEl.className = "ll-opt-label";
+        labelEl.textContent = item.title;
+        topRow.appendChild(labelEl);
+      }
+
+      const descEl = document.createElement("div");
+      descEl.className = "ll-opt-desc";
+      descEl.textContent = item.desc;
+
+      btn.appendChild(topRow);
+      btn.appendChild(descEl);
+
+      btn.addEventListener("click", function () {
+        document.querySelectorAll(".ll-opt-item.is-picked").forEach(function (el) { el.classList.remove("is-picked"); });
+        btn.classList.add("is-picked");
+
+        const hostDoc = getHostDoc();
+        const ta = hostDoc.querySelector("#send_textarea") || document.querySelector("#send_textarea");
+        const sendBtn = hostDoc.querySelector("#send_but") || document.querySelector("#send_but");
+
+        if (ta) {
+          ta.value = fillText;
+          ta.dispatchEvent(new Event("input", { bubbles: true }));
+          ta.dispatchEvent(new Event("change", { bubbles: true }));
+          ta.focus();
+          if (mode === "send" && sendBtn) {
+            sendBtn.click();
+          }
+          showToast((mode === "send" ? "🚀 已发送：" : "📝 已填入输入框：") + fillText);
+        } else if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(fillText).then(function () {
+            showToast("📋 已复制建议内容：" + fillText);
+          }).catch(function () {
+            showToast("⚠️ 未找到酒馆输入框，请长按复制文本");
+          });
+        } else {
+          showToast("⚠️ 未找到酒馆输入框，请手动复制文本");
+        }
+      });
+
+      listEl.appendChild(btn);
+    });
+  } else if (fallbackEl) {
+    fallbackEl.textContent = rawText || "（未识别到可用选项内容）";
+    fallbackEl.style.display = "block";
+  }
+
+  if (typeof ResizeObserver !== "undefined" && (cardEl || document.body)) {
+    new ResizeObserver(notifyFrameResize).observe(cardEl || document.body);
+  }
+  notifyFrameResize();
+})();
+</script>
+</body>
+</html>
+```

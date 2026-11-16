@@ -1,0 +1,10 @@
+{
+  "identifier": "chatHistory",
+  "name": "💬 聊天历史 (Chat History)",
+  "role": "system",
+  "content": "",
+  "system_prompt": true,
+  "marker": true,
+  "forbid_overrides": false,
+  "enabled": true
+}

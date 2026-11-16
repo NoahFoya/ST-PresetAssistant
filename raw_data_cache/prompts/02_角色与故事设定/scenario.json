@@ -1,0 +1,10 @@
+{
+  "identifier": "scenario",
+  "name": "🌠 角色卡 (场景)",
+  "role": "system",
+  "content": "",
+  "system_prompt": true,
+  "marker": true,
+  "forbid_overrides": false,
+  "enabled": true
+}

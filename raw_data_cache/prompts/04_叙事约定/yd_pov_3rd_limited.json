@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_pov_3rd_limited",
+  "name": "[视角] 第三人称限知",
+  "role": "system",
+  "content": "{{setvar::pov::## 叙事视角\n- 用第三人称叙述，以 {{user}} 的名字为主、“他/她”为辅。\n- 镜头始终跟随 {{user}} 的五官感知，视线被遮挡处、他人背对时的隐蔽小动作及 {{user}} 不在场的远方场景一律不写。\n- 在场 NPC 的内心想法与动机不由旁白直接点破，全部通过说话语气、眼神变化和外在动作展现。}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": true,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

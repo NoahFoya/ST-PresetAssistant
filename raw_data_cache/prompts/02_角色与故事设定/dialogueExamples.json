@@ -1,0 +1,10 @@
+{
+  "identifier": "dialogueExamples",
+  "name": "🌠 示例对话 (Chat Examples)",
+  "role": "system",
+  "content": "",
+  "system_prompt": true,
+  "marker": true,
+  "forbid_overrides": false,
+  "enabled": true
+}

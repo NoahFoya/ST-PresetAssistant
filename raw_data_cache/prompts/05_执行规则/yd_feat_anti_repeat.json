@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_feat_anti_repeat",
+  "name": "[功能] 剧情防重复",
+  "role": "system",
+  "content": "{{setvar::rule_anti_repeat::- 禁止照搬设定、示例对话或历史会话原句；避开上一轮用过的开头句式、同类景物、重复小动作与结尾停顿姿势，每轮均须提供新信息、动作结果或关系推进。}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": true,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

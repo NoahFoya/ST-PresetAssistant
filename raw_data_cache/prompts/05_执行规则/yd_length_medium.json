@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_length_medium",
+  "name": "[篇幅] 中篇 (800-1200字)",
+  "role": "system",
+  "content": "{{setvar::target_length::- 正文篇幅控制在 800~1200 字之间，将笔墨分配给现场空间感、神态细节与当下的核心互动，保持自然的对话与行动往来节奏。}}{{setvar::length_comment_hint::2~4 串}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": true,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

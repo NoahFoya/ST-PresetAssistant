@@ -1,0 +1,48 @@
+# 本地智能体配置、草稿与私有参数
+.agents/
+scratch/
+tmp/
+*.local.*
+*.local.json
+*.private.*
+
+# 依赖包与构建缓存
+node_modules/
+__pycache__/
+*.py[cod]
+*$py.class
+dist/
+build/
+.cache/
+
+# 日志与临时输出
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# 环境变量与密钥
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# 操作系统与编辑器缓存
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+*~
+*.tmp
+*.temp
+*.bak
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_exec_rules_close",
+  "name": "</执行规则>",
+  "role": "system",
+  "content": "<执行规则>\n{{getvar::output_spec}}\n\n{{getvar::cot_section}}\n{{getvar::cot_addons}}\n</执行规则>",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": true,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_feat_action_options",
+  "name": "[功能] 行动选项",
+  "role": "system",
+  "content": "{{setvar::rule_action_options::- 在回复最末尾另起一行输出 `<options>` 标签，提供 3 个不同方向的 {{user}} 行动建议；每个选项只写 {{user}} 准备采取的具体行动或说话方向，严禁提前写出结果或 NPC 反应：\n<options>\nA. [简短标题]：{{user}} 准备采取的具体行动或说话方向\nB. [简短标题]：{{user}} 准备采取的具体行动或说话方向\nC. [简短标题]：{{user}} 准备采取的具体行动或说话方向\n</options>}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": true,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

@@ -1,0 +1,10 @@
+{
+  "identifier": "charPersonality",
+  "name": "🌠 角色卡 (性格)",
+  "role": "system",
+  "content": "",
+  "system_prompt": true,
+  "marker": true,
+  "forbid_overrides": false,
+  "enabled": true
+}
