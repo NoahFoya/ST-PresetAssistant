@@ -1,4 +1,4 @@
-# ST-PresetAssistant (`ST-预设助手` `v0.3.0`) · 多人设架构与模块清单
+# ST-PresetAssistant (`ST-预设助手` `v0.1.0`) · 多人设架构与模块清单
 
 ## 一、6 大 XML 语义块与扁平 Markdown 架构
 

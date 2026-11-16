@@ -238,7 +238,7 @@ C. [留余地观察]：靠回椅背慢慢打量这间包厢的隔音与窗栓
     const mockPresetStore = {
       "ST-预设助手": {
         settings: { should_stream: true, temperature: 1.0 },
-        extensions: { tavern_helper: { scripts: [], variables: { st_preset_version: "0.3.0" } } },
+        extensions: { tavern_helper: { scripts: [], variables: { st_preset_version: "0.1.0" } } },
         prompts: [
           { id: "yd_persona_lilith", name: "[人设] 莉莉丝", enabled: true },
           { id: "yd_persona_lingyin", name: "[人设] 泠音", enabled: false },
@@ -384,6 +384,20 @@ C. [留余地观察]：靠回椅背慢慢打量这间包厢的隔音与窗栓
     }
 
     initPreview();
+
+    // Sandbox Mock for single initial update check (supports ?mock_update=0.2.0)
+    const mockParams = new URLSearchParams(window.location.search);
+    const mockRemoteVer = mockParams.get("mock_update") || "0.1.0";
+    window.__YD_FETCH_CALL_COUNT__ = 0;
+    window.__YD_TEST_FETCH__ = async function () {
+      window.__YD_FETCH_CALL_COUNT__ += 1;
+      return {
+        ok: true,
+        async json() {
+          return { version: mockRemoteVer };
+        }
+      };
+    };
   </script>
   <script src="./floating_panel.js"></script>
 </body>

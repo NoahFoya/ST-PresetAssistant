@@ -5,7 +5,13 @@
 (function (root) {
   "use strict";
 
-  const PRESET_VERSION = "0.3.0";
+  const PRESET_VERSION = "0.1.0";
+  const GITHUB_REPO = "NoahFoya/ST-PresetAssistant";
+  const GITHUB_CHANGELOG_URL = "https://github.com/" + GITHUB_REPO + "/blob/main/CHANGELOG.md";
+  const GITHUB_PACKAGE_URLS = [
+    "https://raw.githubusercontent.com/" + GITHUB_REPO + "/main/package.json",
+    "https://cdn.jsdelivr.net/gh/" + GITHUB_REPO + "@main/package.json",
+  ];
   const ROOT_EL_ID = "yd-floating-root";
   const STYLE_EL_ID = "yd-floating-style";
   const STORAGE_KEY = "yd_assistant_floating_state_v2";
@@ -165,6 +171,66 @@
     return "v" + (cleaned || PRESET_VERSION);
   }
 
+  function compareSemver(a, b) {
+    const parse = function (v) {
+      return String(v || "")
+        .trim()
+        .replace(/^[vV]/, "")
+        .split("-")[0]
+        .split(".")
+        .map(function (part) {
+          const n = parseInt(part, 10);
+          return isFinite(n) ? n : 0;
+        });
+    };
+    const pa = parse(a);
+    const pb = parse(b);
+    const len = Math.max(pa.length, pb.length);
+    for (let i = 0; i < len; i++) {
+      const va = pa[i] || 0;
+      const vb = pb[i] || 0;
+      if (va > vb) return 1;
+      if (va < vb) return -1;
+    }
+    return 0;
+  }
+
+  async function checkRemoteUpdateOnce(currentVer, customFetch) {
+    const fetcher = customFetch || (typeof fetch === "function" ? fetch : null);
+    if (!fetcher) {
+      return { checked: false, hasUpdate: false, remoteVersion: null };
+    }
+    for (let i = 0; i < GITHUB_PACKAGE_URLS.length; i++) {
+      const url = GITHUB_PACKAGE_URLS[i];
+      let timer = null;
+      try {
+        const ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+        if (ctrl) {
+          timer = setTimeout(function () { ctrl.abort(); }, 6000);
+        }
+        const resp = await fetcher(url, {
+          method: "GET",
+          signal: ctrl ? ctrl.signal : undefined,
+        });
+        if (!resp || !resp.ok) continue;
+        const data = await resp.json();
+        const remoteVer = data && typeof data.version === "string" ? data.version.trim() : "";
+        if (!remoteVer) continue;
+        return {
+          checked: true,
+          hasUpdate: compareSemver(remoteVer, currentVer) > 0,
+          remoteVersion: remoteVer,
+          sourceUrl: url,
+        };
+      } catch (e) {
+        // 静默降级尝试下一静态源
+      } finally {
+        if (timer) clearTimeout(timer);
+      }
+    }
+    return { checked: false, hasUpdate: false, remoteVersion: null };
+  }
+
   function readPresetThemes(preset) {
     const ext = preset && preset.extensions;
     const thVars = ext && ext.tavern_helper && ext.tavern_helper.variables;
@@ -294,6 +360,9 @@
     DEFAULT_PERSONA_COLORS: DEFAULT_PERSONA_COLORS,
     BUILTIN_PERSONAS: BUILTIN_PERSONAS,
     PRESET_VERSION: PRESET_VERSION,
+    GITHUB_REPO: GITHUB_REPO,
+    GITHUB_CHANGELOG_URL: GITHUB_CHANGELOG_URL,
+    GITHUB_PACKAGE_URLS: GITHUB_PACKAGE_URLS,
     PANEL_SECTIONS: PANEL_SECTIONS,
     normalizeHex: normalizeHex,
     buildThemeFromHex: buildThemeFromHex,
@@ -302,6 +371,8 @@
     discoverPersonas: discoverPersonas,
     resolveActivePersona: resolveActivePersona,
     resolveVersionLabel: resolveVersionLabel,
+    compareSemver: compareSemver,
+    checkRemoteUpdateOnce: checkRemoteUpdateOnce,
     readPresetThemes: readPresetThemes,
     writePresetThemeBinding: writePresetThemeBinding,
     getPersonaTheme: getPersonaTheme,
@@ -441,7 +512,10 @@
       `  border-bottom: 1px dashed var(--yd-accent-border);`,
       `}`,
       `#${ROOT_EL_ID} .yd-head-title { font-weight: 700; font-size: 13px; color: var(--yd-accent); display: flex; align-items: center; gap: 6px; min-width: 0; }`,
-      `#${ROOT_EL_ID} .yd-ver-badge { font-size: 10.5px; font-weight: 600; padding: 1px 6px; border-radius: 999px; background: var(--yd-surface); border: 1px solid var(--yd-accent-border); color: var(--yd-accent); letter-spacing: 0.02em; flex-shrink: 0; }`,
+      `#${ROOT_EL_ID} .yd-ver-badge { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; cursor: pointer; font-size: 10.5px; font-weight: 600; padding: 1px 6px; border-radius: 999px; background: var(--yd-surface); border: 1px solid var(--yd-accent-border); color: var(--yd-accent); letter-spacing: 0.02em; flex-shrink: 0; transition: all 0.14s ease; }`,
+      `#${ROOT_EL_ID} .yd-ver-badge:hover { background: var(--yd-accent-soft); color: var(--yd-fg); }`,
+      `#${ROOT_EL_ID} .yd-ver-badge.is-update { background: var(--yd-accent-soft); border-color: var(--yd-accent); color: var(--yd-fg); box-shadow: 0 0 8px var(--yd-glow); }`,
+      `#${ROOT_EL_ID} .yd-pill.has-update .yd-pill-dot { box-shadow: 0 0 0 2px var(--yd-bg), 0 0 8px var(--yd-accent); }`,
       `#${ROOT_EL_ID} .yd-head-btns { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }`,
       `#${ROOT_EL_ID} .yd-icon-btn {`,
       `  border: 1px solid var(--yd-border); background: var(--yd-surface); color: var(--yd-fg);`,
@@ -529,9 +603,13 @@
     headTitle.className = "yd-head-title";
     const titleMain = hd.createElement("span");
     titleMain.textContent = "ST-预设助手";
-    const verBadge = hd.createElement("span");
+    const verBadge = hd.createElement("a");
     verBadge.className = "yd-ver-badge";
+    verBadge.href = GITHUB_CHANGELOG_URL;
+    verBadge.target = "_blank";
+    verBadge.rel = "noopener noreferrer";
     verBadge.textContent = "v" + PRESET_VERSION;
+    verBadge.title = "点击前往 GitHub 查看更新日志";
     headTitle.appendChild(titleMain);
     headTitle.appendChild(verBadge);
 
@@ -595,6 +673,31 @@
 
     let toastTimer = null;
     let isSelfUpdating = false;
+    let updateCheckResult = null;
+    let hasCheckedUpdateOnLoad = false;
+
+    async function runInitialUpdateCheck() {
+      if (hasCheckedUpdateOnLoad) return;
+      hasCheckedUpdateOnLoad = true;
+      let curVer = PRESET_VERSION;
+      try {
+        const api = resolvePresetApi();
+        const preset = api && api.getPreset("in_use");
+        curVer = resolveVersionLabel(preset).replace(/^v/i, "");
+      } catch (e) {}
+      const testFetcher = window.__YD_TEST_FETCH__ || (hw && hw.__YD_TEST_FETCH__) || null;
+      const res = await checkRemoteUpdateOnce(curVer, testFetcher);
+      updateCheckResult = res;
+      if (res && res.hasUpdate && res.remoteVersion) {
+        const nextVer = "v" + res.remoteVersion.replace(/^[vV]/, "");
+        verBadge.textContent = "v" + curVer + " · 有新版 " + nextVer;
+        verBadge.classList.add("is-update");
+        verBadge.title = "发现新版本 " + nextVer + "，点击前往 GitHub 查看更新日志";
+        pill.classList.add("has-update");
+      } else if (res && res.checked) {
+        verBadge.title = "当前已是最新版本 (v" + curVer + ") · 点击前往 GitHub 查看更新日志";
+      }
+    }
 
     function showToast(msg) {
       toast.textContent = msg;
@@ -678,7 +781,10 @@
       }
       const prompts = (preset && preset.prompts) || [];
       const loadedName = api.getLoadedPresetName ? api.getLoadedPresetName() : "";
-      verBadge.textContent = resolveVersionLabel(preset);
+      const baseVerLabel = resolveVersionLabel(preset);
+      if (!updateCheckResult || !updateCheckResult.hasUpdate) {
+        verBadge.textContent = baseVerLabel;
+      }
       headTitle.title = loadedName ? ("当前酒馆预设：" + loadedName) : "ST-PresetAssistant";
 
       const personas = discoverPersonas(prompts);
@@ -908,6 +1014,7 @@
     }
 
     renderFromPreset();
+    runInitialUpdateCheck();
     return { refresh: renderFromPreset, cleanup: cleanupPanel };
   }
 

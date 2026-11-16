@@ -341,9 +341,14 @@ console.log('SYNTAX_OK');
 const assert = require('assert');
 const eng = require(process.argv[2]);
 
-assert.strictEqual(eng.PRESET_VERSION, '0.3.0');
-assert.strictEqual(eng.resolveVersionLabel({ extensions: { tavern_helper: { variables: { st_preset_version: '0.3.0' } } } }), 'v0.3.0');
-assert.strictEqual(eng.resolveVersionLabel({}), 'v0.3.0');
+assert.strictEqual(eng.PRESET_VERSION, '0.1.0');
+assert.strictEqual(eng.resolveVersionLabel({ extensions: { tavern_helper: { variables: { st_preset_version: '0.1.0' } } } }), 'v0.1.0');
+assert.strictEqual(eng.resolveVersionLabel({}), 'v0.1.0');
+assert.strictEqual(eng.GITHUB_CHANGELOG_URL, 'https://github.com/NoahFoya/ST-PresetAssistant/blob/main/CHANGELOG.md');
+assert.strictEqual(eng.compareSemver('0.2.0', '0.1.0'), 1);
+assert.strictEqual(eng.compareSemver('0.1.10', '0.1.2'), 1);
+assert.strictEqual(eng.compareSemver('v0.1.0', '0.1.0'), 0);
+assert.strictEqual(eng.compareSemver('0.0.9', '0.1.0'), -1);
 assert.strictEqual(eng.stripOptionLabel('[思考] 输出草稿面板'), '输出草稿面板');
 assert.strictEqual(eng.stripOptionLabel('[思考] 基本推理'), '基本推理');
 assert.strictEqual(eng.stripOptionLabel('[思考] 预填充草稿 (Prefill)'), '预填充草稿 (Prefill)');
@@ -409,7 +414,24 @@ const ratios = eng.posToRatio(400, 260, 1280, 720, 94, 32);
 const restored = eng.computePillPosition(ratios.xRatio, ratios.yRatio, 1920, 1080, 94, 32);
 assert.ok(restored.left > 550 && restored.left < 680, 'Center-left position should scale proportionally rather than snap to edges');
 
-console.log('ENGINE_UNIT_OK');
+// Update check: CDN fallback & update detection
+(async () => {
+  let hits = 0;
+  const res = await eng.checkRemoteUpdateOnce('0.1.0', async (url) => {
+    hits += 1;
+    if (url.includes('raw.githubusercontent.com')) return { ok: false };
+    return { ok: true, async json() { return { version: '0.2.0' }; } };
+  });
+  assert.strictEqual(hits, 2, 'Should fallback from raw to jsDelivr CDN');
+  assert.strictEqual(res.checked, true);
+  assert.strictEqual(res.hasUpdate, true);
+  assert.strictEqual(res.remoteVersion, '0.2.0');
+
+  const offRes = await eng.checkRemoteUpdateOnce('0.1.0', async () => { throw new Error('offline'); });
+  assert.strictEqual(offRes.checked, false);
+  assert.strictEqual(offRes.hasUpdate, false);
+  console.log('ENGINE_UNIT_OK');
+})().catch((e) => { console.error(e); process.exit(1); });
 """
     r_eng = subprocess.run(["node", "-", str(UI_DIR / "floating_panel.js")], input=engine_test, text=True, capture_output=True, encoding="utf-8")
     if r_eng.returncode != 0 or "ENGINE_UNIT_OK" not in r_eng.stdout:

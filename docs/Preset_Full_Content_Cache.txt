@@ -1,11 +1,11 @@
 ======================================================================
-ST-PresetAssistant (ST-预设助手) v0.3.0 · 全量提示词源码缓存
+ST-PresetAssistant (ST-预设助手) v0.1.0 · 全量提示词源码缓存
 总模块数: 57
 ======================================================================
 
 === [00] yd_top_user_guide | [说明] ST-预设助手 | en=True | role=system | len=536 | prompts/01_系统框架/yd_top_user_guide.json ===
 {{//
-## ST-PresetAssistant 预设助手 v0.3.0
+## ST-PresetAssistant 预设助手 v0.1.0
 
 ### 开源与版权声明
 - 构建脚本与面板代码：GPL-3.0 | 提示词与预设资产：CC BY-NC-SA 4.0（署名：`NoahFoya`）
