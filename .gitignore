@@ -1,10 +1,14 @@
-# 本地智能体配置、草稿与私有参数
+# 本地研发资料、智能体配置与私有参数
+docs/
 .agents/
 scratch/
-tmp/
 *.local.*
 *.local.json
 *.private.*
+
+# 测试运行环境
+tests/
+tmp/
 
 # 依赖包与构建缓存
 node_modules/

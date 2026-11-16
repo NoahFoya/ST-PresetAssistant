@@ -5,8 +5,9 @@
   "main": "scripts/build_preset.py",
   "scripts": {
     "build": "python scripts/sync_ui.py && python scripts/build_preset.py",
-    "verify": "python scripts/verify.py",
-    "docs": "python scripts/build_docs_and_verify.py",
+    "test": "python tests/verify.py",
+    "verify": "python tests/verify.py",
+    "docs": "python scripts/build_docs.py",
     "all": "npm run build && npm run verify && npm run docs"
   },
   "repository": {
