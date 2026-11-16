@@ -48,7 +48,14 @@
     },
   };
 
+  const PANEL_TABS = [
+    { key: "preset", label: "预设设置" },
+    { key: "regex", label: "正则设置" },
+    { key: "assistant", label: "助手设置" },
+  ];
+
   const PANEL_SECTIONS = [
+    { key: "core", title: "核心规则", mode: "multi", ids: ["main"], prefix: "yd_core_" },
     { key: "style", title: "文风", mode: "radio", prefix: "yd_style_" },
     { key: "pov", title: "叙事视角", mode: "radio", prefix: "yd_pov_" },
     { key: "pace", title: "剧情节奏", mode: "radio", prefix: "yd_pace_" },
@@ -58,6 +65,11 @@
     { key: "length", title: "目标篇幅", mode: "radio", prefix: "yd_length_" },
     { key: "feat", title: "功能开关", mode: "multi", ids: ["yd_feat_inline_comment", "yd_feat_action_options", "yd_feat_anti_repeat", "yd_feat_format_compat"] },
     { key: "cot", title: "思考与草稿", mode: "multi", ids: ["yd_cot_unified", "yd_cot_output_draft", "yd_prefill_draft"] },
+  ];
+
+  const REGEX_SECTIONS = [
+    { key: "display", title: "显示美化", prefixes: ["[思考]", "[批注]", "[选择]", "[正文]"] },
+    { key: "clean", title: "发送净化", prefixes: ["[清理]"] },
   ];
 
   function normalizeHex(hex) {
@@ -108,9 +120,126 @@
   function cleanCustomPersonaLabel(rawName) {
     const s = String(rawName || "").trim();
     const stripped = s
-      .replace(/^(?:🎭|😈|❄️|👤|🧩)?\s*(?:\[(?:助手)?人设\]|(?:助手)?人设\s*[：:])\s*/u, "")
+      .replace(/^(?:🎭|😈|❄️|👤|🧩)?\s*(?:\[(?:AI|助手)?人设\]|(?:AI|助手)?人设\s*[：:])\s*/iu, "")
       .trim();
     return stripped || s || "自定义";
+  }
+
+  function formatRegexLabel(name) {
+    const s = String(name || "").trim();
+    return s.replace(/^\[([^\]]+)\]\s*/, "$1：") || s;
+  }
+
+  function collectSectionItems(prompts, sec) {
+    const safePrompts = Array.isArray(prompts) ? prompts : [];
+    const items = [];
+    const seen = {};
+    if (Array.isArray(sec.ids)) {
+      sec.ids.forEach(function (tid) {
+        const found = safePrompts.find(function (p) { return getPromptId(p) === tid; });
+        if (found && !seen[tid]) {
+          seen[tid] = true;
+          items.push(found);
+        }
+      });
+    }
+    if (sec.prefix) {
+      safePrompts.forEach(function (p) {
+        const pid = getPromptId(p);
+        if (pid && pid.indexOf(sec.prefix) === 0 && !seen[pid]) {
+          seen[pid] = true;
+          items.push(p);
+        }
+      });
+    }
+    return items;
+  }
+
+  function normalizeRegexEntry(raw) {
+    if (!raw || typeof raw !== "object") return null;
+    const id = String(raw.id || "").trim();
+    const name = String(raw.script_name || raw.scriptName || id).trim();
+    const enabled = typeof raw.enabled === "boolean" ? raw.enabled : !Boolean(raw.disabled);
+    return { id: id, name: name, enabled: enabled };
+  }
+
+  function mergePresetRegexes(tavernList, presetScripts) {
+    const liveMap = {};
+    const order = [];
+    const liveArr = Array.isArray(tavernList) ? tavernList : [];
+    const presetArr = Array.isArray(presetScripts) ? presetScripts : [];
+
+    liveArr.forEach(function (item) {
+      const norm = normalizeRegexEntry(item);
+      if (!norm) return;
+      const key = norm.id || norm.name;
+      liveMap[key] = norm;
+      order.push(norm);
+    });
+
+    if (presetArr.length > 0) {
+      const result = [];
+      const used = {};
+      presetArr.forEach(function (item) {
+        const norm = normalizeRegexEntry(item);
+        if (!norm) return;
+        const match = (norm.id && liveMap[norm.id]) || liveMap[norm.name];
+        const merged = match ? { id: norm.id || match.id, name: match.name || norm.name, enabled: match.enabled } : norm;
+        used[merged.id || merged.name] = true;
+        result.push(merged);
+      });
+      order.forEach(function (item) {
+        const k = item.id || item.name;
+        if (!used[k]) result.push(item);
+      });
+      return result;
+    }
+
+    return order;
+  }
+
+  function classifyRegexSections(regexList) {
+    const safeList = Array.isArray(regexList) ? regexList : [];
+    const groups = [];
+    const matched = {};
+
+    REGEX_SECTIONS.forEach(function (sec) {
+      const items = safeList.filter(function (rx) {
+        const hit = sec.prefixes.some(function (pref) { return rx.name.indexOf(pref) === 0; });
+        if (hit) matched[rx.id || rx.name] = true;
+        return hit;
+      });
+      if (items.length > 0) {
+        groups.push({ key: sec.key, title: sec.title, items: items });
+      }
+    });
+
+    const extra = safeList.filter(function (rx) { return !matched[rx.id || rx.name]; });
+    if (extra.length > 0) {
+      groups.push({ key: "other", title: "其他正则", items: extra });
+    }
+    return groups;
+  }
+
+  function applyRegexToggleToTavernList(list, regexId, nextEnabled) {
+    return (Array.isArray(list) ? list : []).map(function (item) {
+      if (item && String(item.id || "") === String(regexId)) {
+        return Object.assign({}, item, { enabled: Boolean(nextEnabled) });
+      }
+      return item;
+    });
+  }
+
+  function applyRegexToggleToPreset(preset, regexId, nextEnabled) {
+    if (!preset || !preset.extensions || !Array.isArray(preset.extensions.regex_scripts)) return false;
+    let changed = false;
+    preset.extensions.regex_scripts.forEach(function (item) {
+      if (item && String(item.id || "") === String(regexId)) {
+        item.disabled = !Boolean(nextEnabled);
+        changed = true;
+      }
+    });
+    return changed;
   }
 
   function discoverPersonas(prompts) {
@@ -126,7 +255,7 @@
       const pid = getPromptId(p);
       const pname = String((p && p.name) || "");
       if (!pid || BUILTIN_PERSONAS[pid]) return;
-      if (pid.indexOf("yd_persona_") === 0 || /(?:助手人设\s*[：:]|^\[人设\])/.test(pname)) {
+      if (pid.indexOf("yd_persona_") === 0 || /(?:(?:AI|助手)人设\s*[：:]|^\[(?:AI)?人设\])/i.test(pname)) {
         list.push({
           id: pid,
           key: "custom:" + pid,
@@ -363,11 +492,20 @@
     GITHUB_REPO: GITHUB_REPO,
     GITHUB_CHANGELOG_URL: GITHUB_CHANGELOG_URL,
     GITHUB_PACKAGE_URLS: GITHUB_PACKAGE_URLS,
+    PANEL_TABS: PANEL_TABS,
     PANEL_SECTIONS: PANEL_SECTIONS,
+    REGEX_SECTIONS: REGEX_SECTIONS,
     normalizeHex: normalizeHex,
     buildThemeFromHex: buildThemeFromHex,
     getPromptId: getPromptId,
     stripOptionLabel: stripOptionLabel,
+    formatRegexLabel: formatRegexLabel,
+    collectSectionItems: collectSectionItems,
+    normalizeRegexEntry: normalizeRegexEntry,
+    mergePresetRegexes: mergePresetRegexes,
+    classifyRegexSections: classifyRegexSections,
+    applyRegexToggleToTavernList: applyRegexToggleToTavernList,
+    applyRegexToggleToPreset: applyRegexToggleToPreset,
     discoverPersonas: discoverPersonas,
     resolveActivePersona: resolveActivePersona,
     resolveVersionLabel: resolveVersionLabel,
@@ -422,19 +560,33 @@
     };
   }
 
+  function resolveRegexApi() {
+    const hw = getHostWin();
+    const th = window.TavernHelper || (hw && hw.TavernHelper) || null;
+    const getTavernRegexes = window.getTavernRegexes || (th && th.getTavernRegexes) || (hw && hw.getTavernRegexes) || null;
+    const updateTavernRegexesWith = window.updateTavernRegexesWith || (th && th.updateTavernRegexesWith) || (hw && hw.updateTavernRegexesWith) || null;
+    if (!getTavernRegexes || !updateTavernRegexesWith) return null;
+    return {
+      getTavernRegexes: getTavernRegexes,
+      updateTavernRegexesWith: updateTavernRegexesWith,
+    };
+  }
+
   function loadPanelState() {
     try {
       const raw = getHostWin().localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
+        const tab = parsed.activeTab;
         return {
           open: Boolean(parsed.open),
+          activeTab: (tab === "regex" || tab === "assistant") ? tab : "preset",
           xRatio: typeof parsed.xRatio === "number" ? clampNumber(parsed.xRatio, 0, 1) : 0.92,
           yRatio: typeof parsed.yRatio === "number" ? clampNumber(parsed.yRatio, 0, 1) : 0.24,
         };
       }
     } catch (e) {}
-    return { open: false, xRatio: 0.92, yRatio: 0.24 };
+    return { open: false, activeTab: "preset", xRatio: 0.92, yRatio: 0.24 };
   }
 
   function savePanelState(state) {
@@ -522,6 +674,14 @@
       `  border-radius: 5px; padding: 3px 8px; font-size: 11.5px; cursor: pointer; font-family: inherit;`,
       `}`,
       `#${ROOT_EL_ID} .yd-icon-btn:hover { border-color: var(--yd-accent-border); color: var(--yd-accent); }`,
+      `#${ROOT_EL_ID} .yd-tabs { display: flex; gap: 4px; padding: 6px 11px; border-bottom: 1px solid var(--yd-border); background: color-mix(in srgb, var(--yd-fg) 3%, transparent); flex-shrink: 0; }`,
+      `#${ROOT_EL_ID} .yd-tab { flex: 1; border: 1px solid transparent; background: transparent; color: color-mix(in srgb, var(--yd-fg) 72%, transparent); border-radius: 6px; padding: 5px 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.14s ease; text-align: center; }`,
+      `#${ROOT_EL_ID} .yd-tab:hover { color: var(--yd-fg); background: var(--yd-surface); }`,
+      `#${ROOT_EL_ID} .yd-tab.is-active { background: var(--yd-accent-soft); border-color: var(--yd-accent-border); color: var(--yd-accent); }`,
+      `#${ROOT_EL_ID} .yd-card-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 9px; border-radius: 7px; border: 1px solid var(--yd-border); background: var(--yd-surface); flex-wrap: wrap; }`,
+      `#${ROOT_EL_ID} .yd-muted { font-size: 11.5px; opacity: 0.78; line-height: 1.45; }`,
+      `#${ROOT_EL_ID} .yd-link-btn { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; border: 1px solid var(--yd-accent-border); background: var(--yd-accent-soft); color: var(--yd-accent); border-radius: 6px; padding: 4px 9px; font-size: 11.5px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.14s ease; }`,
+      `#${ROOT_EL_ID} .yd-link-btn:hover { background: var(--yd-accent); color: #fff; border-color: var(--yd-accent); }`,
       `#${ROOT_EL_ID} .yd-body { padding: 10px 11px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }`,
       `#${ROOT_EL_ID} .yd-sec { display: flex; flex-direction: column; gap: 6px; }`,
       `#${ROOT_EL_ID} .yd-sec-title { font-size: 11.5px; font-weight: 700; color: var(--yd-accent); letter-spacing: 0.03em; }`,
@@ -619,7 +779,7 @@
     saveBtn.type = "button";
     saveBtn.className = "yd-icon-btn";
     saveBtn.textContent = "保存";
-    saveBtn.title = "将当前预设与人设配色写入已加载预设";
+    saveBtn.title = "将当前预设、正则与AI人设配色写入已加载预设";
     const closeBtn = hd.createElement("button");
     closeBtn.type = "button";
     closeBtn.className = "yd-icon-btn";
@@ -630,12 +790,35 @@
     head.appendChild(headTitle);
     head.appendChild(headBtns);
 
+    const tabsBar = hd.createElement("div");
+    tabsBar.className = "yd-tabs";
+    tabsBar.setAttribute("role", "tablist");
+    const tabButtons = {};
+    PANEL_TABS.forEach(function (tab) {
+      const tbtn = hd.createElement("button");
+      tbtn.type = "button";
+      tbtn.className = "yd-tab" + (state.activeTab === tab.key ? " is-active" : "");
+      tbtn.setAttribute("role", "tab");
+      tbtn.setAttribute("data-yd-tab", tab.key);
+      tbtn.setAttribute("aria-selected", String(state.activeTab === tab.key));
+      tbtn.textContent = tab.label;
+      tbtn.addEventListener("click", function () {
+        if (state.activeTab === tab.key) return;
+        state.activeTab = tab.key;
+        savePanelState(state);
+        renderFromPreset();
+      });
+      tabButtons[tab.key] = tbtn;
+      tabsBar.appendChild(tbtn);
+    });
+
     const body = hd.createElement("div");
     body.className = "yd-body";
     const toast = hd.createElement("div");
     toast.className = "yd-toast";
 
     drawer.appendChild(head);
+    drawer.appendChild(tabsBar);
     drawer.appendChild(body);
     drawer.appendChild(toast);
 
@@ -696,6 +879,9 @@
         pill.classList.add("has-update");
       } else if (res && res.checked) {
         verBadge.title = "当前已是最新版本 (v" + curVer + ") · 点击前往 GitHub 查看更新日志";
+      }
+      if (state.open && state.activeTab === "assistant") {
+        renderFromPreset();
       }
     }
 
@@ -769,6 +955,211 @@
       body.appendChild(sec);
     }
 
+    function syncTabButtons() {
+      PANEL_TABS.forEach(function (tab) {
+        const btn = tabButtons[tab.key];
+        if (!btn) return;
+        const active = state.activeTab === tab.key;
+        btn.classList.toggle("is-active", active);
+        btn.setAttribute("aria-selected", String(active));
+      });
+    }
+
+    async function toggleRegexItem(rxItem) {
+      const api = resolvePresetApi();
+      const regexApi = resolveRegexApi();
+      const nextEnabled = !rxItem.enabled;
+      isSelfUpdating = true;
+      try {
+        if (regexApi && regexApi.updateTavernRegexesWith) {
+          await regexApi.updateTavernRegexesWith(function (list) {
+            return applyRegexToggleToTavernList(list, rxItem.id, nextEnabled);
+          }, { type: "preset", name: "in_use" });
+        }
+        if (api && api.updatePresetWith) {
+          await api.updatePresetWith("in_use", function (preset) {
+            applyRegexToggleToPreset(preset, rxItem.id, nextEnabled);
+            return preset;
+          }, { render: "debounced" });
+        }
+        await renderFromPreset();
+      } catch (err) {
+        showToast("正则切换失败：" + (err && err.message ? err.message : String(err)));
+      } finally {
+        setTimeout(function () { isSelfUpdating = false; }, 160);
+      }
+    }
+
+    function renderPresetTab(prompts, personas, activePersona) {
+      renderSection("AI人设", function (wrap) {
+        personas.forEach(function (persona) {
+          const btn = hd.createElement("button");
+          btn.type = "button";
+          btn.className = "yd-chip" + (persona.key === activePersona.key ? " is-active" : "");
+          btn.setAttribute("data-yd-persona-key", persona.key);
+          btn.textContent = persona.label;
+          btn.addEventListener("click", function () {
+            mutatePreset(function (p) {
+              applyPersonaSelection(p.prompts || [], persona.key);
+            });
+          });
+          wrap.appendChild(btn);
+        });
+      });
+
+      PANEL_SECTIONS.forEach(function (sec) {
+        const items = collectSectionItems(prompts, sec);
+        if (!items.length) return;
+        renderSection(sec.title, function (wrap) {
+          items.forEach(function (item) {
+            const iid = getPromptId(item);
+            const btn = hd.createElement("button");
+            btn.type = "button";
+            btn.className = "yd-chip" + (item.enabled ? " is-active" : "");
+            btn.setAttribute("data-yd-item-id", iid);
+            btn.textContent = stripOptionLabel(item.name || iid);
+            btn.addEventListener("click", function () {
+              mutatePreset(function (p) {
+                applySectionToggle(p.prompts || [], sec, iid);
+              });
+            });
+            wrap.appendChild(btn);
+          });
+        });
+      });
+    }
+
+    function renderRegexTab(preset) {
+      const regexApi = resolveRegexApi();
+      let liveList = [];
+      if (regexApi && regexApi.getTavernRegexes) {
+        try {
+          liveList = regexApi.getTavernRegexes({ type: "preset", name: "in_use" }) || [];
+        } catch (e) {}
+      }
+      const presetScripts = (preset && preset.extensions && preset.extensions.regex_scripts) || [];
+      const merged = mergePresetRegexes(liveList, presetScripts);
+      const groups = classifyRegexSections(merged);
+
+      if (!groups.length) {
+        renderSection("正则状态", function (wrap) {
+          const empty = hd.createElement("div");
+          empty.className = "yd-muted";
+          empty.textContent = "当前预设未检测到可管理的预设正则条目。";
+          wrap.appendChild(empty);
+        });
+        return;
+      }
+
+      groups.forEach(function (grp) {
+        renderSection(grp.title, function (wrap) {
+          grp.items.forEach(function (rx) {
+            const btn = hd.createElement("button");
+            btn.type = "button";
+            btn.className = "yd-chip" + (rx.enabled ? " is-active" : "");
+            btn.setAttribute("data-yd-regex-id", rx.id || rx.name);
+            btn.textContent = formatRegexLabel(rx.name);
+            btn.addEventListener("click", function () {
+              toggleRegexItem(rx);
+            });
+            wrap.appendChild(btn);
+          });
+        });
+      });
+    }
+
+    function renderAssistantTab(activePersona, theme, mergedThemes, baseVerLabel) {
+      renderSection("主题配色（绑定：" + activePersona.label + "）", function (wrap) {
+        const isPresetColor = COLOR_SWATCHES.some(function (sw) { return sw.hex === theme.accent; });
+        function saveAndApplyColor(chosenHex) {
+          const nextThemes = Object.assign({}, mergedThemes);
+          nextThemes[activePersona.key] = chosenHex;
+          saveLocalThemes(nextThemes);
+          mutatePreset(function (p) {
+            writePresetThemeBinding(p, activePersona.key, chosenHex);
+          });
+        }
+
+        COLOR_SWATCHES.forEach(function (sw) {
+          const dotBtn = hd.createElement("button");
+          dotBtn.type = "button";
+          dotBtn.className = "yd-swatch" + (theme.accent === sw.hex ? " is-active" : "");
+          dotBtn.style.background = sw.hex;
+          dotBtn.title = sw.name;
+          dotBtn.setAttribute("data-yd-swatch", sw.hex);
+          dotBtn.addEventListener("click", function () {
+            saveAndApplyColor(sw.hex);
+          });
+          wrap.appendChild(dotBtn);
+        });
+
+        const customWrap = hd.createElement("label");
+        customWrap.className = "yd-color-wrap" + (!isPresetColor ? " is-active" : "");
+        customWrap.title = "自定义颜色";
+        const colorInput = hd.createElement("input");
+        colorInput.type = "color";
+        colorInput.className = "yd-color-input";
+        colorInput.value = theme.accent;
+        colorInput.addEventListener("change", function () {
+          const chosen = normalizeHex(colorInput.value);
+          if (chosen) saveAndApplyColor(chosen);
+        });
+        customWrap.appendChild(colorInput);
+        wrap.appendChild(customWrap);
+      }, "yd-swatches");
+
+      renderSection("悬浮球位置", function (wrap) {
+        const row = hd.createElement("div");
+        row.className = "yd-card-row";
+        const coord = hd.createElement("span");
+        coord.className = "yd-muted";
+        coord.textContent = "相对位置：X " + Math.round(state.xRatio * 100) + "% · Y " + Math.round(state.yRatio * 100) + "%";
+        const resetBtn = hd.createElement("button");
+        resetBtn.type = "button";
+        resetBtn.className = "yd-chip";
+        resetBtn.setAttribute("data-yd-action", "reset-pill-pos");
+        resetBtn.textContent = "重置默认位置";
+        resetBtn.addEventListener("click", function () {
+          state.xRatio = 0.92;
+          state.yRatio = 0.24;
+          savePanelState(state);
+          applyRelativePosition();
+          renderFromPreset();
+          showToast("已恢复默认悬浮球位置");
+        });
+        row.appendChild(coord);
+        row.appendChild(resetBtn);
+        wrap.appendChild(row);
+      }, "yd-sec");
+
+      renderSection("版本与更新", function (wrap) {
+        const row = hd.createElement("div");
+        row.className = "yd-card-row";
+        const statusEl = hd.createElement("div");
+        statusEl.className = "yd-muted";
+        let statusText = "当前版本：" + baseVerLabel;
+        if (updateCheckResult && updateCheckResult.hasUpdate && updateCheckResult.remoteVersion) {
+          statusText += " · 发现新版本 v" + updateCheckResult.remoteVersion.replace(/^[vV]/, "");
+        } else if (updateCheckResult && updateCheckResult.checked) {
+          statusText += " · 已是最新";
+        } else if (updateCheckResult && !updateCheckResult.checked) {
+          statusText += " · 暂未连接更新源";
+        }
+        statusEl.textContent = statusText;
+
+        const link = hd.createElement("a");
+        link.className = "yd-link-btn";
+        link.href = GITHUB_CHANGELOG_URL;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = "查看更新日志";
+
+        row.appendChild(statusEl);
+        row.appendChild(link);
+        wrap.appendChild(row);
+      }, "yd-sec");
+    }
+
     async function renderFromPreset() {
       syncHostColors();
       const api = resolvePresetApi();
@@ -794,101 +1185,16 @@
       applyThemeColors(theme);
       pillSub.textContent = activePersona.label;
 
+      syncTabButtons();
       body.innerHTML = "";
 
-      // 1. 助手人设切换 + 紧邻其下方的紧凑单行主题配色
-      renderSection("助手人设", function (wrap, secEl) {
-        personas.forEach(function (persona) {
-          const btn = hd.createElement("button");
-          btn.type = "button";
-          btn.className = "yd-chip" + (persona.key === activePersona.key ? " is-active" : "");
-          btn.setAttribute("data-yd-persona-key", persona.key);
-          btn.textContent = persona.label;
-          btn.addEventListener("click", function () {
-            mutatePreset(function (p) {
-              applyPersonaSelection(p.prompts || [], persona.key);
-            });
-          });
-          wrap.appendChild(btn);
-        });
-
-        const colorBar = hd.createElement("div");
-        colorBar.className = "yd-theme-inline";
-        const colorLabel = hd.createElement("span");
-        colorLabel.className = "yd-theme-tag";
-        colorLabel.textContent = "主题配色";
-        colorBar.appendChild(colorLabel);
-
-        const isPresetColor = COLOR_SWATCHES.some(function (sw) { return sw.hex === theme.accent; });
-        function saveAndApplyColor(chosenHex) {
-          const nextThemes = Object.assign({}, mergedThemes);
-          nextThemes[activePersona.key] = chosenHex;
-          saveLocalThemes(nextThemes);
-          mutatePreset(function (p) {
-            writePresetThemeBinding(p, activePersona.key, chosenHex);
-          });
-        }
-
-        COLOR_SWATCHES.forEach(function (sw) {
-          const dotBtn = hd.createElement("button");
-          dotBtn.type = "button";
-          dotBtn.className = "yd-swatch" + (theme.accent === sw.hex ? " is-active" : "");
-          dotBtn.style.background = sw.hex;
-          dotBtn.title = sw.name;
-          dotBtn.setAttribute("data-yd-swatch", sw.hex);
-          dotBtn.addEventListener("click", function () {
-            saveAndApplyColor(sw.hex);
-          });
-          colorBar.appendChild(dotBtn);
-        });
-
-        const customWrap = hd.createElement("label");
-        customWrap.className = "yd-color-wrap" + (!isPresetColor ? " is-active" : "");
-        customWrap.title = "自定义颜色";
-        const colorInput = hd.createElement("input");
-        colorInput.type = "color";
-        colorInput.className = "yd-color-input";
-        colorInput.value = theme.accent;
-        colorInput.addEventListener("change", function () {
-          const chosen = normalizeHex(colorInput.value);
-          if (chosen) saveAndApplyColor(chosen);
-        });
-        customWrap.appendChild(colorInput);
-        colorBar.appendChild(customWrap);
-
-        secEl.appendChild(colorBar);
-      });
-
-      // 2. 严格按「叙事约定 -> 执行规则」有序展示既有分类
-      PANEL_SECTIONS.forEach(function (sec) {
-        let items;
-        if (sec.ids) {
-          items = [];
-          sec.ids.forEach(function (tid) {
-            const found = prompts.find(function (p) { return getPromptId(p) === tid; });
-            if (found) items.push(found);
-          });
-        } else {
-          items = prompts.filter(function (p) { return getPromptId(p).indexOf(sec.prefix) === 0; });
-        }
-        if (!items.length) return;
-        renderSection(sec.title, function (wrap) {
-          items.forEach(function (item) {
-            const iid = getPromptId(item);
-            const btn = hd.createElement("button");
-            btn.type = "button";
-            btn.className = "yd-chip" + (item.enabled ? " is-active" : "");
-            btn.setAttribute("data-yd-item-id", iid);
-            btn.textContent = stripOptionLabel(item.name || iid);
-            btn.addEventListener("click", function () {
-              mutatePreset(function (p) {
-                applySectionToggle(p.prompts || [], sec, iid);
-              });
-            });
-            wrap.appendChild(btn);
-          });
-        });
-      });
+      if (state.activeTab === "regex") {
+        renderRegexTab(preset);
+      } else if (state.activeTab === "assistant") {
+        renderAssistantTab(activePersona, theme, mergedThemes, baseVerLabel);
+      } else {
+        renderPresetTab(prompts, personas, activePersona);
+      }
 
       applyRelativePosition();
     }

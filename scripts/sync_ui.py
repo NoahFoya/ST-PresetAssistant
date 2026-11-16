@@ -10,9 +10,10 @@ MANIFEST_PATH = BASE / "raw_data_cache" / "preset_manifest.json"
 UI_DIR = BASE / "raw_data_cache" / "ui"
 
 SCRIPT_TO_UI = {
-    "💭 构思手记折叠": UI_DIR / "draft_card.html",
-    "💬 段间随记与批注卡片": UI_DIR / "comment_card.html",
-    "🎯 行动选项交互卡片": UI_DIR / "options_card.html",
+    "[思考] 构思手记": UI_DIR / "draft_card.html",
+    "[批注] 段间随记楼": UI_DIR / "comment_card.html",
+    "[选择] 行动建议卡片": UI_DIR / "options_card.html",
+    "[正文] 对白与排版美化": UI_DIR / "prose_beautify.html",
 }
 FLOAT_SCRIPT_FILE = UI_DIR / "floating_panel.js"
 FLOAT_SCRIPT_NAME = "🎛️ ST-预设助手悬浮控制面板"
