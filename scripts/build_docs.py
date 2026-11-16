@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate architecture guide and full content cache for Yuedu Assistant."""
+"""Generate architecture guide and full content cache for ST-PresetAssistant."""
 import json
 from pathlib import Path
 

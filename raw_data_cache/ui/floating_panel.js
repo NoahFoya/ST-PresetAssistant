@@ -107,20 +107,14 @@
 
   function stripOptionLabel(name) {
     return String(name || "")
-      .replace(/^☑️\d️⃣\[[^\]]+\]:\s*/u, "")
-      .replace(/^🛠️\[[^\]]+\]:\s*/u, "")
-      .replace(/^(?:✅|📝)\s*COT[：:]\s*/iu, "")
-      .replace(/^💭\s*/u, "")
       .replace(/^\[[^\]]+\]\s*/u, "")
-      .replace(/\s*\(Assistant Prefill\)\s*/i, "")
-      .replace(/^[\u{1F300}-\u{1FAFF}\u2600-\u27BF]\s*/u, "")
       .trim();
   }
 
   function cleanCustomPersonaLabel(rawName) {
     const s = String(rawName || "").trim();
     const stripped = s
-      .replace(/^(?:🎭|😈|❄️|👤|🧩)?\s*(?:\[(?:AI|助手)?人设\]|(?:AI|助手)?人设\s*[：:])\s*/iu, "")
+      .replace(/^\[(?:AI)?人设\]\s*|^(?:AI|助手)人设\s*[：:]\s*/iu, "")
       .trim();
     return stripped || s || "自定义";
   }
@@ -255,7 +249,7 @@
       const pid = getPromptId(p);
       const pname = String((p && p.name) || "");
       if (!pid || BUILTIN_PERSONAS[pid]) return;
-      if (pid.indexOf("yd_persona_") === 0 || /(?:(?:AI|助手)人设\s*[：:]|^\[(?:AI)?人设\])/i.test(pname)) {
+      if (pid.indexOf("yd_persona_") === 0 || /^\[(?:AI)?人设\]|^AI人设\s*[：:]/i.test(pname)) {
         list.push({
           id: pid,
           key: "custom:" + pid,
@@ -292,12 +286,16 @@
     };
   }
 
+  function formatVerTag(rawVer) {
+    const cleaned = String(rawVer || PRESET_VERSION).trim().replace(/^[vV]/, "");
+    return "v" + (cleaned || PRESET_VERSION);
+  }
+
   function resolveVersionLabel(preset) {
     const ext = preset && preset.extensions;
     const thVars = ext && ext.tavern_helper && ext.tavern_helper.variables;
     const rawVer = (thVars && thVars.st_preset_version) || PRESET_VERSION;
-    const cleaned = String(rawVer || PRESET_VERSION).trim().replace(/^[vV]/, "");
-    return "v" + (cleaned || PRESET_VERSION);
+    return formatVerTag(rawVer);
   }
 
   function compareSemver(a, b) {
@@ -696,8 +694,6 @@
       `  background: var(--yd-accent-soft); border-color: var(--yd-accent); color: var(--yd-accent); font-weight: 600;`,
       `}`,
       `#${ROOT_EL_ID} .yd-swatches { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }`,
-      `#${ROOT_EL_ID} .yd-theme-inline { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-top: 2px; }`,
-      `#${ROOT_EL_ID} .yd-theme-tag { font-size: 11px; opacity: 0.72; margin-right: 2px; }`,
       `#${ROOT_EL_ID} .yd-swatch {`,
       `  width: 20px; height: 20px; border-radius: 50%; padding: 0; cursor: pointer;`,
       `  border: 2px solid transparent; transition: transform 0.14s ease, border-color 0.14s ease;`,
@@ -872,13 +868,13 @@
       const res = await checkRemoteUpdateOnce(curVer, testFetcher);
       updateCheckResult = res;
       if (res && res.hasUpdate && res.remoteVersion) {
-        const nextVer = "v" + res.remoteVersion.replace(/^[vV]/, "");
-        verBadge.textContent = "v" + curVer + " · 有新版 " + nextVer;
+        const nextVer = formatVerTag(res.remoteVersion);
+        verBadge.textContent = formatVerTag(curVer) + " · 有新版 " + nextVer;
         verBadge.classList.add("is-update");
         verBadge.title = "发现新版本 " + nextVer + "，点击前往 GitHub 查看更新日志";
         pill.classList.add("has-update");
       } else if (res && res.checked) {
-        verBadge.title = "当前已是最新版本 (v" + curVer + ") · 点击前往 GitHub 查看更新日志";
+        verBadge.title = "当前已是最新版本 (" + formatVerTag(curVer) + ") · 点击前往 GitHub 查看更新日志";
       }
       if (state.open && state.activeTab === "assistant") {
         renderFromPreset();
@@ -1139,7 +1135,7 @@
         statusEl.className = "yd-muted";
         let statusText = "当前版本：" + baseVerLabel;
         if (updateCheckResult && updateCheckResult.hasUpdate && updateCheckResult.remoteVersion) {
-          statusText += " · 发现新版本 v" + updateCheckResult.remoteVersion.replace(/^[vV]/, "");
+          statusText += " · 发现新版本 " + formatVerTag(updateCheckResult.remoteVersion);
         } else if (updateCheckResult && updateCheckResult.checked) {
           statusText += " · 已是最新";
         } else if (updateCheckResult && !updateCheckResult.checked) {

@@ -22,7 +22,7 @@
     line-height: 1.55;
     overflow-x: hidden;
   }
-  .ll-talk-card {
+  .yd-talk-card {
     margin: 4px 0;
     border-radius: 8px;
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 3.4%, transparent);
@@ -31,7 +31,7 @@
     overflow: hidden;
     box-shadow: 0 1px 4px color-mix(in srgb, var(--SmartThemeBodyColor) 5%, transparent);
   }
-  .ll-talk-head {
+  .yd-talk-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -40,22 +40,22 @@
     background: color-mix(in srgb, var(--SmartThemeEmColor) 8%, transparent);
     border-bottom: 1px dashed color-mix(in srgb, var(--SmartThemeBodyColor) 15%, transparent);
   }
-  .ll-talk-card.is-collapsed .ll-talk-head {
+  .yd-talk-card.is-collapsed .yd-talk-head {
     border-bottom: none;
   }
-  .ll-talk-title-wrap {
+  .yd-talk-title-wrap {
     display: flex;
     align-items: center;
     gap: 7px;
     min-width: 0;
   }
-  .ll-talk-title {
+  .yd-talk-title {
     font-size: 0.92em;
     font-weight: 600;
     color: var(--SmartThemeEmColor);
     letter-spacing: 0.03em;
   }
-  .ll-talk-count {
+  .yd-talk-count {
     font-size: 0.74em;
     padding: 1px 7px;
     border-radius: 999px;
@@ -63,7 +63,7 @@
     color: var(--SmartThemeEmColor);
     border: 1px solid color-mix(in srgb, var(--SmartThemeEmColor) 28%, transparent);
   }
-  .ll-talk-preview {
+  .yd-talk-preview {
     font-size: 0.8em;
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 58%, transparent);
     overflow: hidden;
@@ -72,10 +72,10 @@
     max-width: 320px;
     display: none;
   }
-  .ll-talk-card.is-collapsed .ll-talk-preview {
+  .yd-talk-card.is-collapsed .yd-talk-preview {
     display: inline-block;
   }
-  .ll-collapse-btn {
+  .yd-collapse-btn {
     background: transparent;
     border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 16%, transparent);
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 68%, transparent);
@@ -90,39 +90,39 @@
     flex-shrink: 0;
     transition: all 0.16s ease;
   }
-  .ll-collapse-btn:hover {
+  .yd-collapse-btn:hover {
     border-color: color-mix(in srgb, var(--SmartThemeEmColor) 55%, transparent);
     color: var(--SmartThemeEmColor);
   }
-  .ll-talk-body {
+  .yd-talk-body {
     padding: 8px 11px 10px 11px;
   }
-  .ll-talk-card.is-collapsed .ll-talk-body {
+  .yd-talk-card.is-collapsed .yd-talk-body {
     display: none;
   }
-  .ll-floor-list {
+  .yd-floor-list {
     display: flex;
     flex-direction: column;
     gap: 6px;
   }
-  .ll-floor {
+  .yd-floor {
     padding: 7px 10px;
     border-radius: 6px;
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 2.5%, transparent);
     border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 11%, transparent);
   }
-  .ll-floor.is-master {
+  .yd-floor.is-master {
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 7.5%, transparent);
     border-color: color-mix(in srgb, var(--SmartThemeEmColor) 26%, transparent);
   }
-  .ll-floor-meta {
+  .yd-floor-meta {
     display: flex;
     align-items: center;
     gap: 6px;
     margin-bottom: 4px;
     flex-wrap: wrap;
   }
-  .ll-avatar {
+  .yd-avatar {
     width: 20px;
     height: 20px;
     border-radius: 50%;
@@ -135,23 +135,23 @@
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 12%, transparent);
     color: var(--SmartThemeBodyColor);
   }
-  .ll-floor.is-author .ll-avatar {
+  .yd-floor.is-author .yd-avatar {
     background: color-mix(in srgb, var(--SmartThemeEmColor) 22%, transparent);
     color: var(--SmartThemeEmColor);
   }
-  .ll-floor.is-master .ll-avatar {
+  .yd-floor.is-master .yd-avatar {
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 20%, transparent);
     color: var(--SmartThemeBodyColor);
   }
-  .ll-speaker {
+  .yd-speaker {
     font-weight: 600;
     font-size: 0.88em;
     color: var(--SmartThemeBodyColor);
   }
-  .ll-floor.is-author .ll-speaker {
+  .yd-floor.is-author .yd-speaker {
     color: var(--SmartThemeEmColor);
   }
-  .ll-badge {
+  .yd-badge {
     font-size: 0.7em;
     padding: 0 6px;
     line-height: 1.55;
@@ -160,27 +160,27 @@
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 72%, transparent);
     border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 14%, transparent);
   }
-  .ll-floor.is-author .ll-badge {
+  .yd-floor.is-author .yd-badge {
     background: color-mix(in srgb, var(--SmartThemeEmColor) 15%, transparent);
     color: var(--SmartThemeEmColor);
     border-color: color-mix(in srgb, var(--SmartThemeEmColor) 32%, transparent);
   }
-  .ll-floor.is-master .ll-badge {
+  .yd-floor.is-master .yd-badge {
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 14%, transparent);
     color: var(--SmartThemeBodyColor);
   }
-  .ll-floor-num {
+  .yd-floor-num {
     margin-left: auto;
     font-size: 0.74em;
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 48%, transparent);
     font-variant-numeric: tabular-nums;
   }
-  .ll-floor-actions {
+  .yd-floor-actions {
     display: inline-flex;
     gap: 4px;
     margin-left: 6px;
   }
-  .ll-mini-btn {
+  .yd-mini-btn {
     background: transparent;
     border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 16%, transparent);
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 68%, transparent);
@@ -191,15 +191,15 @@
     font-family: inherit;
     transition: all 0.14s ease;
   }
-  .ll-mini-btn:hover {
+  .yd-mini-btn:hover {
     color: var(--SmartThemeEmColor);
     border-color: color-mix(in srgb, var(--SmartThemeEmColor) 48%, transparent);
   }
-  .ll-mini-btn.is-danger:hover {
+  .yd-mini-btn.is-danger:hover {
     color: #c94a4a;
     border-color: rgba(201, 74, 74, 0.5);
   }
-  .ll-floor-text {
+  .yd-floor-text {
     font-size: 0.91em;
     line-height: 1.58;
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 92%, transparent);
@@ -207,13 +207,13 @@
     word-break: break-word;
     padding-left: 26px;
   }
-  .ll-edit-box {
+  .yd-edit-box {
     padding-left: 26px;
     display: flex;
     flex-direction: column;
     gap: 6px;
   }
-  .ll-edit-input {
+  .yd-edit-input {
     width: 100%;
     min-height: 44px;
     padding: 5px 8px;
@@ -227,17 +227,17 @@
     resize: vertical;
     outline: none;
   }
-  .ll-edit-bar {
+  .yd-edit-bar {
     display: flex;
     gap: 6px;
   }
-  .ll-reply-bar {
+  .yd-reply-bar {
     margin-top: 8px;
     display: flex;
     gap: 6px;
     align-items: center;
   }
-  .ll-reply-input {
+  .yd-reply-input {
     flex: 1;
     min-width: 0;
     height: 30px;
@@ -251,10 +251,10 @@
     outline: none;
     transition: border-color 0.15s ease;
   }
-  .ll-reply-input:focus {
+  .yd-reply-input:focus {
     border-color: color-mix(in srgb, var(--SmartThemeEmColor) 60%, transparent);
   }
-  .ll-reply-select {
+  .yd-reply-select {
     height: 30px;
     padding: 0 6px;
     border-radius: 5px;
@@ -266,11 +266,11 @@
     cursor: pointer;
     flex-shrink: 0;
   }
-  .ll-reply-select option {
+  .yd-reply-select option {
     background: Canvas;
     color: CanvasText;
   }
-  .ll-reply-btn {
+  .yd-reply-btn {
     height: 30px;
     padding: 0 11px;
     border-radius: 5px;
@@ -284,53 +284,53 @@
     flex-shrink: 0;
     transition: all 0.15s ease;
   }
-  .ll-reply-btn:hover:not(:disabled) {
+  .yd-reply-btn:hover:not(:disabled) {
     background: color-mix(in srgb, var(--SmartThemeEmColor) 26%, transparent);
   }
-  .ll-reply-btn:disabled {
+  .yd-reply-btn:disabled {
     opacity: 0.55;
     cursor: not-allowed;
   }
-  .ll-talk-toast {
+  .yd-talk-toast {
     margin-top: 6px;
     font-size: 0.78em;
     color: var(--SmartThemeEmColor);
     display: none;
     word-break: break-word;
   }
-  .ll-talk-toast.show {
+  .yd-talk-toast.show {
     display: block;
   }
   @media (max-width: 620px) {
-    .ll-talk-head { padding: 6px 9px; }
-    .ll-talk-body { padding: 7px 9px 9px 9px; }
-    .ll-talk-preview { max-width: 150px; }
+    .yd-talk-head { padding: 6px 9px; }
+    .yd-talk-body { padding: 7px 9px 9px 9px; }
+    .yd-talk-preview { max-width: 150px; }
   }
 </style>
 </head>
 <body>
-<div class="ll-talk-card" id="ll-talk-card" data-ll-card="comment">
-  <div class="ll-talk-head">
-    <div class="ll-talk-title-wrap">
-      <span class="ll-talk-title">💬 段间随记与批注楼</span>
-      <span class="ll-talk-count" id="ll-talk-count">0 楼</span>
-      <span class="ll-talk-preview" id="ll-talk-preview"></span>
+<div class="yd-talk-card" id="yd-talk-card" data-yd-card="comment">
+  <div class="yd-talk-head">
+    <div class="yd-talk-title-wrap">
+      <span class="yd-talk-title">💬 段间随记与批注楼</span>
+      <span class="yd-talk-count" id="yd-talk-count">0 楼</span>
+      <span class="yd-talk-preview" id="yd-talk-preview"></span>
     </div>
-    <button type="button" class="ll-collapse-btn" id="ll-collapse-btn" aria-expanded="true" title="展开 / 收起">▾</button>
+    <button type="button" class="yd-collapse-btn" id="yd-collapse-btn" aria-expanded="true" title="展开 / 收起">▾</button>
   </div>
-  <div class="ll-talk-body" id="ll-talk-body">
-    <div class="ll-floor-list" id="ll-floor-list"></div>
-    <div class="ll-reply-bar">
-      <select class="ll-reply-select" id="ll-reply-role" aria-label="追加署名">
+  <div class="yd-talk-body" id="yd-talk-body">
+    <div class="yd-floor-list" id="yd-floor-list"></div>
+    <div class="yd-reply-bar">
+      <select class="yd-reply-select" id="yd-reply-role" aria-label="追加署名">
         <option value="master">master</option>
         <option value="随记">伏笔随记</option>
       </select>
-      <input type="text" class="ll-reply-input" id="ll-reply-input" placeholder="追加点评或伏笔随记（全楼层支持直接编辑改写）..." />
-      <button type="button" class="ll-reply-btn" id="ll-reply-btn">追加</button>
+      <input type="text" class="yd-reply-input" id="yd-reply-input" placeholder="追加点评或伏笔随记（全楼层支持直接编辑改写）..." />
+      <button type="button" class="yd-reply-btn" id="yd-reply-btn">追加</button>
     </div>
-    <div class="ll-talk-toast" id="ll-talk-toast"></div>
+    <div class="yd-talk-toast" id="yd-talk-toast"></div>
   </div>
-  <textarea id="ll-talk-raw" style="display:none;" readonly>$1</textarea>
+  <textarea id="yd-talk-raw" style="display:none;" readonly>$1</textarea>
 </div>
 <script>
 (function () {
@@ -368,16 +368,16 @@
     } catch (e) {}
   }
 
-  const cardEl = document.getElementById("ll-talk-card");
-  const rawEl = document.getElementById("ll-talk-raw");
-  const listEl = document.getElementById("ll-floor-list");
-  const countEl = document.getElementById("ll-talk-count");
-  const previewEl = document.getElementById("ll-talk-preview");
-  const collapseBtn = document.getElementById("ll-collapse-btn");
-  const replyInput = document.getElementById("ll-reply-input");
-  const replyRoleSelect = document.getElementById("ll-reply-role");
-  const replyBtn = document.getElementById("ll-reply-btn");
-  const toastEl = document.getElementById("ll-talk-toast");
+  const cardEl = document.getElementById("yd-talk-card");
+  const rawEl = document.getElementById("yd-talk-raw");
+  const listEl = document.getElementById("yd-floor-list");
+  const countEl = document.getElementById("yd-talk-count");
+  const previewEl = document.getElementById("yd-talk-preview");
+  const collapseBtn = document.getElementById("yd-collapse-btn");
+  const replyInput = document.getElementById("yd-reply-input");
+  const replyRoleSelect = document.getElementById("yd-reply-role");
+  const replyBtn = document.getElementById("yd-reply-btn");
+  const toastEl = document.getElementById("yd-talk-toast");
 
   function notifyFrameResize() {
     try {
@@ -437,7 +437,7 @@
       } else if (floors.length > 0) {
         floors[floors.length - 1].text += "\n" + line;
       } else {
-        floors.push({ speaker: "莉莉丝", text: line.replace(/^※\s*/, "") });
+        floors.push({ speaker: "随记", text: line.replace(/^※\s*/, "") });
       }
     });
     return floors;
@@ -462,7 +462,7 @@
     if (low === "master" || s === "读者") {
       return { cls: "is-master", badge: "读者", avatar: low === "master" ? "M" : s.charAt(0) };
     }
-    return { cls: "is-guest", badge: "助/客", avatar: (s.charAt(0) || "?").toUpperCase() };
+    return { cls: "is-guest", badge: "客评", avatar: (s.charAt(0) || "?").toUpperCase() };
   }
 
   function resolveTavernAdapter() {
@@ -504,7 +504,7 @@
               break;
             }
             try {
-              if (fr.contentDocument && fr.contentDocument.querySelector('[data-ll-card="comment"]')) {
+              if (fr.contentDocument && fr.contentDocument.querySelector('[data-yd-card="comment"]')) {
                 commentCount++;
               }
             } catch (e) {}
@@ -602,40 +602,39 @@
     listEl.innerHTML = "";
     floors.forEach(function (floor, idx) {
       const roleMeta = getRoleMeta(floor.speaker);
-      const isMaster = floor.speaker.trim().toLowerCase() === "master";
 
       const row = document.createElement("div");
-      row.className = "ll-floor " + roleMeta.cls;
+      row.className = "yd-floor " + roleMeta.cls;
 
       const meta = document.createElement("div");
-      meta.className = "ll-floor-meta";
+      meta.className = "yd-floor-meta";
 
       const avatar = document.createElement("span");
-      avatar.className = "ll-avatar";
+      avatar.className = "yd-avatar";
       avatar.textContent = roleMeta.avatar;
       meta.appendChild(avatar);
 
       const speaker = document.createElement("span");
-      speaker.className = "ll-speaker";
+      speaker.className = "yd-speaker";
       speaker.textContent = floor.speaker;
       meta.appendChild(speaker);
 
       const badge = document.createElement("span");
-      badge.className = "ll-badge";
+      badge.className = "yd-badge";
       badge.textContent = roleMeta.badge;
       meta.appendChild(badge);
 
       const num = document.createElement("span");
-      num.className = "ll-floor-num";
+      num.className = "yd-floor-num";
       num.textContent = "#" + (idx + 1);
       meta.appendChild(num);
 
       const actions = document.createElement("div");
-      actions.className = "ll-floor-actions";
+      actions.className = "yd-floor-actions";
 
       const editBtn = document.createElement("button");
       editBtn.type = "button";
-      editBtn.className = "ll-mini-btn";
+      editBtn.className = "yd-mini-btn";
       editBtn.textContent = "编辑";
       editBtn.addEventListener("click", function () {
         editingFloorIdx = editingFloorIdx === idx ? -1 : idx;
@@ -645,7 +644,7 @@
 
       const delBtn = document.createElement("button");
       delBtn.type = "button";
-      delBtn.className = "ll-mini-btn is-danger";
+      delBtn.className = "yd-mini-btn is-danger";
       delBtn.textContent = "删除";
       delBtn.addEventListener("click", function () {
         const nextFloors = floors.filter(function (_, j) { return j !== idx; });
@@ -659,19 +658,19 @@
 
       if (editingFloorIdx === idx) {
         const editBox = document.createElement("div");
-        editBox.className = "ll-edit-box";
+        editBox.className = "yd-edit-box";
 
         const editInput = document.createElement("textarea");
-        editInput.className = "ll-edit-input";
+        editInput.className = "yd-edit-input";
         editInput.value = floor.text;
         editBox.appendChild(editInput);
 
         const editBar = document.createElement("div");
-        editBar.className = "ll-edit-bar";
+        editBar.className = "yd-edit-bar";
 
         const saveBtn = document.createElement("button");
         saveBtn.type = "button";
-        saveBtn.className = "ll-mini-btn";
+        saveBtn.className = "yd-mini-btn";
         saveBtn.textContent = "保存";
         saveBtn.addEventListener("click", function () {
           const val = editInput.value.trim();
@@ -688,7 +687,7 @@
 
         const cancelBtn = document.createElement("button");
         cancelBtn.type = "button";
-        cancelBtn.className = "ll-mini-btn";
+        cancelBtn.className = "yd-mini-btn";
         cancelBtn.textContent = "取消";
         cancelBtn.addEventListener("click", function () {
           editingFloorIdx = -1;
@@ -700,7 +699,7 @@
         row.appendChild(editBox);
       } else {
         const textEl = document.createElement("div");
-        textEl.className = "ll-floor-text";
+        textEl.className = "yd-floor-text";
         textEl.textContent = floor.text;
         row.appendChild(textEl);
       }

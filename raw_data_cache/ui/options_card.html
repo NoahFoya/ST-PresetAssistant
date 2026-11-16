@@ -22,7 +22,7 @@
     line-height: 1.55;
     overflow-x: hidden;
   }
-  .ll-opt-card {
+  .yd-opt-card {
     margin: 4px 0;
     border-radius: 8px;
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 3.8%, transparent);
@@ -31,7 +31,7 @@
     overflow: hidden;
     box-shadow: 0 1px 4px color-mix(in srgb, var(--SmartThemeBodyColor) 5%, transparent);
   }
-  .ll-opt-head {
+  .yd-opt-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -41,22 +41,22 @@
     background: color-mix(in srgb, var(--SmartThemeEmColor) 7.5%, transparent);
     border-bottom: 1px dashed color-mix(in srgb, var(--SmartThemeBodyColor) 15%, transparent);
   }
-  .ll-opt-card.is-collapsed .ll-opt-head {
+  .yd-opt-card.is-collapsed .yd-opt-head {
     border-bottom: none;
   }
-  .ll-opt-title-wrap {
+  .yd-opt-title-wrap {
     display: flex;
     align-items: center;
     gap: 7px;
     min-width: 0;
   }
-  .ll-opt-title {
+  .yd-opt-title {
     font-size: 0.94em;
     font-weight: 600;
     color: var(--SmartThemeEmColor);
     letter-spacing: 0.04em;
   }
-  .ll-opt-count {
+  .yd-opt-count {
     font-size: 0.75em;
     padding: 1px 7px;
     border-radius: 999px;
@@ -64,13 +64,13 @@
     color: var(--SmartThemeEmColor);
     border: 1px solid color-mix(in srgb, var(--SmartThemeEmColor) 28%, transparent);
   }
-  .ll-opt-controls {
+  .yd-opt-controls {
     display: flex;
     align-items: center;
     gap: 6px;
     margin-left: auto;
   }
-  .ll-opt-modes {
+  .yd-opt-modes {
     display: inline-flex;
     padding: 2px;
     border-radius: 6px;
@@ -78,7 +78,7 @@
     border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 14%, transparent);
     gap: 2px;
   }
-  .ll-mode-btn {
+  .yd-mode-btn {
     background: transparent;
     border: none;
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 68%, transparent);
@@ -89,17 +89,17 @@
     font-family: inherit;
     transition: all 0.16s ease;
   }
-  .ll-mode-btn:hover {
+  .yd-mode-btn:hover {
     color: var(--SmartThemeBodyColor);
     background: color-mix(in srgb, var(--SmartThemeEmColor) 10%, transparent);
   }
-  .ll-mode-btn.active {
+  .yd-mode-btn.active {
     background: color-mix(in srgb, var(--SmartThemeEmColor) 20%, transparent);
     color: var(--SmartThemeBodyColor);
     font-weight: 600;
     box-shadow: 0 1px 2px color-mix(in srgb, var(--SmartThemeBodyColor) 8%, transparent);
   }
-  .ll-collapse-btn {
+  .yd-collapse-btn {
     background: transparent;
     border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 16%, transparent);
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 68%, transparent);
@@ -113,22 +113,22 @@
     font-size: 0.8em;
     transition: all 0.16s ease;
   }
-  .ll-collapse-btn:hover {
+  .yd-collapse-btn:hover {
     border-color: color-mix(in srgb, var(--SmartThemeEmColor) 55%, transparent);
     color: var(--SmartThemeEmColor);
   }
-  .ll-opt-body {
+  .yd-opt-body {
     padding: 10px 12px 11px 12px;
   }
-  .ll-opt-card.is-collapsed .ll-opt-body {
+  .yd-opt-card.is-collapsed .yd-opt-body {
     display: none;
   }
-  .ll-opt-list {
+  .yd-opt-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 8px;
   }
-  .ll-opt-item {
+  .yd-opt-item {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -147,26 +147,26 @@
     outline: none;
     font-family: inherit;
   }
-  .ll-opt-item:hover {
+  .yd-opt-item:hover {
     background: color-mix(in srgb, var(--SmartThemeEmColor) 11%, transparent);
     border-color: color-mix(in srgb, var(--SmartThemeEmColor) 58%, transparent);
     transform: translateY(-1px);
   }
-  .ll-opt-item:active {
+  .yd-opt-item:active {
     transform: translateY(0);
   }
-  .ll-opt-item.is-picked {
+  .yd-opt-item.is-picked {
     border-color: color-mix(in srgb, var(--SmartThemeEmColor) 75%, transparent);
     background: color-mix(in srgb, var(--SmartThemeEmColor) 14%, transparent);
   }
-  .ll-opt-item-top {
+  .yd-opt-item-top {
     display: flex;
     align-items: center;
     gap: 6px;
     width: 100%;
     flex-wrap: wrap;
   }
-  .ll-opt-badge {
+  .yd-opt-badge {
     flex-shrink: 0;
     display: inline-flex;
     align-items: center;
@@ -180,18 +180,18 @@
     font-size: 0.82em;
     font-weight: 700;
   }
-  .ll-opt-label {
+  .yd-opt-label {
     font-weight: 600;
     font-size: 0.9em;
     color: var(--SmartThemeEmColor);
     word-break: break-word;
   }
-  .ll-opt-desc {
+  .yd-opt-desc {
     width: 100%;
     word-break: break-word;
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 90%, transparent);
   }
-  .ll-opt-fallback {
+  .yd-opt-fallback {
     display: none;
     white-space: pre-wrap;
     word-break: break-word;
@@ -202,50 +202,50 @@
     border: 1px dashed color-mix(in srgb, var(--SmartThemeBodyColor) 20%, transparent);
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 88%, transparent);
   }
-  .ll-opt-toast {
+  .yd-opt-toast {
     margin-top: 8px;
     font-size: 0.8em;
     color: var(--SmartThemeEmColor);
     display: none;
     word-break: break-word;
   }
-  .ll-opt-toast.show {
+  .yd-opt-toast.show {
     display: block;
   }
   @media (max-width: 620px) {
-    .ll-opt-list {
+    .yd-opt-list {
       grid-template-columns: 1fr;
     }
-    .ll-opt-head {
+    .yd-opt-head {
       padding: 7px 10px;
     }
-    .ll-opt-body {
+    .yd-opt-body {
       padding: 9px 10px 10px 10px;
     }
   }
 </style>
 </head>
 <body>
-<div class="ll-opt-card" id="ll-opt-card" data-ll-card="options">
-  <div class="ll-opt-head">
-    <div class="ll-opt-title-wrap">
-      <span class="ll-opt-title">🧭 行动方向建议</span>
-      <span class="ll-opt-count" id="ll-opt-count"></span>
+<div class="yd-opt-card" id="yd-opt-card" data-yd-card="options">
+  <div class="yd-opt-head">
+    <div class="yd-opt-title-wrap">
+      <span class="yd-opt-title">🧭 行动方向建议</span>
+      <span class="yd-opt-count" id="yd-opt-count"></span>
     </div>
-    <div class="ll-opt-controls">
-      <div class="ll-opt-modes" role="group" aria-label="输入模式">
-        <button type="button" class="ll-mode-btn active" data-mode="fill" title="填入并覆盖当前输入框内容">填入</button>
-        <button type="button" class="ll-mode-btn" data-mode="send" title="覆盖输入框内容后立即发送">发送</button>
+    <div class="yd-opt-controls">
+      <div class="yd-opt-modes" role="group" aria-label="输入模式">
+        <button type="button" class="yd-mode-btn active" data-mode="fill" title="填入并覆盖当前输入框内容">填入</button>
+        <button type="button" class="yd-mode-btn" data-mode="send" title="覆盖输入框内容后立即发送">发送</button>
       </div>
-      <button type="button" class="ll-collapse-btn" id="ll-collapse-btn" aria-expanded="true" title="展开 / 收起">▾</button>
+      <button type="button" class="yd-collapse-btn" id="yd-collapse-btn" aria-expanded="true" title="展开 / 收起">▾</button>
     </div>
   </div>
-  <div class="ll-opt-body" id="ll-opt-body">
-    <div class="ll-opt-list" id="ll-opt-list"></div>
-    <div class="ll-opt-fallback" id="ll-opt-fallback"></div>
-    <div class="ll-opt-toast" id="ll-opt-toast"></div>
+  <div class="yd-opt-body" id="yd-opt-body">
+    <div class="yd-opt-list" id="yd-opt-list"></div>
+    <div class="yd-opt-fallback" id="yd-opt-fallback"></div>
+    <div class="yd-opt-toast" id="yd-opt-toast"></div>
   </div>
-  <textarea class="ll-opt-raw" id="ll-opt-raw" style="display:none;" readonly>$1</textarea>
+  <textarea class="yd-opt-raw" id="yd-opt-raw" style="display:none;" readonly>$1</textarea>
 </div>
 <script>
 (function () {
@@ -277,13 +277,13 @@
     } catch (e) {}
   }
 
-  const cardEl = document.getElementById("ll-opt-card");
-  const rawEl = document.getElementById("ll-opt-raw");
-  const listEl = document.getElementById("ll-opt-list");
-  const countEl = document.getElementById("ll-opt-count");
-  const fallbackEl = document.getElementById("ll-opt-fallback");
-  const toastEl = document.getElementById("ll-opt-toast");
-  const collapseBtn = document.getElementById("ll-collapse-btn");
+  const cardEl = document.getElementById("yd-opt-card");
+  const rawEl = document.getElementById("yd-opt-raw");
+  const listEl = document.getElementById("yd-opt-list");
+  const countEl = document.getElementById("yd-opt-count");
+  const fallbackEl = document.getElementById("yd-opt-fallback");
+  const toastEl = document.getElementById("yd-opt-toast");
+  const collapseBtn = document.getElementById("yd-collapse-btn");
 
   function notifyFrameResize() {
     try {
@@ -319,9 +319,9 @@
     }, 2400);
   }
 
-  document.querySelectorAll(".ll-mode-btn").forEach(function (btn) {
+  document.querySelectorAll(".yd-mode-btn").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      document.querySelectorAll(".ll-mode-btn").forEach(function (b) { b.classList.remove("active"); });
+      document.querySelectorAll(".yd-mode-btn").forEach(function (b) { b.classList.remove("active"); });
       btn.classList.add("active");
       mode = btn.getAttribute("data-mode") || "fill";
     });
@@ -392,32 +392,32 @@
       const fillText = item.desc || item.title;
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "ll-opt-item";
+      btn.className = "yd-opt-item";
 
       const topRow = document.createElement("div");
-      topRow.className = "ll-opt-item-top";
+      topRow.className = "yd-opt-item-top";
 
       const badgeEl = document.createElement("span");
-      badgeEl.className = "ll-opt-badge";
+      badgeEl.className = "yd-opt-badge";
       badgeEl.textContent = item.badge;
       topRow.appendChild(badgeEl);
 
       if (item.title) {
         const labelEl = document.createElement("span");
-        labelEl.className = "ll-opt-label";
+        labelEl.className = "yd-opt-label";
         labelEl.textContent = item.title;
         topRow.appendChild(labelEl);
       }
 
       const descEl = document.createElement("div");
-      descEl.className = "ll-opt-desc";
+      descEl.className = "yd-opt-desc";
       descEl.textContent = item.desc;
 
       btn.appendChild(topRow);
       btn.appendChild(descEl);
 
       btn.addEventListener("click", function () {
-        document.querySelectorAll(".ll-opt-item.is-picked").forEach(function (el) { el.classList.remove("is-picked"); });
+        document.querySelectorAll(".yd-opt-item.is-picked").forEach(function (el) { el.classList.remove("is-picked"); });
         btn.classList.add("is-picked");
 
         const hostDoc = getHostDoc();
