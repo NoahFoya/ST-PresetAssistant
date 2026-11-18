@@ -1,0 +1,13 @@
+DUAL LICENSING NOTICE
+
+1. CODE, UI SCRIPTS, AND BUILD PIPELINE (GPL-3.0)
+All automation build scripts, verification scripts, and JavaScript control panel source code (scripts/, raw_data_cache/ui/floating_panel.js) in this repository are licensed under the GNU General Public License v3.0 (GPL-3.0).
+https://www.gnu.org/licenses/gpl-3.0.html
+
+2. PRESET PROMPTS, HTML TEMPLATES, AND COMPILED JSON ASSETS (CC BY-NC-SA 4.0)
+All SillyTavern prompt entries, text templates, UI card HTML/CSS templates, documentation, and compiled preset JSON assets in this repository are licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0).
+https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+STRICT NON-COMMERCIAL NOTICE:
+Commercial use, selling, paid packaging, or monetizing any preset prompts, templates, or compiled JSON assets from this project is STRICTLY PROHIBITED.
+Any derivative works or redistributed versions must credit the original author: NoahFoya (https://github.com/NoahFoya/ST-PresetAssistant).
