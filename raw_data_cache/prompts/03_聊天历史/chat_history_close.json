@@ -1,8 +1,8 @@
 {
   "identifier": "chat_history_close",
-  "name": "</历史会话>",
+  "name": "💬 历史会话 - 结束",
   "role": "system",
-  "content": "</历史会话>",
+  "content": "</chat_history>",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

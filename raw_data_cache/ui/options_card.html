@@ -22,14 +22,19 @@
     line-height: 1.55;
     overflow-x: hidden;
   }
+  @keyframes yd-opt-reveal {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
   .yd-opt-card {
     margin: 4px 0;
-    border-radius: 8px;
+    border-radius: 10px;
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 3.8%, transparent);
-    border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 15%, transparent);
-    border-left: 3px solid color-mix(in srgb, var(--SmartThemeEmColor) 82%, transparent);
+    border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 16%, transparent);
+    border-left: 3px solid color-mix(in srgb, var(--SmartThemeEmColor) 86%, transparent);
     overflow: hidden;
-    box-shadow: 0 1px 4px color-mix(in srgb, var(--SmartThemeBodyColor) 5%, transparent);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 8px color-mix(in srgb, var(--SmartThemeBodyColor) 6%, transparent);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
   .yd-opt-head {
     display: flex;
@@ -38,7 +43,7 @@
     flex-wrap: wrap;
     gap: 8px;
     padding: 8px 12px;
-    background: color-mix(in srgb, var(--SmartThemeEmColor) 7.5%, transparent);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--SmartThemeEmColor) 10%, transparent), color-mix(in srgb, var(--SmartThemeEmColor) 4%, transparent));
     border-bottom: 1px dashed color-mix(in srgb, var(--SmartThemeBodyColor) 15%, transparent);
   }
   .yd-opt-card.is-collapsed .yd-opt-head {
@@ -49,6 +54,8 @@
     align-items: center;
     gap: 7px;
     min-width: 0;
+    cursor: pointer;
+    user-select: none;
   }
   .yd-opt-title {
     font-size: 0.94em;
@@ -120,6 +127,9 @@
   .yd-opt-body {
     padding: 10px 12px 11px 12px;
   }
+  .yd-opt-card:not(.is-collapsed) .yd-opt-body {
+    animation: yd-opt-reveal 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
   .yd-opt-card.is-collapsed .yd-opt-body {
     display: none;
   }
@@ -137,27 +147,29 @@
     text-align: left;
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 2.5%, transparent);
     border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 14%, transparent);
-    border-radius: 6px;
+    border-radius: 7px;
     padding: 9px 11px;
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 92%, transparent);
     font-size: 0.91em;
     line-height: 1.56;
     cursor: pointer;
-    transition: all 0.16s ease;
+    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
     outline: none;
     font-family: inherit;
   }
   .yd-opt-item:hover {
     background: color-mix(in srgb, var(--SmartThemeEmColor) 11%, transparent);
     border-color: color-mix(in srgb, var(--SmartThemeEmColor) 58%, transparent);
+    box-shadow: 0 3px 10px color-mix(in srgb, var(--SmartThemeEmColor) 10%, transparent);
     transform: translateY(-1px);
   }
   .yd-opt-item:active {
-    transform: translateY(0);
+    transform: scale(0.985);
   }
   .yd-opt-item.is-picked {
-    border-color: color-mix(in srgb, var(--SmartThemeEmColor) 75%, transparent);
-    background: color-mix(in srgb, var(--SmartThemeEmColor) 14%, transparent);
+    border-color: color-mix(in srgb, var(--SmartThemeEmColor) 78%, transparent);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--SmartThemeEmColor) 18%, transparent), color-mix(in srgb, var(--SmartThemeEmColor) 9%, transparent));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 0 10px color-mix(in srgb, var(--SmartThemeEmColor) 16%, transparent);
   }
   .yd-opt-item-top {
     display: flex;
@@ -222,13 +234,28 @@
     .yd-opt-body {
       padding: 9px 10px 10px 10px;
     }
+    .yd-mode-btn {
+      padding: 5px 10px;
+    }
+    .yd-collapse-btn {
+      width: 28px;
+      height: 28px;
+      font-size: 0.88em;
+    }
+  }
+  .yd-mode-btn:active, .yd-collapse-btn:active {
+    transform: scale(0.97);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .yd-opt-card:not(.is-collapsed) .yd-opt-body { animation: none; }
+    * { transition: none !important; }
   }
 </style>
 </head>
 <body>
 <div class="yd-opt-card" id="yd-opt-card" data-yd-card="options">
   <div class="yd-opt-head">
-    <div class="yd-opt-title-wrap">
+    <div class="yd-opt-title-wrap" id="yd-opt-title-wrap">
       <span class="yd-opt-title">选择</span>
       <span class="yd-opt-count" id="yd-opt-count"></span>
     </div>
@@ -283,6 +310,7 @@
   const countEl = document.getElementById("yd-opt-count");
   const fallbackEl = document.getElementById("yd-opt-fallback");
   const toastEl = document.getElementById("yd-opt-toast");
+  const titleWrapEl = document.getElementById("yd-opt-title-wrap");
   const collapseBtn = document.getElementById("yd-collapse-btn");
 
   function notifyFrameResize() {
@@ -305,6 +333,7 @@
   } catch (e) {}
 
   let mode = "fill";
+  let lastSendAt = 0;
   let toastTimer = null;
 
   function showToast(msg) {
@@ -327,13 +356,19 @@
     });
   });
 
+  function toggleOptCollapse() {
+    if (!collapseBtn || !cardEl) return;
+    const collapsed = cardEl.classList.toggle("is-collapsed");
+    collapseBtn.textContent = collapsed ? "▸" : "▾";
+    collapseBtn.setAttribute("aria-expanded", String(!collapsed));
+    notifyFrameResize();
+  }
+
   if (collapseBtn && cardEl) {
-    collapseBtn.addEventListener("click", function () {
-      const collapsed = cardEl.classList.toggle("is-collapsed");
-      collapseBtn.textContent = collapsed ? "▸" : "▾";
-      collapseBtn.setAttribute("aria-expanded", String(!collapsed));
-      notifyFrameResize();
-    });
+    collapseBtn.addEventListener("click", toggleOptCollapse);
+  }
+  if (titleWrapEl && cardEl) {
+    titleWrapEl.addEventListener("click", toggleOptCollapse);
   }
 
   let rawText = "";
@@ -429,10 +464,23 @@
           ta.dispatchEvent(new Event("input", { bubbles: true }));
           ta.dispatchEvent(new Event("change", { bubbles: true }));
           ta.focus();
-          if (mode === "send" && sendBtn) {
-            sendBtn.click();
+          if (mode === "send") {
+            const now = Date.now();
+            if (now - lastSendAt < 800) {
+              showToast("⏳ 操作过快，请稍候再试");
+              return;
+            }
+            const sendReady = sendBtn && !sendBtn.disabled && sendBtn.offsetParent !== null && sendBtn.getAttribute("aria-disabled") !== "true";
+            if (sendReady) {
+              lastSendAt = now;
+              sendBtn.click();
+              showToast("🚀 已发送：" + fillText);
+            } else {
+              showToast("📝 发送按钮当前不可用，已改为填入输入框：" + fillText);
+            }
+          } else {
+            showToast("📝 已填入输入框：" + fillText);
           }
-          showToast((mode === "send" ? "🚀 已发送：" : "📝 已填入输入框：") + fillText);
         } else if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(fillText).then(function () {
             showToast("📋 已复制建议内容：" + fillText);

@@ -22,14 +22,19 @@
     line-height: 1.55;
     overflow-x: hidden;
   }
+  @keyframes yd-card-reveal {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
   .yd-talk-card {
     margin: 4px 0;
-    border-radius: 8px;
+    border-radius: 10px;
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 3.4%, transparent);
-    border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 15%, transparent);
-    border-left: 3px solid color-mix(in srgb, var(--SmartThemeEmColor) 84%, transparent);
+    border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 16%, transparent);
+    border-left: 3px solid color-mix(in srgb, var(--SmartThemeEmColor) 86%, transparent);
     overflow: hidden;
-    box-shadow: 0 1px 4px color-mix(in srgb, var(--SmartThemeBodyColor) 5%, transparent);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 8px color-mix(in srgb, var(--SmartThemeBodyColor) 6%, transparent);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
   .yd-talk-head {
     display: flex;
@@ -37,8 +42,14 @@
     justify-content: space-between;
     gap: 8px;
     padding: 7px 11px;
-    background: color-mix(in srgb, var(--SmartThemeEmColor) 8%, transparent);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--SmartThemeEmColor) 11%, transparent), color-mix(in srgb, var(--SmartThemeEmColor) 4%, transparent));
     border-bottom: 1px dashed color-mix(in srgb, var(--SmartThemeBodyColor) 15%, transparent);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.18s ease;
+  }
+  .yd-talk-head:hover {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--SmartThemeEmColor) 16%, transparent), color-mix(in srgb, var(--SmartThemeEmColor) 7%, transparent));
   }
   .yd-talk-card.is-collapsed .yd-talk-head {
     border-bottom: none;
@@ -47,6 +58,7 @@
     display: flex;
     align-items: center;
     gap: 7px;
+    flex: 1;
     min-width: 0;
   }
   .yd-talk-title {
@@ -54,6 +66,7 @@
     font-weight: 600;
     color: var(--SmartThemeEmColor);
     letter-spacing: 0.03em;
+    flex-shrink: 0;
   }
   .yd-talk-count {
     font-size: 0.74em;
@@ -62,6 +75,7 @@
     background: color-mix(in srgb, var(--SmartThemeEmColor) 14%, transparent);
     color: var(--SmartThemeEmColor);
     border: 1px solid color-mix(in srgb, var(--SmartThemeEmColor) 28%, transparent);
+    flex-shrink: 0;
   }
   .yd-talk-preview {
     font-size: 0.8em;
@@ -69,7 +83,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 320px;
+    flex: 1;
+    min-width: 0;
     display: none;
   }
   .yd-talk-card.is-collapsed .yd-talk-preview {
@@ -97,6 +112,9 @@
   .yd-talk-body {
     padding: 8px 11px 10px 11px;
   }
+  .yd-talk-card:not(.is-collapsed) .yd-talk-body {
+    animation: yd-card-reveal 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
   .yd-talk-card.is-collapsed .yd-talk-body {
     display: none;
   }
@@ -107,9 +125,13 @@
   }
   .yd-floor {
     padding: 7px 10px;
-    border-radius: 6px;
+    border-radius: 7px;
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 2.5%, transparent);
     border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 11%, transparent);
+    transition: border-color 0.16s ease, background 0.16s ease;
+  }
+  .yd-floor:hover {
+    border-color: color-mix(in srgb, var(--SmartThemeEmColor) 28%, transparent);
   }
   .yd-floor.is-master {
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 7.5%, transparent);
@@ -302,30 +324,46 @@
     display: block;
   }
   @media (max-width: 620px) {
-    .yd-talk-head { padding: 6px 9px; }
-    .yd-talk-body { padding: 7px 9px 9px 9px; }
-    .yd-talk-preview { max-width: 150px; }
+    .yd-talk-head { padding: 7px 10px; }
+    .yd-talk-body { padding: 8px 10px 10px 10px; }
+    .yd-collapse-btn { width: 28px; height: 28px; font-size: 0.88em; }
+    .yd-mini-btn { padding: 4px 10px; min-height: 28px; font-size: 0.78em; }
+    .yd-reply-input, .yd-edit-input, .yd-reply-select { font-size: 16px; }
+  }
+  @media (max-width: 520px) {
+    .yd-floor-text, .yd-edit-box { padding-left: 0; }
+    .yd-reply-bar { flex-wrap: wrap; }
+    .yd-reply-input { flex: 1 1 100%; height: 36px; }
+    .yd-reply-select { flex: 1 1 auto; height: 34px; }
+    .yd-reply-btn { height: 34px; padding: 0 14px; }
+  }
+  .yd-mini-btn:active, .yd-reply-btn:active, .yd-collapse-btn:active {
+    transform: scale(0.97);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .yd-talk-card:not(.is-collapsed) .yd-talk-body { animation: none; }
+    * { transition: none !important; }
   }
 </style>
 </head>
 <body>
-<div class="yd-talk-card" id="yd-talk-card" data-yd-card="comment">
-  <div class="yd-talk-head">
+<div class="yd-talk-card is-collapsed" id="yd-talk-card" data-yd-card="comment">
+  <div class="yd-talk-head" id="yd-talk-head">
     <div class="yd-talk-title-wrap">
       <span class="yd-talk-title">批注</span>
       <span class="yd-talk-count" id="yd-talk-count">0 楼</span>
       <span class="yd-talk-preview" id="yd-talk-preview"></span>
     </div>
-    <button type="button" class="yd-collapse-btn" id="yd-collapse-btn" aria-expanded="true" title="展开 / 收起">▾</button>
+    <button type="button" class="yd-collapse-btn" id="yd-collapse-btn" aria-expanded="false" title="展开 / 收起">▸</button>
   </div>
   <div class="yd-talk-body" id="yd-talk-body">
     <div class="yd-floor-list" id="yd-floor-list"></div>
     <div class="yd-reply-bar">
       <select class="yd-reply-select" id="yd-reply-role" aria-label="追加署名">
         <option value="master">master</option>
-        <option value="随记">伏笔随记</option>
+        <option value="批注">段间批注</option>
       </select>
-      <input type="text" class="yd-reply-input" id="yd-reply-input" placeholder="追加点评或伏笔随记（全楼层支持直接编辑改写）..." />
+      <input type="text" class="yd-reply-input" id="yd-reply-input" placeholder="追加点评或段间批注（全楼层支持直接编辑改写）..." />
       <button type="button" class="yd-reply-btn" id="yd-reply-btn">追加</button>
     </div>
     <div class="yd-talk-toast" id="yd-talk-toast"></div>
@@ -369,6 +407,7 @@
   }
 
   const cardEl = document.getElementById("yd-talk-card");
+  const headEl = document.getElementById("yd-talk-head");
   const rawEl = document.getElementById("yd-talk-raw");
   const listEl = document.getElementById("yd-floor-list");
   const countEl = document.getElementById("yd-talk-count");
@@ -437,7 +476,7 @@
       } else if (floors.length > 0) {
         floors[floors.length - 1].text += "\n" + line;
       } else {
-        floors.push({ speaker: "随记", text: line.replace(/^※\s*/, "") });
+        floors.push({ speaker: "批注", text: line.replace(/^※\s*/, "") });
       }
     });
     return floors;
@@ -456,8 +495,8 @@
     if (s === "莉莉丝" || low === "lilith" || s === "泠音" || low === "lingyin") {
       return { cls: "is-author", badge: "作者", avatar: s.charAt(0).toUpperCase() };
     }
-    if (s === "随记" || s === "伏笔") {
-      return { cls: "is-author", badge: "伏笔", avatar: s.charAt(0) };
+    if (s === "批注") {
+      return { cls: "is-author", badge: "批注", avatar: s.charAt(0) };
     }
     if (low === "master" || s === "读者") {
       return { cls: "is-master", badge: "读者", avatar: low === "master" ? "M" : s.charAt(0) };
@@ -503,11 +542,23 @@
               blockIdx = commentCount;
               break;
             }
+            let isCommentCard = false;
             try {
               if (fr.contentDocument && fr.contentDocument.querySelector('[data-yd-card="comment"]')) {
-                commentCount++;
+                isCommentCard = true;
               }
             } catch (e) {}
+            if (!isCommentCard) {
+              try {
+                const rawDoc = fr.getAttribute("srcdoc") || fr.srcdoc || "";
+                if (rawDoc.indexOf('data-yd-card="comment"') !== -1) {
+                  isCommentCard = true;
+                }
+              } catch (e) {}
+            }
+            if (isCommentCard) {
+              commentCount++;
+            }
           }
         }
       }
@@ -517,7 +568,7 @@
   }
 
   function maskThinkBlocks(text) {
-    return text.replace(/<构思(?=[\s>])[^>]*>[\s\S]*?<\/构思>/gi, function (m) {
+    return text.replace(/<draft(?=[\s>])[^>]*>[\s\S]*?<\/draft>/gi, function (m) {
       return m.replace(/[^\r\n]/g, " ");
     });
   }
@@ -535,9 +586,29 @@
     return ranges;
   }
 
+  function resolveTargetCommentRange(ranges, blockIdx, wantedText) {
+    const direct = ranges[blockIdx] || null;
+    const wanted = String(wantedText || "").trim();
+    if (direct && direct.raw.trim() === wanted) {
+      return direct;
+    }
+    const matches = ranges.filter(function (item) {
+      return item.raw.trim() === wanted;
+    });
+    if (matches.length === 1) {
+      return matches[0];
+    }
+    if (matches.length > 1) {
+      throw new Error("存在多个相同批注块且索引失配，请刷新消息后重试");
+    }
+    throw new Error("未能定位当前批注串在消息中的位置");
+  }
+
   async function persistBlockUpdate(nextBlockText, okMsg, onSuccess) {
-    if (isWriting) return false;
+    const hw = getHostWin();
+    if (isWriting || (hw && hw.__YD_COMMENT_WRITE_LOCK__)) return false;
     isWriting = true;
+    if (hw) hw.__YD_COMMENT_WRITE_LOCK__ = true;
     if (replyBtn) replyBtn.disabled = true;
     if (replyInput) replyInput.disabled = true;
 
@@ -559,14 +630,7 @@
       }
 
       const ranges = findCommentBlocksInMessage(msgObj.message);
-      let targetRange = ranges[ctx.blockIdx] || null;
-      if (!targetRange || targetRange.raw.trim() !== currentBlockText.trim()) {
-        const exact = ranges.find(function (r) { return r.raw.trim() === currentBlockText.trim(); });
-        if (exact) targetRange = exact;
-      }
-      if (!targetRange) {
-        throw new Error("未能定位当前批注串在消息中的位置");
-      }
+      const targetRange = resolveTargetCommentRange(ranges, ctx.blockIdx, currentBlockText);
 
       const before = msgObj.message.slice(0, targetRange.start);
       const after = msgObj.message.slice(targetRange.end);
@@ -587,6 +651,7 @@
       return false;
     } finally {
       isWriting = false;
+      if (hw) hw.__YD_COMMENT_WRITE_LOCK__ = false;
       if (replyBtn) replyBtn.disabled = false;
       if (replyInput) replyInput.disabled = false;
     }
@@ -736,13 +801,22 @@
     });
   }
 
+  function toggleCollapse() {
+    if (!cardEl || !collapseBtn) return;
+    const collapsed = cardEl.classList.toggle("is-collapsed");
+    collapseBtn.textContent = collapsed ? "▸" : "▾";
+    collapseBtn.setAttribute("aria-expanded", String(!collapsed));
+    notifyFrameResize();
+  }
+
   if (collapseBtn && cardEl) {
-    collapseBtn.addEventListener("click", function () {
-      const collapsed = cardEl.classList.toggle("is-collapsed");
-      collapseBtn.textContent = collapsed ? "▸" : "▾";
-      collapseBtn.setAttribute("aria-expanded", String(!collapsed));
-      notifyFrameResize();
+    collapseBtn.addEventListener("click", function (ev) {
+      ev.stopPropagation();
+      toggleCollapse();
     });
+  }
+  if (headEl && cardEl) {
+    headEl.addEventListener("click", toggleCollapse);
   }
 
   render();

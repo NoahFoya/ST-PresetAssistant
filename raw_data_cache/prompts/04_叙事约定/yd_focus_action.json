@@ -2,7 +2,7 @@
   "identifier": "yd_focus_action",
   "name": "[侧重] 动作神态 [单选]",
   "role": "system",
-  "content": "{{setvar::focus::## 描写侧重\n- 聚焦人物的动作细节、身位进退、重心力道、眼神移转与微妙表情变化，写出行为连贯感与现场物理反馈。\n- 当人物言行口是心非或暗藏戒备、动摇时，以具体的动作与神态反差代替直白解释。}}",
+  "content": "{{setvar::focus::\n## 描写侧重\n- 聚焦人物的动作细节、身位进退、重心力道、眼神移转与微妙表情变化，写出行为连贯感与现场物理反馈。\n- 当人物言行口是心非或暗藏戒备、动摇时，以具体的动作与神态反差代替直白解释。\n}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

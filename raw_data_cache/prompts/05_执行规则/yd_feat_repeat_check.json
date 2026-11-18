@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_feat_repeat_check",
+  "name": "[功能] 防重复校验 [多选]",
+  "role": "system",
+  "content": "{{setvar::rule_repeat_check::\n- 防重复校验：动笔前对照 `<chat_history>` 近几轮回复做跨回合查重与信息增量审计，排查是否出现换用不同措辞重复表达同一情绪结论或连续多轮沿用相同段落推进结构；一旦发现交互陷入同质化循环，主动调整本轮交互支点与信息增量，确保提供实质性的新反馈与关系推进。\n}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": false,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

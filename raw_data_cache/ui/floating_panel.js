@@ -5,7 +5,7 @@
 (function (root) {
   "use strict";
 
-  const PRESET_VERSION = "0.1.0";
+  const PRESET_VERSION = "0.3.0";
   const GITHUB_REPO = "NoahFoya/ST-PresetAssistant";
   const GITHUB_CHANGELOG_URL = "https://github.com/" + GITHUB_REPO + "/blob/main/CHANGELOG.md";
   const GITHUB_PACKAGE_URLS = [
@@ -55,6 +55,40 @@
   ];
 
   const REGEX_BEAUTIFY_PREFIX = "[美化]";
+  const BANNED_REGEX_ID = "b2c3d4e5-2106-4e8a-9b10-111122220006";
+  const BANNED_REGEX_NAME = "历史禁词清洗";
+  const MAX_BANNED_WORDS = 80;
+  const MAX_BANNED_WORD_LEN = 40;
+  const DEFAULT_BANNED_WORDS = [
+    "生理性的",
+    "生理性",
+    "生理泪水",
+    "硬生生",
+    "条件反射般",
+    "某种意义上",
+    "喉咙里滚出轻笑",
+    "嘴角勾起一抹弧度",
+    "嘴角勾起弧度",
+    "死死咬住下唇",
+    "眼底闪过一丝",
+    "眼底闪过一抹",
+    "空气瞬间凝固",
+    "倒吸一口凉气",
+    "灭顶的快感",
+    "瞳孔微缩",
+    "瞳孔地震",
+    "指节泛白",
+    "喉结滚动",
+    "指腹摩挲",
+    "不可置信",
+    "不容置疑",
+    "五味杂陈",
+    "理智崩塌",
+    "眼神失焦",
+    "铁锈味",
+    "浮木",
+    "逼仄",
+  ];
 
   function normalizeHex(hex) {
     const raw = String(hex || "").trim();
@@ -92,22 +126,53 @@
   function parsePromptEntry(p) {
     if (!p || p.marker) return null;
     const rawName = String((p && p.name) || "").trim();
-    const match = rawName.match(/^\[([^\]]+)\]\s*(.+?)\s*\[(单选|多选)\]\s*$/);
+    const match = rawName.match(/^\[([^\]]+)\]\s*(.+?)\s*\[(单选|多选)\]((?:\s*&\s*[^&\s][^&]*)*)\s*$/);
     if (!match) return null;
+    const bindRaw = match[4] || "";
+    const bindNames = bindRaw
+      ? bindRaw.split("&").map(function (s) { return s.trim(); }).filter(Boolean)
+      : [];
     return {
       group: match[1].trim(),
       label: match[2].trim(),
       selectType: match[3] === "单选" ? "single" : "multi",
+      bindNames: bindNames,
     };
   }
 
-  function stripOptionLabel(name) {
-    const parsed = parsePromptEntry({ name: name });
-    if (parsed) return parsed.label;
-    return String(name || "")
-      .replace(/^\[[^\]]+\]\s*/, "")
-      .replace(/\s*\[(单选|多选)\]\s*$/, "")
-      .trim();
+  function isPromptVisible(entry, prompts) {
+    const bindNames = entry && Array.isArray(entry.bindNames) ? entry.bindNames : [];
+    if (!bindNames.length) return true;
+    const safePrompts = Array.isArray(prompts) ? prompts : [];
+    const matched = [];
+    safePrompts.forEach(function (p) {
+      if (!p) return;
+      const pName = String(p.name || "").trim();
+      const pParsed = parsePromptEntry(p);
+      const hit = bindNames.some(function (t) {
+        return pName === t || (pParsed && pParsed.label === t);
+      });
+      if (hit) matched.push(p);
+    });
+    if (!matched.length) return true;
+    return matched.some(function (p) { return Boolean(p.enabled); });
+  }
+
+  function syncBoundVisibility(prompts) {
+    const safePrompts = Array.isArray(prompts) ? prompts : [];
+    for (let pass = 0; pass <= safePrompts.length; pass++) {
+      let changed = false;
+      safePrompts.forEach(function (p) {
+        if (!p || !p.enabled) return;
+        const parsed = parsePromptEntry(p);
+        if (!parsed || !parsed.bindNames.length) return;
+        if (!isPromptVisible(parsed, safePrompts)) {
+          p.enabled = false;
+          changed = true;
+        }
+      });
+      if (!changed) break;
+    }
   }
 
   function formatRegexLabel(name) {
@@ -115,7 +180,7 @@
     if (s.indexOf(REGEX_BEAUTIFY_PREFIX) === 0) {
       return s.slice(REGEX_BEAUTIFY_PREFIX.length).trim() || s;
     }
-    return s.replace(/^\[([^\]]+)\]\s*/, "$1：") || s;
+    return s;
   }
 
   function buildPresetSections(prompts) {
@@ -137,10 +202,26 @@
         id: pid,
         label: parsed.label,
         selectType: parsed.selectType,
+        bindNames: parsed.bindNames,
       });
     });
 
     return groupOrder;
+  }
+
+  function buildVisiblePresetSections(prompts) {
+    const safePrompts = Array.isArray(prompts) ? prompts : [];
+    return buildPresetSections(safePrompts).map(function (sec) {
+      return {
+        key: sec.key,
+        title: sec.title,
+        items: sec.items.filter(function (item) {
+          return isPromptVisible(item, safePrompts);
+        }),
+      };
+    }).filter(function (sec) {
+      return sec.items.length > 0;
+    });
   }
 
   function normalizeRegexEntry(raw) {
@@ -228,6 +309,119 @@
       }
     });
     return changed;
+  }
+
+  function escapeRegexLiteral(text) {
+    return String(text || "").replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
+  }
+
+  function normalizeBannedWords(words) {
+    if (!Array.isArray(words)) return [];
+    const seen = {};
+    const out = [];
+    for (let i = 0; i < words.length; i++) {
+      const w = String(words[i] || "").trim().slice(0, MAX_BANNED_WORD_LEN);
+      if (!w || seen[w]) continue;
+      seen[w] = true;
+      out.push(w);
+      if (out.length >= MAX_BANNED_WORDS) break;
+    }
+    return out;
+  }
+
+  function compileBannedRegex(words) {
+    const clean = normalizeBannedWords(words);
+    if (clean.length === 0) {
+      return "/^(?!)/";
+    }
+    const sorted = clean.slice().sort(function (a, b) {
+      return (b.length - a.length) || (a < b ? -1 : (a > b ? 1 : 0));
+    });
+    return "/(?:" + sorted.map(escapeRegexLiteral).join("|") + ")/gi";
+  }
+
+  function readPresetBannedWords(preset) {
+    const ext = preset && preset.extensions;
+    const thVars = ext && ext.tavern_helper && ext.tavern_helper.variables;
+    if (thVars && Array.isArray(thVars.yd_banned_words)) {
+      return normalizeBannedWords(thVars.yd_banned_words);
+    }
+    return DEFAULT_BANNED_WORDS.slice();
+  }
+
+  function applyBannedRegexToTavernList(list, nextFindRegex) {
+    return (Array.isArray(list) ? list : []).map(function (item) {
+      if (!item) return item;
+      const itemId = String(item.id || "");
+      const itemName = String(item.script_name || item.scriptName || "");
+      if (itemId === BANNED_REGEX_ID || itemName === BANNED_REGEX_NAME) {
+        const next = Object.assign({}, item);
+        if ("find_regex" in next || !("findRegex" in next)) next.find_regex = nextFindRegex;
+        if ("findRegex" in next) next.findRegex = nextFindRegex;
+        if ("replace_string" in next || !("replaceString" in next)) next.replace_string = "";
+        if ("replaceString" in next) next.replaceString = "";
+        return next;
+      }
+      return item;
+    });
+  }
+
+  function applyBannedRegexToPreset(preset, nextFindRegex) {
+    if (!preset) return false;
+    if (!preset.extensions) preset.extensions = {};
+    if (!Array.isArray(preset.extensions.regex_scripts)) preset.extensions.regex_scripts = [];
+    let found = false;
+    preset.extensions.regex_scripts.forEach(function (item) {
+      if (!item) return;
+      if (String(item.id || "") === BANNED_REGEX_ID || String(item.scriptName || "") === BANNED_REGEX_NAME) {
+        item.findRegex = nextFindRegex;
+        item.replaceString = "";
+        found = true;
+      }
+    });
+    if (!found) {
+      preset.extensions.regex_scripts.push({
+        id: BANNED_REGEX_ID,
+        scriptName: BANNED_REGEX_NAME,
+        disabled: false,
+        placement: [2],
+        findRegex: nextFindRegex,
+        replaceString: "",
+        trimStrings: [],
+        runOnEdit: true,
+        markdownOnly: false,
+        promptOnly: true,
+      });
+    }
+    return true;
+  }
+
+  function writePresetBannedWords(preset, words) {
+    if (!preset) return [];
+    const clean = normalizeBannedWords(words);
+    if (!preset.extensions) preset.extensions = {};
+    if (!preset.extensions.tavern_helper) preset.extensions.tavern_helper = { scripts: [], variables: {} };
+    if (!preset.extensions.tavern_helper.variables) preset.extensions.tavern_helper.variables = {};
+    preset.extensions.tavern_helper.variables.yd_banned_words = clean;
+    applyBannedRegexToPreset(preset, compileBannedRegex(clean));
+    return clean;
+  }
+
+  function addBannedWord(words, rawInput) {
+    const current = normalizeBannedWords(words);
+    const val = String(rawInput || "").trim();
+    if (!val) return { words: current, added: false, reason: "empty" };
+    if (val.length > MAX_BANNED_WORD_LEN) return { words: current, added: false, reason: "too_long" };
+    if (current.indexOf(val) !== -1) return { words: current, added: false, reason: "duplicate" };
+    if (current.length >= MAX_BANNED_WORDS) return { words: current, added: false, reason: "limit" };
+    return { words: current.concat([val]), added: true, reason: "ok" };
+  }
+
+  function removeBannedWord(words, targetWord) {
+    const cleanTarget = String(targetWord || "").trim();
+    return normalizeBannedWords(words).filter(function (w) {
+      return w !== cleanTarget;
+    });
   }
 
   function discoverPersonas(prompts) {
@@ -390,10 +584,12 @@
           p.enabled = pid === targetId ? nextState : false;
         }
       });
+      syncBoundVisibility(safePrompts);
       return nextState;
     }
 
     target.enabled = nextState;
+    syncBoundVisibility(safePrompts);
     return nextState;
   }
 
@@ -435,8 +631,8 @@
     const effH = Math.min(drawerH || 480, safeVH - margin * 2);
 
     // Align right edge with pill when on right half, left edge when on left half, then clamp
-    const alignRight = pillLeft + (pillW || 92) / 2 > safeVW / 2;
-    const rawLeft = alignRight ? (pillLeft + (pillW || 92) - effW) : pillLeft;
+    const alignRight = pillLeft + (pillW || 42) / 2 > safeVW / 2;
+    const rawLeft = alignRight ? (pillLeft + (pillW || 42) - effW) : pillLeft;
     const left = Math.round(clampNumber(rawLeft, margin, Math.max(margin, safeVW - effW - margin)));
 
     // Open near pill top without exceeding bottom edge
@@ -454,18 +650,33 @@
     GITHUB_CHANGELOG_URL: GITHUB_CHANGELOG_URL,
     GITHUB_PACKAGE_URLS: GITHUB_PACKAGE_URLS,
     PANEL_TABS: PANEL_TABS,
+    BANNED_REGEX_ID: BANNED_REGEX_ID,
+    BANNED_REGEX_NAME: BANNED_REGEX_NAME,
+    MAX_BANNED_WORDS: MAX_BANNED_WORDS,
+    MAX_BANNED_WORD_LEN: MAX_BANNED_WORD_LEN,
+    DEFAULT_BANNED_WORDS: DEFAULT_BANNED_WORDS,
     normalizeHex: normalizeHex,
     buildThemeFromHex: buildThemeFromHex,
     getPromptId: getPromptId,
     parsePromptEntry: parsePromptEntry,
+    isPromptVisible: isPromptVisible,
+    syncBoundVisibility: syncBoundVisibility,
     buildPresetSections: buildPresetSections,
-    stripOptionLabel: stripOptionLabel,
+    buildVisiblePresetSections: buildVisiblePresetSections,
     formatRegexLabel: formatRegexLabel,
     normalizeRegexEntry: normalizeRegexEntry,
     mergePresetRegexes: mergePresetRegexes,
     classifyRegexSections: classifyRegexSections,
     applyRegexToggleToTavernList: applyRegexToggleToTavernList,
     applyRegexToggleToPreset: applyRegexToggleToPreset,
+    normalizeBannedWords: normalizeBannedWords,
+    compileBannedRegex: compileBannedRegex,
+    readPresetBannedWords: readPresetBannedWords,
+    writePresetBannedWords: writePresetBannedWords,
+    applyBannedRegexToTavernList: applyBannedRegexToTavernList,
+    applyBannedRegexToPreset: applyBannedRegexToPreset,
+    addBannedWord: addBannedWord,
+    removeBannedWord: removeBannedWord,
     discoverPersonas: discoverPersonas,
     resolveActivePersona: resolveActivePersona,
     resolveVersionLabel: resolveVersionLabel,
@@ -591,57 +802,113 @@
       `  color: var(--yd-fg); font-size: 13px; line-height: 1.45;`,
       `}`,
       `#${ROOT_EL_ID} * { box-sizing: border-box; }`,
+      `@keyframes yd-sphere-breathe {`,
+      `  0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 5px 16px rgba(0,0,0,0.22), 0 0 10px var(--yd-glow); }`,
+      `  50% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.26), 0 6px 18px rgba(0,0,0,0.25), 0 0 15px var(--yd-accent-border); }`,
+      `}`,
+      `@keyframes yd-star-orbit {`,
+      `  from { transform: rotate(0deg); }`,
+      `  to { transform: rotate(360deg); }`,
+      `}`,
+      `@keyframes yd-twinkle {`,
+      `  0%, 100% { opacity: 0.96; transform: scale(1); }`,
+      `  50% { opacity: 0.56; transform: scale(0.9); }`,
+      `}`,
+      `@keyframes yd-update-pulse {`,
+      `  0% { box-shadow: 0 0 0 2px var(--yd-bg), 0 0 0 2px var(--yd-accent); }`,
+      `  70% { box-shadow: 0 0 0 2px var(--yd-bg), 0 0 0 5px transparent; }`,
+      `  100% { box-shadow: 0 0 0 2px var(--yd-bg), 0 0 0 2px transparent; }`,
+      `}`,
+      `@keyframes yd-sec-enter {`,
+      `  from { opacity: 0; transform: translateY(4px); }`,
+      `  to { opacity: 1; transform: translateY(0); }`,
+      `}`,
       `#${ROOT_EL_ID} .yd-pill {`,
-      `  display: inline-flex; align-items: center; gap: 6px;`,
-      `  padding: 6px 12px; border-radius: 999px; cursor: grab; user-select: none; touch-action: none;`,
-      `  background: var(--yd-bg); color: var(--yd-fg);`,
+      `  position: relative; display: inline-flex; align-items: center; justify-content: center; overflow: visible;`,
+      `  width: 42px; height: 42px; padding: 0; border-radius: 50%; cursor: grab; user-select: none; touch-action: none;`,
+      `  background: radial-gradient(circle at 30% 28%, color-mix(in srgb, var(--yd-accent) 16%, transparent), color-mix(in srgb, var(--yd-bg) 70%, transparent));`,
+      `  color: var(--yd-accent); opacity: 0.86;`,
       `  border: 1.5px solid var(--yd-accent-border);`,
-      `  box-shadow: 0 4px 14px rgba(0,0,0,0.26), 0 0 10px var(--yd-glow);`,
-      `  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);`,
-      `  transition: border-color 0.2s ease, box-shadow 0.2s ease;`,
+      `  box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 5px 16px rgba(0,0,0,0.22), 0 0 10px var(--yd-glow);`,
+      `  backdrop-filter: blur(12px) saturate(135%); -webkit-backdrop-filter: blur(12px) saturate(135%);`,
+      `  animation: yd-sphere-breathe 5.2s ease-in-out infinite;`,
+      `  transition: opacity 0.24s ease, transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.24s ease, box-shadow 0.24s ease, visibility 0s linear 0s;`,
       `}`,
-      `#${ROOT_EL_ID} .yd-pill:active { cursor: grabbing; }`,
-      `#${ROOT_EL_ID} .yd-pill-dot {`,
+      `#${ROOT_EL_ID} .yd-pill:hover {`,
+      `  opacity: 1; transform: scale(1.04);`,
+      `  border-color: var(--yd-accent);`,
+      `  box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), 0 7px 20px rgba(0,0,0,0.26), 0 0 16px var(--yd-accent-border);`,
+      `}`,
+      `#${ROOT_EL_ID} .yd-pill:active, #${ROOT_EL_ID} .yd-pill.is-dragging {`,
+      `  cursor: grabbing; opacity: 1; transform: scale(1.06); animation: none;`,
+      `  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 10px 24px rgba(0,0,0,0.32), 0 0 20px var(--yd-accent-border);`,
+      `}`,
+      `#${ROOT_EL_ID} .yd-pill-orbit {`,
+      `  position: absolute; inset: -7px; width: calc(100% + 14px); height: calc(100% + 14px);`,
+      `  color: var(--yd-accent); opacity: 0.64; pointer-events: none;`,
+      `  filter: drop-shadow(0 0 4px var(--yd-glow));`,
+      `  animation: yd-star-orbit 14s linear infinite;`,
+      `  transition: opacity 0.3s ease;`,
+      `}`,
+      `#${ROOT_EL_ID} .yd-pill:hover .yd-pill-orbit, #${ROOT_EL_ID} .yd-pill.is-dragging .yd-pill-orbit { opacity: 0.94; }`,
+      `#${ROOT_EL_ID} .yd-pill-sparkle {`,
+      `  width: 21px; height: 21px; display: block; flex-shrink: 0; position: relative; z-index: 1;`,
+      `  color: var(--yd-accent); filter: drop-shadow(0 0 5px var(--yd-glow)); pointer-events: none;`,
+      `  transition: opacity 0.24s ease;`,
+      `}`,
+      `#${ROOT_EL_ID} .yd-pill-sparkle path:nth-child(2) { transform-box: fill-box; transform-origin: center; animation: yd-twinkle 4.2s ease-in-out infinite; }`,
+      `#${ROOT_EL_ID} .yd-pill-sparkle path:nth-child(3) { transform-box: fill-box; transform-origin: center; animation: yd-twinkle 4.2s ease-in-out 1.8s infinite; }`,
+      `#${ROOT_EL_ID} .yd-pill-update-dot {`,
+      `  display: none; position: absolute; top: 1px; right: 1px; z-index: 2;`,
       `  width: 8px; height: 8px; border-radius: 50%; background: var(--yd-accent);`,
-      `  box-shadow: 0 0 7px var(--yd-accent); flex-shrink: 0;`,
+      `  box-shadow: 0 0 0 2px var(--yd-bg), 0 0 8px var(--yd-accent); pointer-events: none;`,
       `}`,
-      `#${ROOT_EL_ID} .yd-pill-label { font-weight: 600; font-size: 12.5px; color: var(--yd-accent); white-space: nowrap; }`,
-      `#${ROOT_EL_ID} .yd-pill-sub { font-size: 12px; opacity: 0.9; white-space: nowrap; }`,
+      `#${ROOT_EL_ID} .yd-pill.has-update .yd-pill-update-dot { display: block; animation: yd-update-pulse 2.6s ease-out infinite; }`,
       `#${ROOT_EL_ID} .yd-drawer {`,
-      `  position: fixed; width: min(344px, calc(100vw - 16px)); height: min(460px, calc(100vh - 24px));`,
-      `  display: none; flex-direction: column; border-radius: 10px; overflow: hidden;`,
-      `  background: var(--yd-bg); color: var(--yd-fg);`,
-      `  border: 1.5px solid var(--yd-accent-border);`,
-      `  box-shadow: 0 10px 30px rgba(0,0,0,0.34), 0 0 16px var(--yd-glow);`,
-      `  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);`,
+      `  position: fixed; width: min(344px, calc(100vw - 16px)); height: min(460px, calc(100dvh - 24px));`,
+      `  display: flex; flex-direction: column; border-radius: 12px; overflow: hidden;`,
+      `  background: color-mix(in srgb, var(--yd-bg) 92%, transparent); color: var(--yd-fg);`,
+      `  border: 1px solid var(--yd-accent-border);`,
+      `  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 14px 36px rgba(0,0,0,0.34), 0 0 20px var(--yd-glow);`,
+      `  backdrop-filter: blur(16px) saturate(135%); -webkit-backdrop-filter: blur(16px) saturate(135%);`,
+      `  opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(-4px) scale(0.97);`,
+      `  transition: opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1), transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.24s;`,
       `}`,
-      `#${ROOT_EL_ID}.is-open .yd-drawer { display: flex; }`,
-      `#${ROOT_EL_ID}.is-open .yd-pill { display: none; }`,
+      `#${ROOT_EL_ID}.is-open .yd-drawer {`,
+      `  opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0) scale(1);`,
+      `  transition: opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1), transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0s;`,
+      `}`,
+      `#${ROOT_EL_ID}.is-open .yd-pill { opacity: 0; visibility: hidden; pointer-events: none; transform: scale(0.86); animation: none; transition: opacity 0.16s ease, transform 0.18s ease, visibility 0s linear 0.18s; }`,
+      `#${ROOT_EL_ID}.is-open .yd-pill-orbit { animation: none; }`,
       `#${ROOT_EL_ID} .yd-head {`,
       `  display: flex; align-items: center; justify-content: space-between; gap: 6px;`,
-      `  padding: 9px 11px; background: var(--yd-accent-soft);`,
+      `  padding: 9px 11px; background: linear-gradient(180deg, color-mix(in srgb, var(--yd-accent) 16%, transparent), color-mix(in srgb, var(--yd-accent) 7%, transparent));`,
       `  border-bottom: 1px dashed var(--yd-accent-border);`,
       `}`,
       `#${ROOT_EL_ID} .yd-head-title { font-weight: 700; font-size: 13px; color: var(--yd-accent); display: flex; align-items: center; gap: 6px; min-width: 0; }`,
-      `#${ROOT_EL_ID} .yd-ver-badge { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; cursor: pointer; font-size: 10.5px; font-weight: 600; padding: 1px 6px; border-radius: 999px; background: var(--yd-surface); border: 1px solid var(--yd-accent-border); color: var(--yd-accent); letter-spacing: 0.02em; flex-shrink: 0; transition: all 0.14s ease; }`,
+      `#${ROOT_EL_ID} .yd-ver-badge { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; cursor: pointer; font-size: 10.5px; font-weight: 600; padding: 1px 6px; border-radius: 999px; background: var(--yd-surface); border: 1px solid var(--yd-accent-border); color: var(--yd-accent); letter-spacing: 0.02em; flex-shrink: 0; transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease; }`,
       `#${ROOT_EL_ID} .yd-ver-badge:hover { background: var(--yd-accent-soft); color: var(--yd-fg); }`,
       `#${ROOT_EL_ID} .yd-ver-badge.is-update { background: var(--yd-accent-soft); border-color: var(--yd-accent); color: var(--yd-fg); box-shadow: 0 0 8px var(--yd-glow); }`,
-      `#${ROOT_EL_ID} .yd-pill.has-update .yd-pill-dot { box-shadow: 0 0 0 2px var(--yd-bg), 0 0 8px var(--yd-accent); }`,
       `#${ROOT_EL_ID} .yd-head-btns { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }`,
       `#${ROOT_EL_ID} .yd-icon-btn {`,
       `  border: 1px solid var(--yd-border); background: var(--yd-surface); color: var(--yd-fg);`,
-      `  border-radius: 5px; padding: 3px 8px; font-size: 11.5px; cursor: pointer; font-family: inherit;`,
+      `  border-radius: 6px; padding: 3px 8px; font-size: 11.5px; cursor: pointer; font-family: inherit;`,
+      `  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s ease, color 0.18s ease, background 0.18s ease;`,
       `}`,
-      `#${ROOT_EL_ID} .yd-icon-btn:hover { border-color: var(--yd-accent-border); color: var(--yd-accent); }`,
+      `#${ROOT_EL_ID} .yd-icon-btn:hover { border-color: var(--yd-accent-border); color: var(--yd-accent); background: var(--yd-accent-soft); }`,
+      `#${ROOT_EL_ID} .yd-icon-btn:active { transform: scale(0.97); }`,
       `#${ROOT_EL_ID} .yd-tabs { display: flex; gap: 4px; padding: 6px 11px; border-bottom: 1px solid var(--yd-border); background: color-mix(in srgb, var(--yd-fg) 3%, transparent); flex-shrink: 0; }`,
-      `#${ROOT_EL_ID} .yd-tab { flex: 1; border: 1px solid transparent; background: transparent; color: color-mix(in srgb, var(--yd-fg) 72%, transparent); border-radius: 6px; padding: 5px 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.14s ease; text-align: center; }`,
+      `#${ROOT_EL_ID} .yd-tab { flex: 1; border: 1px solid transparent; background: transparent; color: color-mix(in srgb, var(--yd-fg) 72%, transparent); border-radius: 7px; padding: 5px 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: color 0.18s ease, background 0.2s ease, border-color 0.2s ease, transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease; text-align: center; }`,
       `#${ROOT_EL_ID} .yd-tab:hover { color: var(--yd-fg); background: var(--yd-surface); }`,
-      `#${ROOT_EL_ID} .yd-tab.is-active { background: var(--yd-accent-soft); border-color: var(--yd-accent-border); color: var(--yd-accent); }`,
-      `#${ROOT_EL_ID} .yd-card-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 9px; border-radius: 7px; border: 1px solid var(--yd-border); background: var(--yd-surface); flex-wrap: wrap; }`,
+      `#${ROOT_EL_ID} .yd-tab:active { transform: scale(0.98); }`,
+      `#${ROOT_EL_ID} .yd-tab.is-active { background: linear-gradient(135deg, color-mix(in srgb, var(--yd-accent) 20%, transparent), color-mix(in srgb, var(--yd-accent) 10%, transparent)); border-color: var(--yd-accent-border); color: var(--yd-accent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 6px rgba(0,0,0,0.1); }`,
+      `#${ROOT_EL_ID} .yd-card-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--yd-border); background: var(--yd-surface); flex-wrap: wrap; transition: border-color 0.18s ease; }`,
       `#${ROOT_EL_ID} .yd-muted { font-size: 11.5px; opacity: 0.78; line-height: 1.45; }`,
-      `#${ROOT_EL_ID} .yd-link-btn { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; border: 1px solid var(--yd-accent-border); background: var(--yd-accent-soft); color: var(--yd-accent); border-radius: 6px; padding: 4px 9px; font-size: 11.5px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.14s ease; }`,
+      `#${ROOT_EL_ID} .yd-link-btn { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; border: 1px solid var(--yd-accent-border); background: var(--yd-accent-soft); color: var(--yd-accent); border-radius: 6px; padding: 4px 9px; font-size: 11.5px; font-weight: 600; cursor: pointer; font-family: inherit; transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), background 0.18s ease, color 0.18s ease; }`,
       `#${ROOT_EL_ID} .yd-link-btn:hover { background: var(--yd-accent); color: #fff; border-color: var(--yd-accent); }`,
-      `#${ROOT_EL_ID} .yd-body { flex: 1; min-height: 0; padding: 10px 11px; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 10px; scrollbar-gutter: stable; }`,
+      `#${ROOT_EL_ID} .yd-link-btn:active { transform: scale(0.97); }`,
+      `#${ROOT_EL_ID} .yd-body { flex: 1; min-height: 0; padding: 10px 11px; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 10px; scrollbar-gutter: stable; }`,
+      `#${ROOT_EL_ID} .yd-body.is-entering > .yd-sec { animation: yd-sec-enter 0.2s cubic-bezier(0.22, 1, 0.36, 1) both; }`,
       `@supports (-moz-appearance: none) { #${ROOT_EL_ID} .yd-body { scrollbar-width: thin; scrollbar-color: var(--yd-accent-border) transparent; } }`,
       `#${ROOT_EL_ID} .yd-body::-webkit-scrollbar { width: 5px; }`,
       `#${ROOT_EL_ID} .yd-body::-webkit-scrollbar-track { background: transparent; margin: 6px 0; }`,
@@ -650,30 +917,56 @@
       `#${ROOT_EL_ID} .yd-body::-webkit-scrollbar-button { display: none; height: 0; width: 0; }`,
       `#${ROOT_EL_ID} .yd-sec { display: flex; flex-direction: column; gap: 6px; }`,
       `#${ROOT_EL_ID} .yd-sec-title { font-size: 11.5px; font-weight: 700; color: var(--yd-accent); letter-spacing: 0.03em; }`,
+      `#${ROOT_EL_ID} .yd-sec-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; }`,
+      `#${ROOT_EL_ID} .yd-sec-head-left { display: flex; align-items: center; gap: 5px; min-width: 0; }`,
+      `#${ROOT_EL_ID} .yd-sec-head-right { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }`,
+      `#${ROOT_EL_ID} .yd-sec-count { font-size: 10.5px; opacity: 0.72; font-variant-numeric: tabular-nums; }`,
+      `#${ROOT_EL_ID} .yd-help-btn { width: 17px; height: 17px; padding: 0; border-radius: 50%; border: 1px solid var(--yd-accent-border); background: var(--yd-surface); color: var(--yd-accent); font-size: 10.5px; font-weight: 700; line-height: 1; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-family: inherit; transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease; }`,
+      `#${ROOT_EL_ID} .yd-help-btn:hover, #${ROOT_EL_ID} .yd-help-btn.is-active { background: var(--yd-accent-soft); border-color: var(--yd-accent); }`,
+      `#${ROOT_EL_ID} .yd-mini-link { border: 1px solid var(--yd-border); background: var(--yd-surface); color: var(--yd-fg); border-radius: 5px; padding: 2px 7px; font-size: 11px; cursor: pointer; font-family: inherit; opacity: 0.86; transition: border-color 0.16s ease, color 0.16s ease, opacity 0.16s ease; }`,
+      `#${ROOT_EL_ID} .yd-mini-link:hover { border-color: var(--yd-accent-border); color: var(--yd-accent); opacity: 1; }`,
+      `#${ROOT_EL_ID} .yd-help-card { padding: 8px 10px; border-radius: 8px; border: 1px dashed var(--yd-accent-border); background: color-mix(in srgb, var(--yd-accent) 7%, var(--yd-surface)); font-size: 11.5px; line-height: 1.52; color: color-mix(in srgb, var(--yd-fg) 90%, transparent); display: flex; flex-direction: column; gap: 3px; animation: yd-sec-enter 0.18s ease-out; }`,
+      `#${ROOT_EL_ID} .yd-help-card strong { color: var(--yd-accent); font-weight: 600; }`,
+      `#${ROOT_EL_ID} .yd-banned-form { display: flex; gap: 5px; align-items: center; }`,
+      `#${ROOT_EL_ID} .yd-input { flex: 1; min-width: 0; height: 28px; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--yd-border); background: var(--yd-surface); color: var(--yd-fg); font-family: inherit; font-size: 12px; outline: none; transition: border-color 0.16s ease; }`,
+      `#${ROOT_EL_ID} .yd-input:focus { border-color: var(--yd-accent); }`,
+      `#${ROOT_EL_ID} .yd-btn-sm { height: 28px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--yd-accent-border); background: var(--yd-accent-soft); color: var(--yd-accent); font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; flex-shrink: 0; transition: background 0.16s ease, color 0.16s ease; }`,
+      `#${ROOT_EL_ID} .yd-btn-sm:hover { background: var(--yd-accent); color: #fff; }`,
+      `#${ROOT_EL_ID} .yd-banned-tags { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }`,
+      `#${ROOT_EL_ID} .yd-banned-tag { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--yd-border); background: var(--yd-surface); color: var(--yd-fg); border-radius: 6px; padding: 2px 4px 2px 7px; font-size: 11.5px; max-width: 100%; }`,
+      `#${ROOT_EL_ID} .yd-banned-tag-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }`,
+      `#${ROOT_EL_ID} .yd-tag-del { border: none; background: transparent; color: color-mix(in srgb, var(--yd-fg) 62%, transparent); cursor: pointer; font-size: 13px; line-height: 1; padding: 1px 4px; border-radius: 4px; font-family: inherit; transition: color 0.14s ease, background 0.14s ease; }`,
+      `#${ROOT_EL_ID} .yd-tag-del:hover { color: #e06c75; background: rgba(224, 108, 117, 0.14); }`,
       `#${ROOT_EL_ID} .yd-chips { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }`,
       `#${ROOT_EL_ID} .yd-chip {`,
       `  border: 1px solid var(--yd-border); background: var(--yd-surface); color: var(--yd-fg);`,
-      `  border-radius: 6px; padding: 4px 8px; font-size: 12px; cursor: pointer; font-family: inherit;`,
-      `  transition: all 0.14s ease;`,
+      `  border-radius: 7px; padding: 4px 8px; font-size: 12px; cursor: pointer; font-family: inherit;`,
+      `  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;`,
       `}`,
       `#${ROOT_EL_ID} .yd-chip:hover { border-color: var(--yd-accent-border); }`,
+      `#${ROOT_EL_ID} .yd-chip:active { transform: scale(0.97); }`,
       `#${ROOT_EL_ID} .yd-chip.is-active {`,
-      `  background: var(--yd-accent-soft); border-color: var(--yd-accent); color: var(--yd-accent); font-weight: 600;`,
+      `  background: linear-gradient(135deg, color-mix(in srgb, var(--yd-accent) 20%, transparent), color-mix(in srgb, var(--yd-accent) 10%, transparent));`,
+      `  border-color: var(--yd-accent); color: var(--yd-accent); font-weight: 600;`,
+      `  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 0 8px var(--yd-glow);`,
       `}`,
       `#${ROOT_EL_ID} .yd-swatches { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }`,
       `#${ROOT_EL_ID} .yd-swatch {`,
       `  width: 20px; height: 20px; border-radius: 50%; padding: 0; cursor: pointer;`,
-      `  border: 2px solid transparent; transition: transform 0.14s ease, border-color 0.14s ease;`,
+      `  border: 2px solid transparent; transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s ease, box-shadow 0.18s ease;`,
       `  box-shadow: 0 1px 3px rgba(0,0,0,0.28);`,
       `}`,
-      `#${ROOT_EL_ID} .yd-swatch:hover { transform: scale(1.1); }`,
-      `#${ROOT_EL_ID} .yd-swatch.is-active { border-color: var(--yd-fg); transform: scale(1.1); }`,
+      `#${ROOT_EL_ID} .yd-swatch:hover { transform: scale(1.08); }`,
+      `#${ROOT_EL_ID} .yd-swatch:active { transform: scale(0.95); }`,
+      `#${ROOT_EL_ID} .yd-swatch.is-active { border-color: var(--yd-fg); transform: scale(1.06); box-shadow: 0 0 8px var(--yd-glow); }`,
       `#${ROOT_EL_ID} .yd-color-wrap {`,
       `  position: relative; width: 20px; height: 20px; border-radius: 50%; overflow: hidden;`,
       `  border: 1.5px solid var(--yd-border); display: inline-flex; align-items: center; justify-content: center;`,
       `  background: conic-gradient(#d46b94, #c69352, #59a985, #5fa0d0, #9575d8, #d46b94); cursor: pointer;`,
+      `  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);`,
       `}`,
-      `#${ROOT_EL_ID} .yd-color-wrap.is-active { border: 2px solid var(--yd-fg); transform: scale(1.1); }`,
+      `#${ROOT_EL_ID} .yd-color-wrap:hover { transform: scale(1.08); }`,
+      `#${ROOT_EL_ID} .yd-color-wrap.is-active { border: 2px solid var(--yd-fg); transform: scale(1.06); }`,
       `#${ROOT_EL_ID} .yd-color-input {`,
       `  position: absolute; inset: -4px; width: 28px; height: 28px; opacity: 0; cursor: pointer; border: none; padding: 0;`,
       `}`,
@@ -681,7 +974,21 @@
       `  display: none; font-size: 11.5px; padding: 6px 10px;`,
       `  border-top: 1px solid var(--yd-border); background: var(--yd-accent-soft); color: var(--yd-accent);`,
       `}`,
-      `#${ROOT_EL_ID} .yd-toast.show { display: block; }`,
+      `#${ROOT_EL_ID} .yd-toast.show { display: block; animation: yd-sec-enter 0.18s ease-out; }`,
+      `@media (max-width: 600px) {`,
+      `  #${ROOT_EL_ID} .yd-drawer { width: calc(100vw - 16px); }`,
+      `  #${ROOT_EL_ID} .yd-chip { min-height: 32px; padding: 6px 10px; }`,
+      `  #${ROOT_EL_ID} .yd-tab { min-height: 32px; padding: 6px; }`,
+      `  #${ROOT_EL_ID} .yd-icon-btn { min-height: 28px; padding: 4px 10px; }`,
+      `  #${ROOT_EL_ID} .yd-input { height: 32px; font-size: 16px; }`,
+      `  #${ROOT_EL_ID} .yd-btn-sm { height: 32px; padding: 0 12px; }`,
+      `  #${ROOT_EL_ID} .yd-help-btn { width: 22px; height: 22px; font-size: 12px; }`,
+      `  #${ROOT_EL_ID} .yd-tag-del { padding: 2px 6px; font-size: 15px; }`,
+      `}`,
+      `@media (prefers-reduced-motion: reduce) {`,
+      `  #${ROOT_EL_ID} .yd-pill, #${ROOT_EL_ID} .yd-pill-orbit, #${ROOT_EL_ID} .yd-pill-sparkle path, #${ROOT_EL_ID} .yd-pill-update-dot, #${ROOT_EL_ID} .yd-body.is-entering > .yd-sec, #${ROOT_EL_ID} .yd-toast.show { animation: none !important; }`,
+      `  #${ROOT_EL_ID} * { transition-duration: 0.01ms !important; }`,
+      `}`,
     ].join("\n");
     (hd.head || hd.documentElement).appendChild(style);
   }
@@ -703,19 +1010,62 @@
     const pill = hd.createElement("button");
     pill.type = "button";
     pill.className = "yd-pill";
-    pill.title = "点击展开 ST-预设助手面板，按住可自由拖动位置";
+    pill.title = "ST-预设助手 · 莉莉丝（点击展开，按住拖动）";
+    pill.setAttribute("aria-label", "打开 ST-预设助手面板");
 
-    const dot = hd.createElement("span");
-    dot.className = "yd-pill-dot";
-    const pillLabel = hd.createElement("span");
-    pillLabel.className = "yd-pill-label";
-    pillLabel.textContent = "预设助手";
-    const pillSub = hd.createElement("span");
-    pillSub.className = "yd-pill-sub";
-    pillSub.textContent = "莉莉丝";
-    pill.appendChild(dot);
-    pill.appendChild(pillLabel);
-    pill.appendChild(pillSub);
+    const svgNS = "http://www.w3.org/2000/svg";
+    const orbitSvg = hd.createElementNS(svgNS, "svg");
+    orbitSvg.setAttribute("class", "yd-pill-orbit");
+    orbitSvg.setAttribute("viewBox", "0 0 56 56");
+    orbitSvg.setAttribute("aria-hidden", "true");
+    const orbitCircle = hd.createElementNS(svgNS, "circle");
+    orbitCircle.setAttribute("cx", "28");
+    orbitCircle.setAttribute("cy", "28");
+    orbitCircle.setAttribute("r", "24");
+    orbitCircle.setAttribute("fill", "none");
+    orbitCircle.setAttribute("stroke", "currentColor");
+    orbitCircle.setAttribute("stroke-width", "0.9");
+    orbitCircle.setAttribute("stroke-dasharray", "16 14 7 18");
+    orbitCircle.setAttribute("stroke-linecap", "round");
+    orbitCircle.setAttribute("opacity", "0.45");
+    orbitSvg.appendChild(orbitCircle);
+    [
+      "M45 7.5L45.7 9.8L48 10.5L45.7 11.2L45 13.5L44.3 11.2L42 10.5L44.3 9.8Z",
+      "M7.5 16L8 17.6L9.6 18.1L8 18.6L7.5 20.2L7 18.6L5.4 18.1L7 17.6Z",
+    ].forEach(function (d) {
+      const star = hd.createElementNS(svgNS, "path");
+      star.setAttribute("d", d);
+      star.setAttribute("fill", "currentColor");
+      star.setAttribute("opacity", "0.88");
+      orbitSvg.appendChild(star);
+    });
+    const orbitDot = hd.createElementNS(svgNS, "circle");
+    orbitDot.setAttribute("cx", "25");
+    orbitDot.setAttribute("cy", "51.8");
+    orbitDot.setAttribute("r", "1.35");
+    orbitDot.setAttribute("fill", "currentColor");
+    orbitDot.setAttribute("opacity", "0.78");
+    orbitSvg.appendChild(orbitDot);
+
+    const sparkleSvg = hd.createElementNS(svgNS, "svg");
+    sparkleSvg.setAttribute("class", "yd-pill-sparkle");
+    sparkleSvg.setAttribute("viewBox", "0 0 24 24");
+    sparkleSvg.setAttribute("fill", "currentColor");
+    sparkleSvg.setAttribute("aria-hidden", "true");
+    [
+      "M10 2.5L11.75 8.25L17.5 10L11.75 11.75L10 17.5L8.25 11.75L2.5 10L8.25 8.25Z",
+      "M18.5 3L19.35 5.45L21.8 6.3L19.35 7.15L18.5 9.6L17.65 7.15L15.2 6.3L17.65 5.45Z",
+      "M18 15.2L18.7 17.3L20.8 18L18.7 18.7L18 20.8L17.3 18.7L15.2 18L17.3 17.3Z",
+    ].forEach(function (d) {
+      const pEl = hd.createElementNS(svgNS, "path");
+      pEl.setAttribute("d", d);
+      sparkleSvg.appendChild(pEl);
+    });
+    const updateDot = hd.createElement("span");
+    updateDot.className = "yd-pill-update-dot";
+    pill.appendChild(orbitSvg);
+    pill.appendChild(sparkleSvg);
+    pill.appendChild(updateDot);
 
     const drawer = hd.createElement("div");
     drawer.className = "yd-drawer";
@@ -789,7 +1139,7 @@
     rootEl.appendChild(drawer);
     hd.body.appendChild(rootEl);
 
-    let lastPillMetrics = { w: 94, h: 32 };
+    let lastPillMetrics = { w: 42, h: 42 };
     function getPillMetrics() {
       const rect = pill.getBoundingClientRect();
       if (rect.width > 0 && rect.height > 0) {
@@ -798,9 +1148,17 @@
       return lastPillMetrics;
     }
 
+    function getViewportSize() {
+      const vv = hw.visualViewport;
+      const vw = (vv && vv.width) || hw.innerWidth || 1280;
+      const vh = (vv && vv.height) || hw.innerHeight || 720;
+      return { vw: vw, vh: vh };
+    }
+
     function applyRelativePosition() {
-      const vw = hw.innerWidth || 1280;
-      const vh = hw.innerHeight || 720;
+      const vp = getViewportSize();
+      const vw = vp.vw;
+      const vh = vp.vh;
       const pm = getPillMetrics();
       const pos = computePillPosition(state.xRatio, state.yRatio, vw, vh, pm.w, pm.h);
       rootEl.style.left = pos.left + "px";
@@ -820,6 +1178,7 @@
     let isSelfUpdating = false;
     let updateCheckResult = null;
     let hasCheckedUpdateOnLoad = false;
+    let bannedHelpOpen = false;
 
     async function runInitialUpdateCheck() {
       if (hasCheckedUpdateOnLoad) return;
@@ -953,7 +1312,7 @@
     }
 
     function renderPresetTab(prompts) {
-      const sections = buildPresetSections(prompts);
+      const sections = buildVisiblePresetSections(prompts);
       if (!sections.length) {
         renderSection("预设条目", function (wrap) {
           const empty = hd.createElement("div");
@@ -974,7 +1333,8 @@
             btn.textContent = item.label;
             btn.addEventListener("click", function () {
               mutatePreset(function (p) {
-                applyDynamicToggle(p.prompts || [], sec, item.id);
+                const liveSec = buildPresetSections(p.prompts || []).find(function (s) { return s.key === sec.key; }) || sec;
+                applyDynamicToggle(p.prompts || [], liveSec, item.id);
               });
             });
             wrap.appendChild(btn);
@@ -1002,24 +1362,196 @@
           empty.textContent = "当前预设未检测到可管理的预设正则条目。";
           wrap.appendChild(empty);
         });
-        return;
-      }
-
-      groups.forEach(function (grp) {
-        renderSection(grp.title, function (wrap) {
-          grp.items.forEach(function (rx) {
-            const btn = hd.createElement("button");
-            btn.type = "button";
-            btn.className = "yd-chip" + (rx.enabled ? " is-active" : "");
-            btn.setAttribute("data-yd-regex-id", rx.id || rx.name);
-            btn.textContent = formatRegexLabel(rx.name);
-            btn.addEventListener("click", function () {
-              toggleRegexItem(rx);
+      } else {
+        groups.forEach(function (grp) {
+          renderSection(grp.title, function (wrap) {
+            grp.items.forEach(function (rx) {
+              const btn = hd.createElement("button");
+              btn.type = "button";
+              btn.className = "yd-chip" + (rx.enabled ? " is-active" : "");
+              btn.setAttribute("data-yd-regex-id", rx.id || rx.name);
+              btn.textContent = formatRegexLabel(rx.name);
+              btn.addEventListener("click", function () {
+                toggleRegexItem(rx);
+              });
+              wrap.appendChild(btn);
             });
-            wrap.appendChild(btn);
           });
         });
+      }
+
+      renderBannedWordsSection(preset);
+    }
+
+    async function mutateBannedWords(nextWords, toastMsg) {
+      const api = resolvePresetApi();
+      const regexApi = resolveRegexApi();
+      const cleanWords = normalizeBannedWords(nextWords);
+      const nextFindRegex = compileBannedRegex(cleanWords);
+      isSelfUpdating = true;
+      try {
+        if (regexApi && regexApi.updateTavernRegexesWith) {
+          await regexApi.updateTavernRegexesWith(function (list) {
+            return applyBannedRegexToTavernList(list, nextFindRegex);
+          }, { type: "preset", name: "in_use" });
+        }
+        if (api && api.updatePresetWith) {
+          await api.updatePresetWith("in_use", function (p) {
+            writePresetBannedWords(p, cleanWords);
+            return p;
+          }, { render: "debounced" });
+        }
+        await renderFromPreset({ preserveScroll: true, reposition: false });
+        if (toastMsg) showToast(toastMsg);
+      } catch (err) {
+        showToast("禁词表更新失败：" + (err && err.message ? err.message : String(err)));
+      } finally {
+        setTimeout(function () { isSelfUpdating = false; }, 160);
+      }
+    }
+
+    function renderBannedWordsSection(preset) {
+      const words = readPresetBannedWords(preset);
+      const sec = hd.createElement("div");
+      sec.className = "yd-sec";
+      sec.setAttribute("data-yd-section", "banned-words");
+
+      const headRow = hd.createElement("div");
+      headRow.className = "yd-sec-head";
+
+      const headLeft = hd.createElement("div");
+      headLeft.className = "yd-sec-head-left";
+      const titleEl = hd.createElement("span");
+      titleEl.className = "yd-sec-title";
+      titleEl.textContent = "禁词清洗";
+      const countEl = hd.createElement("span");
+      countEl.className = "yd-sec-count";
+      countEl.textContent = words.length + "/" + MAX_BANNED_WORDS;
+      const helpBtn = hd.createElement("button");
+      helpBtn.type = "button";
+      helpBtn.className = "yd-help-btn" + (bannedHelpOpen ? " is-active" : "");
+      helpBtn.textContent = "?";
+      helpBtn.title = "查看禁词清洗说明";
+      helpBtn.setAttribute("aria-label", "禁词清洗说明");
+      helpBtn.setAttribute("aria-expanded", String(bannedHelpOpen));
+      headLeft.appendChild(titleEl);
+      headLeft.appendChild(countEl);
+      headLeft.appendChild(helpBtn);
+
+      const headRight = hd.createElement("div");
+      headRight.className = "yd-sec-head-right";
+      const resetBtn = hd.createElement("button");
+      resetBtn.type = "button";
+      resetBtn.className = "yd-mini-link";
+      resetBtn.setAttribute("data-yd-action", "reset-banned-words");
+      resetBtn.textContent = "恢复默认";
+      resetBtn.addEventListener("click", function () {
+        mutateBannedWords(DEFAULT_BANNED_WORDS, "已恢复默认禁词表（" + DEFAULT_BANNED_WORDS.length + " 条）");
       });
+      headRight.appendChild(resetBtn);
+
+      headRow.appendChild(headLeft);
+      headRow.appendChild(headRight);
+      sec.appendChild(headRow);
+
+      const helpCard = hd.createElement("div");
+      helpCard.className = "yd-help-card";
+      helpCard.style.display = bannedHelpOpen ? "flex" : "none";
+      [
+        { k: "作用", v: "发送给模型前，从 AI 历史回复中剔除这些词；不改聊天存档与界面显示。" },
+        { k: "定位", v: "用于切断复读传染的辅助手段，不是根治方法。" },
+        { k: "录入建议", v: "优先录入修饰语与填充词；谓语型词条剔除后可能留下残句。" },
+        { k: "不生效范围", v: "你的输入、模型当前新生成的文本。" },
+      ].forEach(function (item) {
+        const line = hd.createElement("div");
+        const strong = hd.createElement("strong");
+        strong.textContent = item.k + "：";
+        line.appendChild(strong);
+        line.appendChild(hd.createTextNode(item.v));
+        helpCard.appendChild(line);
+      });
+      sec.appendChild(helpCard);
+
+      helpBtn.addEventListener("click", function () {
+        bannedHelpOpen = !bannedHelpOpen;
+        helpBtn.classList.toggle("is-active", bannedHelpOpen);
+        helpBtn.setAttribute("aria-expanded", String(bannedHelpOpen));
+        helpCard.style.display = bannedHelpOpen ? "flex" : "none";
+      });
+
+      const form = hd.createElement("div");
+      form.className = "yd-banned-form";
+      const input = hd.createElement("input");
+      input.type = "text";
+      input.className = "yd-input";
+      input.maxLength = MAX_BANNED_WORD_LEN;
+      input.placeholder = "输入要剔除的词条（最多 " + MAX_BANNED_WORD_LEN + " 字）...";
+      input.setAttribute("aria-label", "新增历史禁词");
+      const addBtn = hd.createElement("button");
+      addBtn.type = "button";
+      addBtn.className = "yd-btn-sm";
+      addBtn.setAttribute("data-yd-action", "add-banned-word");
+      addBtn.textContent = "添加";
+
+      function submitNewWord() {
+        const res = addBannedWord(words, input.value);
+        if (!res.added) {
+          const msgMap = {
+            empty: "请输入要剔除的词条",
+            too_long: "单个词条最多 " + MAX_BANNED_WORD_LEN + " 字",
+            duplicate: "该词条已存在",
+            limit: "禁词表最多支持 " + MAX_BANNED_WORDS + " 条",
+          };
+          showToast(msgMap[res.reason] || "无法添加词条");
+          return;
+        }
+        input.value = "";
+        mutateBannedWords(res.words, "已添加禁词并更新清洗正则");
+      }
+
+      addBtn.addEventListener("click", submitNewWord);
+      input.addEventListener("keydown", function (ev) {
+        if (ev.key === "Enter") {
+          ev.preventDefault();
+          submitNewWord();
+        }
+      });
+      form.appendChild(input);
+      form.appendChild(addBtn);
+      sec.appendChild(form);
+
+      const tagsWrap = hd.createElement("div");
+      tagsWrap.className = "yd-banned-tags";
+      if (words.length === 0) {
+        const empty = hd.createElement("div");
+        empty.className = "yd-muted";
+        empty.textContent = "当前未配置禁词，历史清洗正则处于空匹配状态。";
+        tagsWrap.appendChild(empty);
+      } else {
+        words.forEach(function (w) {
+          const tag = hd.createElement("span");
+          tag.className = "yd-banned-tag";
+          tag.setAttribute("data-yd-banned-word", w);
+          const txt = hd.createElement("span");
+          txt.className = "yd-banned-tag-text";
+          txt.textContent = w;
+          txt.title = w;
+          const del = hd.createElement("button");
+          del.type = "button";
+          del.className = "yd-tag-del";
+          del.textContent = "×";
+          del.title = "删除 " + w;
+          del.setAttribute("aria-label", "删除 " + w);
+          del.addEventListener("click", function () {
+            mutateBannedWords(removeBannedWord(words, w), "已移除禁词：" + w);
+          });
+          tag.appendChild(txt);
+          tag.appendChild(del);
+          tagsWrap.appendChild(tag);
+        });
+      }
+      sec.appendChild(tagsWrap);
+      body.appendChild(sec);
     }
 
     function renderAssistantTab(activePersona, theme, mergedThemes, baseVerLabel) {
@@ -1140,11 +1672,13 @@
       const mergedThemes = Object.assign({}, loadLocalThemes(), readPresetThemes(preset));
       const theme = getPersonaTheme(activePersona, mergedThemes);
       applyThemeColors(theme);
-      pillSub.textContent = activePersona.label;
-      pillSub.style.display = activePersona.label ? "" : "none";
+      const pillPersonaDesc = activePersona.label ? ("ST-预设助手 · " + activePersona.label) : "ST-预设助手";
+      pill.title = pillPersonaDesc + (updateCheckResult && updateCheckResult.hasUpdate ? " · 发现新版本" : "") + "（点击展开，按住拖动）";
+      pill.setAttribute("aria-label", pillPersonaDesc);
 
       syncTabButtons();
       const prevScrollTop = preserveScroll ? body.scrollTop : 0;
+      body.classList.toggle("is-entering", !preserveScroll);
       body.innerHTML = "";
 
       if (state.activeTab === "regex") {
@@ -1187,10 +1721,15 @@
       if (!isDragging) return;
       const dx = ev.clientX - dragStartX;
       const dy = ev.clientY - dragStartY;
-      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
+      const dragThreshold = ev.pointerType === "touch" ? 8 : 5;
+      if (Math.abs(dx) > dragThreshold || Math.abs(dy) > dragThreshold) {
+        moved = true;
+        pill.classList.add("is-dragging");
+      }
       if (moved) {
-        const vw = hw.innerWidth || 1280;
-        const vh = hw.innerHeight || 720;
+        const vp = getViewportSize();
+        const vw = vp.vw;
+        const vh = vp.vh;
         const pm = getPillMetrics();
         const margin = 8;
         const nextLeft = Math.round(clampNumber(startLeft + dx, margin, Math.max(margin, vw - pm.w - margin)));
@@ -1206,6 +1745,7 @@
     function endDrag(ev) {
       if (!isDragging) return;
       isDragging = false;
+      pill.classList.remove("is-dragging");
       if (moved) {
         savePanelState(state);
       } else {
@@ -1218,7 +1758,10 @@
     }
 
     pill.addEventListener("pointerup", endDrag);
-    pill.addEventListener("pointercancel", function () { isDragging = false; });
+    pill.addEventListener("pointercancel", function () {
+      isDragging = false;
+      pill.classList.remove("is-dragging");
+    });
 
     closeBtn.addEventListener("click", function () {
       state.open = false;
@@ -1251,6 +1794,9 @@
       applyRelativePosition();
     }
     hw.addEventListener("resize", handleResize);
+    if (hw.visualViewport) {
+      hw.visualViewport.addEventListener("resize", handleResize);
+    }
 
     const themeObs = typeof MutationObserver !== "undefined"
       ? new MutationObserver(syncHostColors)
@@ -1265,6 +1811,9 @@
       if (cleaned) return;
       cleaned = true;
       hw.removeEventListener("resize", handleResize);
+      if (hw.visualViewport) {
+        hw.visualViewport.removeEventListener("resize", handleResize);
+      }
       if (themeObs) themeObs.disconnect();
       const el = hd.getElementById(ROOT_EL_ID);
       if (el) el.remove();

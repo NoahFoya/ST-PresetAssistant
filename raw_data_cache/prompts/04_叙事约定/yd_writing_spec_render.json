@@ -1,8 +1,8 @@
 {
   "identifier": "yd_writing_spec_render",
-  "name": "</叙事约定>",
+  "name": "📐 叙事约定 - 汇总",
   "role": "system",
-  "content": "<叙事约定>\n{{getvar::general_spec}}\n\n{{getvar::style}}\n\n{{getvar::pov}}\n\n{{getvar::pace}}\n\n{{getvar::focus}}\n{{getvar::vocab}}\n{{getvar::vocab_diversity}}\n</叙事约定>",
+  "content": "<narrative_rules>\n{{getvar::general_spec}}\n{{getvar::style}}\n{{getvar::pov}}\n{{getvar::pace}}\n{{getvar::focus}}\n{{getvar::vocab}}\n{{getvar::vocab_diversity}}\n</narrative_rules>",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

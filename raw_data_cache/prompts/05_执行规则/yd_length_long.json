@@ -2,7 +2,7 @@
   "identifier": "yd_length_long",
   "name": "[篇幅] 长篇 (1200-1800字) [单选]",
   "role": "system",
-  "content": "{{setvar::target_length::- 正文篇幅控制在 1200~1800 字之间，通过展开现场氛围、多轮交锋与具体互动充实内容，保持合理的交互节奏与留白。}}{{setvar::length_comment_hint::3~5 串}}",
+  "content": "{{setvar::target_length::\n- 正文篇幅以 1200~1800 字左右为参考目标，通过展开现场氛围、多轮交锋与具体互动充实内容，保持合理的交互节奏与留白。\n}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

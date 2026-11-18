@@ -1,8 +1,8 @@
 {
   "identifier": "story_setting_close",
-  "name": "</故事设定>",
+  "name": "📖 故事设定 - 结束",
   "role": "system",
-  "content": "</故事设定>",
+  "content": "</story_setting>",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

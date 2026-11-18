@@ -2,7 +2,7 @@
   "identifier": "yd_feat_action_options",
   "name": "[功能] 行动选项 [多选]",
   "role": "system",
-  "content": "{{setvar::rule_action_options::- 在回复最末尾另起一行输出 `<选择>` 标签，提供 3 个不同方向的 {{user}} 行动建议；每个选项只写 {{user}} 准备采取的具体行动或说话方向，严禁提前写出结果或 NPC 反应：\n<选择>\nA. [简短标题]：{{user}} 准备采取的具体行动或说话方向\nB. [简短标题]：{{user}} 准备采取的具体行动或说话方向\nC. [简短标题]：{{user}} 准备采取的具体行动或说话方向\n</选择>}}",
+  "content": "{{setvar::rule_action_options::\n- 行动选项：在回复最末尾另起一行输出 `<options>` 标签，紧扣当前现场局势与人物关系给出 2~4 个不同风格或不同作用的行动分支，确保各选项在互动策略、态度取向或推进方向上形成实质差异，不套用固定分类模板，也避免仅换措辞却传达相同意图的伪分支。每项仅基于 {{user}} 当前已知信息单行写成可直接发出的具体言行，不替 NPC 预设反应；若场景已自然收束、结尾停在需要 {{user}} 自由作答的开放性提问、{{user}} 已明确敲定下一步行动或暂无实质分叉时，可精简至 2 项或省略输出，格式如下：\n<options>\nA. 简短标题：可直接作为 {{user}} 下一轮发出的具体行动或对白\n</options>\n}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

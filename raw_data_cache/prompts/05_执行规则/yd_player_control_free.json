@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_player_control_free",
+  "name": "[玩家控制] 无限制 [单选]",
+  "role": "system",
+  "content": "{{setvar::player_control::\n- 玩家控制：允许根据剧情节奏与场景张力自主推进并立体刻画 {{user}} 的言行、心理活动、感官反应与行动走向；但不得覆盖 {{user}} 刚刚明确表达的拒绝、既定事实与关键选择，所有刻画仍须贴合 {{user}} 既定人物性格与当前处境，并在阶段性节点适时停笔，保留 {{user}} 随时接管互动的余地。\n}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": false,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

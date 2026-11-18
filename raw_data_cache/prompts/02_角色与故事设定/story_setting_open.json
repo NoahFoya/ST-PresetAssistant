@@ -1,8 +1,8 @@
 {
   "identifier": "story_setting_open",
-  "name": "<故事设定>",
+  "name": "📖 故事设定 - 开始",
   "role": "system",
-  "content": "<故事设定>",
+  "content": "<story_setting>",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

@@ -43,14 +43,22 @@ def main() -> None:
             clean_mod["injection_position"] = mod.get("injection_position", 0)
             clean_mod["injection_depth"] = mod.get("injection_depth", 4)
             clean_mod["injection_order"] = mod.get("injection_order", 100)
-        if "triggers" in mod:
-            clean_mod["triggers"] = mod["triggers"]
+        if "injection_trigger" in mod:
+            clean_mod["injection_trigger"] = mod["injection_trigger"]
         prompts.append(clean_mod)
 
     preset["prompts"] = prompts
+    expected_order = [
+        {"identifier": e["identifier"], "enabled": bool(e["enabled"])}
+        for e in manifest["prompt_index"]
+    ]
+    preset["prompt_order"] = [
+        {"character_id": 100000, "order": expected_order},
+        {"character_id": 100001, "order": [dict(x) for x in expected_order]},
+    ]
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    out_file = OUT_DIR / f"ST-PresetAssistant_preset_v{version}.json"
+    out_file = OUT_DIR / f"ST-PresetAssistant_V{version}.json"
     out_file.write_text(json.dumps(preset, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"[build_preset] Compiled {len(prompts)} modules -> {out_file}")
 

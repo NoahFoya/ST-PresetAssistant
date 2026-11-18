@@ -1,8 +1,8 @@
 {
   "identifier": "chat_history_open",
-  "name": "<历史会话>",
+  "name": "💬 历史会话 - 开始",
   "role": "system",
-  "content": "<历史会话>",
+  "content": "<chat_history>",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

@@ -2,7 +2,7 @@
   "identifier": "yd_feat_format_compat",
   "name": "[功能] 格式兼容 [多选]",
   "role": "system",
-  "content": "{{setvar::rule_format_compat::- 若 `<故事设定>` 或 `<历史会话>` 要求输出特定格式（如状态栏、属性面板、变量更新 `<UpdateVariable>` 或特定 XML 标签），须按原标签名与顺序独立完整闭合输出；若未要求额外格式，禁止自行编造状态栏或属性面板。}}",
+  "content": "{{setvar::rule_format_compat::\n- 格式兼容：保持故事正文、结构化格式（如状态栏、属性面板、变量更新 `<UpdateVariable>` 或专属标签）与其余附加输出的层级清晰分离；输出前先核对 `<story_setting>` 与 `<chat_history>` 是否明确约定了额外格式，凡有明确约定即严格按原标签名、字段顺序与闭合要求在正文之外独立完整输出；未作额外约定时保持版面纯粹，不自行增设状态栏、规则解释或创作说明。\n}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,
