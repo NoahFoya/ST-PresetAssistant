@@ -1,0 +1,27 @@
+{
+  "name": "st-preset-assistant",
+  "version": "0.5.0",
+  "description": "ST-PresetAssistant (ST-预设助手): SillyTavern Multi-Persona Interactive Fiction Preset & TavernHelper Control Suite",
+  "main": "scripts/build_preset.py",
+  "scripts": {
+    "build": "python scripts/sync_ui.py && python scripts/build_preset.py",
+    "test": "python tests/verify.py",
+    "verify": "python tests/verify.py",
+    "docs": "python scripts/build_docs.py",
+    "all": "npm run build && npm run verify && npm run docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NoahFoya/ST-PresetAssistant.git"
+  },
+  "keywords": [
+    "sillytavern",
+    "preset",
+    "st-preset-assistant",
+    "tavern-helper",
+    "multi-persona",
+    "prompt-engineering"
+  ],
+  "author": "NoahFoya",
+  "license": "GPL-3.0-only AND CC-BY-NC-SA-4.0"
+}
