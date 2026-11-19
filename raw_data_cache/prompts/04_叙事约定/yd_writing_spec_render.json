@@ -2,7 +2,7 @@
   "identifier": "yd_writing_spec_render",
   "name": "📐 叙事约定 - 汇总",
   "role": "system",
-  "content": "<narrative_rules>\n{{getvar::general_spec}}\n{{getvar::style}}\n{{getvar::pov}}\n{{getvar::pace}}\n{{getvar::focus}}\n{{getvar::vocab}}\n{{getvar::vocab_diversity}}\n</narrative_rules>",
+  "content": "<narrative_rules>{{getvar::general_spec}}{{getvar::style}}{{getvar::pov}}{{getvar::pace}}{{getvar::focus}}{{getvar::vocab}}{{getvar::vocab_diversity}}\n</narrative_rules>",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

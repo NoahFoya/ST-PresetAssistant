@@ -41,7 +41,7 @@ def main() -> None:
         )
 
     cache_path = DOCS_DIR / "Preset_Full_Content_Cache.txt"
-    cache_path.write_text("\n".join(cache_lines), encoding="utf-8")
+    cache_path.write_text("\n".join(cache_lines), encoding="utf-8", newline="\n")
 
     ext = manifest["preset_config"]["extensions"]
     scripts = ext["regex_scripts"]
@@ -63,8 +63,8 @@ def main() -> None:
         "1. **01_系统框架（使用说明 + 变量统一初始化 + 最上方 AI 人设 + `<core_rules>` + 助手确认）**：`main` 设为 `✨ST-使用说明`（仅含 `{{// ... }}` 注释，0 Token 且 `forbid_overrides: true`）；紧接 `yd_vars_init` 紧贴单行清零并预设全部扁平宏变量；随后支持 `[AI人设] 莉莉丝 / 泠音 [单选]` 与动态扩展人设；`<core_rules>` 聚焦创作边界、既定玩家输入保护/模态区分、性格/状态变化证据强度、历史可信度甄别、长期连续性及叙事因果；末尾 `🤝 助手确认`（`role: assistant`）动态读取 `persona_ack` 分隔系统提示词并强化助手自认同。",
         "2. **02_角色与故事设定 (`📖 故事设定 - 开始/结束` -> `<story_setting>`)**：SillyTavern 原生世界书、角色设定与示例对话插槽。",
         "3. **03_聊天历史 (`💬 历史会话 - 开始/结束` -> `<chat_history>`)**：`chatHistory` 对话记录区。",
-        "4. **04_叙事约定 (`📐 叙事约定 - 汇总` -> `<narrative_rules>`)**：内接 `[写作规范] 默认 / 宽松 [单选]`（仅约束实际口头台词双引号）+ 8 款按「对话交锋 / 动作神态 / 环境氛围」三段示范编排的文风 + 视角 + 叙事时间管理节奏 + 五维描写侧重 + `[NSFW倾向]`/`[NSFW细化]`，末尾单块 `<narrative_rules>` 扁平直渲输出。",
-        "5. **05_执行规则 (`⚙️ 执行规则 - 汇总` -> `<execution_rules>`)**：顶层 6 顺位 `## 规则优先级` 冲突裁决 + `[玩家控制]` 三档独立尺度 + `[篇幅]` 软性目标 + `[功能]` 正交层级输出（`格式兼容 / 段间批注 / 行动选项 / 防重复校验`）+ `[思考]` 完整双开执行（`输出思考面板 / 基本推理 / 预填充思考`），末尾单块 `<execution_rules>` 一层直渲输出。",
+        "4. **04_叙事约定 (`📐 叙事约定 - 汇总` -> `<narrative_rules>`)**：内接 `[写作规范] 默认 / 宽松 [单选]`（仅约束实际口头台词双引号，内置 `### 详略与节奏`）+ 8 款含三段语感示范的文风 + 视角 + 叙事时间管理节奏 + 五维描写侧重 + 感受驱动的 `[NSFW倾向]`（`通用 / 男性向 / 女性向`）/`[NSFW细化]`，末尾单块 `<narrative_rules>` 扁平紧凑直渲输出。",
+        "5. **05_执行规则 (`⚙️ 执行规则 - 汇总` -> `<execution_rules>`)**：顶层 6 顺位 `## 规则优先级` 冲突裁决 + `[代写边界]`（`禁止代写 / 允许延伸 / 自由代写`）三档独立尺度 + `[篇幅]`（`较短 / 适中 / 较长`）软性目标 + `[功能]` 正交层级输出（`格式兼容 / 正文批注 / 行动选项 / 防复读检查`）+ `[思考]` 完整双开执行（`输出思考面板 / 构思推演 / 预填充思考`），末尾单块 `<execution_rules>` 紧凑直渲输出。",
         "",
         "## 二、内置正则与酒馆助手脚本",
         "",
@@ -86,7 +86,7 @@ def main() -> None:
         "",
     ])
     guide_path = DOCS_DIR / "Preset_Architecture_Guide.md"
-    guide_path.write_text(guide_md, encoding="utf-8")
+    guide_path.write_text(guide_md, encoding="utf-8", newline="\n")
 
     print(f"[docs] Generated {guide_path.name} and {cache_path.name}")
 

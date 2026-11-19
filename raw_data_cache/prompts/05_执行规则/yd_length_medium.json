@@ -1,8 +1,8 @@
 {
   "identifier": "yd_length_medium",
-  "name": "[篇幅] 中篇 (800-1200字) [单选]",
+  "name": "[篇幅] 适中 (800-1200字) [单选]",
   "role": "system",
-  "content": "{{setvar::target_length::\n- 正文篇幅以 800~1200 字左右为参考目标，将笔墨分配给现场空间感、神态细节与当下的核心互动，保持自然的对话与行动往来节奏。\n}}",
+  "content": "{{setvar::target_length::\n- 正文篇幅以 800~1200 字左右为参考目标，围绕当下的核心互动与情绪流动展开，在重点交锋处写足感受与反应，过渡处保持简练利落。\n}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

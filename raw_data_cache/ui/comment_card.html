@@ -276,21 +276,141 @@
   .yd-reply-input:focus {
     border-color: color-mix(in srgb, var(--SmartThemeEmColor) 60%, transparent);
   }
-  .yd-reply-select {
+  .yd-role-wrap {
+    display: inline-flex;
+    align-items: center;
+    width: 112px;
+    flex-shrink: 0;
     height: 30px;
-    padding: 0 6px;
     border-radius: 5px;
     border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 16%, transparent);
     background: color-mix(in srgb, var(--SmartThemeBodyColor) 4%, transparent);
+    overflow: hidden;
+    transition: border-color 0.15s ease;
+  }
+  .yd-role-wrap:focus-within,
+  .yd-role-wrap.is-open {
+    border-color: color-mix(in srgb, var(--SmartThemeEmColor) 60%, transparent);
+  }
+  .yd-reply-role {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0 6px;
+    border: none;
+    background: transparent;
     color: var(--SmartThemeBodyColor);
     font-family: inherit;
     font-size: 0.8em;
-    cursor: pointer;
-    flex-shrink: 0;
+    outline: none;
   }
-  .yd-reply-select option {
-    background: Canvas;
-    color: CanvasText;
+  .yd-reply-role:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .yd-role-toggle {
+    width: 22px;
+    height: 100%;
+    flex-shrink: 0;
+    border: none;
+    border-left: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 12%, transparent);
+    background: transparent;
+    color: color-mix(in srgb, var(--SmartThemeBodyColor) 66%, transparent);
+    font-size: 0.72em;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+    transition: color 0.15s ease, background 0.15s ease, transform 0.16s ease;
+  }
+  .yd-role-toggle:hover:not(:disabled) {
+    color: var(--SmartThemeEmColor);
+    background: color-mix(in srgb, var(--SmartThemeEmColor) 10%, transparent);
+  }
+  .yd-role-toggle:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .yd-role-wrap.is-open .yd-role-toggle {
+    color: var(--SmartThemeEmColor);
+    background: color-mix(in srgb, var(--SmartThemeEmColor) 12%, transparent);
+  }
+  .yd-role-menu {
+    margin-top: 6px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px dashed color-mix(in srgb, var(--SmartThemeEmColor) 34%, transparent);
+    background: color-mix(in srgb, var(--SmartThemeBodyColor) 3.4%, transparent);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: center;
+    animation: yd-card-reveal 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .yd-role-menu[hidden] {
+    display: none;
+  }
+  .yd-role-menu-label {
+    font-size: 0.74em;
+    color: color-mix(in srgb, var(--SmartThemeBodyColor) 56%, transparent);
+    margin-right: 2px;
+  }
+  .yd-role-chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 16%, transparent);
+    background: color-mix(in srgb, var(--SmartThemeBodyColor) 4%, transparent);
+    color: var(--SmartThemeBodyColor);
+    font-size: 0.78em;
+    overflow: hidden;
+    transition: border-color 0.14s ease, background 0.14s ease;
+  }
+  .yd-role-chip.is-active {
+    border-color: color-mix(in srgb, var(--SmartThemeEmColor) 68%, transparent);
+    background: color-mix(in srgb, var(--SmartThemeEmColor) 15%, transparent);
+    color: var(--SmartThemeEmColor);
+    font-weight: 600;
+  }
+  .yd-role-chip-pick {
+    border: none;
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    padding: 2px 8px;
+    cursor: pointer;
+    line-height: 1.45;
+  }
+  .yd-role-chip-pick:hover {
+    color: var(--SmartThemeEmColor);
+  }
+  .yd-role-chip-del {
+    border: none;
+    background: transparent;
+    color: color-mix(in srgb, var(--SmartThemeBodyColor) 54%, transparent);
+    font-family: inherit;
+    font-size: 0.96em;
+    line-height: 1;
+    padding: 2px 6px 2px 1px;
+    cursor: pointer;
+    transition: color 0.14s ease;
+  }
+  .yd-role-chip-del:hover {
+    color: #c94a4a;
+  }
+  .yd-empty-note {
+    font-size: 0.84em;
+    color: color-mix(in srgb, var(--SmartThemeBodyColor) 64%, transparent);
+    padding: 6px 2px;
+  }
+  .yd-talk-card.is-empty .yd-reply-bar,
+  .yd-talk-card.is-empty .yd-role-menu {
+    display: none;
   }
   .yd-reply-btn {
     height: 30px;
@@ -328,13 +448,14 @@
     .yd-talk-body { padding: 8px 10px 10px 10px; }
     .yd-collapse-btn { width: 28px; height: 28px; font-size: 0.88em; }
     .yd-mini-btn { padding: 4px 10px; min-height: 28px; font-size: 0.78em; }
-    .yd-reply-input, .yd-edit-input, .yd-reply-select { font-size: 16px; }
+    .yd-reply-input, .yd-edit-input, .yd-reply-role { font-size: 16px; }
   }
   @media (max-width: 520px) {
     .yd-floor-text, .yd-edit-box { padding-left: 0; }
     .yd-reply-bar { flex-wrap: wrap; }
     .yd-reply-input { flex: 1 1 100%; height: 36px; }
-    .yd-reply-select { flex: 1 1 auto; height: 34px; }
+    .yd-role-wrap { flex: 1 1 auto; width: auto; height: 34px; }
+    .yd-role-toggle { width: 28px; font-size: 0.86em; }
     .yd-reply-btn { height: 34px; padding: 0 14px; }
   }
   .yd-mini-btn:active, .yd-reply-btn:active, .yd-collapse-btn:active {
@@ -359,13 +480,14 @@
   <div class="yd-talk-body" id="yd-talk-body">
     <div class="yd-floor-list" id="yd-floor-list"></div>
     <div class="yd-reply-bar">
-      <select class="yd-reply-select" id="yd-reply-role" aria-label="追加署名">
-        <option value="master">master</option>
-        <option value="批注">段间批注</option>
-      </select>
-      <input type="text" class="yd-reply-input" id="yd-reply-input" placeholder="追加点评或段间批注（全楼层支持直接编辑改写）..." />
+      <div class="yd-role-wrap" id="yd-role-wrap">
+        <input type="text" class="yd-reply-role" id="yd-reply-role" maxlength="24" value="master" aria-label="追加署名" placeholder="署名" autocomplete="off" title="点击选择或输入自定义署名（自动记忆）" />
+        <button type="button" class="yd-role-toggle" id="yd-role-toggle" aria-label="展开或收起署名候选" aria-expanded="false" title="选择历史记忆署名">▾</button>
+      </div>
+      <input type="text" class="yd-reply-input" id="yd-reply-input" placeholder="追加点评或正文批注（全楼层支持直接编辑改写）..." />
       <button type="button" class="yd-reply-btn" id="yd-reply-btn">追加</button>
     </div>
+    <div class="yd-role-menu" id="yd-role-menu" hidden></div>
     <div class="yd-talk-toast" id="yd-talk-toast"></div>
   </div>
   <textarea id="yd-talk-raw" style="display:none;" readonly>$1</textarea>
@@ -414,9 +536,174 @@
   const previewEl = document.getElementById("yd-talk-preview");
   const collapseBtn = document.getElementById("yd-collapse-btn");
   const replyInput = document.getElementById("yd-reply-input");
-  const replyRoleSelect = document.getElementById("yd-reply-role");
+  const roleWrap = document.getElementById("yd-role-wrap");
+  const replyRoleInput = document.getElementById("yd-reply-role");
+  const roleToggleBtn = document.getElementById("yd-role-toggle");
+  const roleMenuEl = document.getElementById("yd-role-menu");
   const replyBtn = document.getElementById("yd-reply-btn");
   const toastEl = document.getElementById("yd-talk-toast");
+
+  const LAST_SPEAKER_KEY = "yd_assistant_comment_last_speaker_v1";
+  const CUSTOM_SPEAKERS_KEY = "yd_assistant_comment_custom_speakers_v1";
+  const MAX_CUSTOM_SPEAKERS = 8;
+  let lastSavedSpeaker = null;
+  let roleMenuOpen = false;
+
+  function getHostStorage() {
+    try {
+      const hw = getHostWin();
+      if (hw && hw.localStorage) return hw.localStorage;
+    } catch (e) {}
+    try {
+      if (window.localStorage) return window.localStorage;
+    } catch (e) {}
+    return null;
+  }
+
+  function sanitizeSpeaker(raw) {
+    return String(raw || "")
+      .replace(/[:：\r\n]+/g, "")
+      .trim()
+      .slice(0, 24);
+  }
+
+  function loadLastSpeaker() {
+    try {
+      const st = getHostStorage();
+      const clean = st ? sanitizeSpeaker(st.getItem(LAST_SPEAKER_KEY)) : "";
+      if (clean) return clean;
+    } catch (e) {}
+    return "master";
+  }
+
+  function saveLastSpeaker(name) {
+    const clean = sanitizeSpeaker(name);
+    if (!clean || clean === lastSavedSpeaker) return;
+    lastSavedSpeaker = clean;
+    try {
+      const st = getHostStorage();
+      if (st) st.setItem(LAST_SPEAKER_KEY, clean);
+    } catch (e) {}
+  }
+
+  function loadCustomSpeakers() {
+    try {
+      const st = getHostStorage();
+      const raw = st ? st.getItem(CUSTOM_SPEAKERS_KEY) : null;
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) {
+          const out = [];
+          arr.forEach(function (item) {
+            const clean = sanitizeSpeaker(item);
+            if (clean && out.indexOf(clean) === -1) out.push(clean);
+          });
+          return out.slice(0, MAX_CUSTOM_SPEAKERS);
+        }
+      }
+    } catch (e) {}
+    return [];
+  }
+
+  function saveCustomSpeakersList(list) {
+    try {
+      const st = getHostStorage();
+      if (st) st.setItem(CUSTOM_SPEAKERS_KEY, JSON.stringify(list.slice(0, MAX_CUSTOM_SPEAKERS)));
+    } catch (e) {}
+  }
+
+  function rememberCustomSpeaker(name, authorSet) {
+    const clean = sanitizeSpeaker(name);
+    if (!clean) return;
+    const low = clean.toLowerCase();
+    if (low === "master" || clean === "读者" || clean === "批注") return;
+    if (authorSet && authorSet[low]) return;
+    const prev = loadCustomSpeakers().filter(function (item) {
+      return item.toLowerCase() !== low;
+    });
+    prev.unshift(clean);
+    saveCustomSpeakersList(prev);
+  }
+
+  function removeCustomSpeaker(name) {
+    const clean = sanitizeSpeaker(name);
+    if (!clean) return;
+    const low = clean.toLowerCase();
+    const next = loadCustomSpeakers().filter(function (item) {
+      return item.toLowerCase() !== low;
+    });
+    saveCustomSpeakersList(next);
+    if (replyRoleInput && sanitizeSpeaker(replyRoleInput.value).toLowerCase() === low) {
+      replyRoleInput.value = "master";
+      saveLastSpeaker("master");
+    }
+    renderRoleMenu();
+    render();
+  }
+
+  function setRoleMenuOpen(open) {
+    roleMenuOpen = Boolean(open);
+    if (roleWrap) roleWrap.classList.toggle("is-open", roleMenuOpen);
+    if (roleToggleBtn) roleToggleBtn.setAttribute("aria-expanded", String(roleMenuOpen));
+    if (roleMenuEl) roleMenuEl.hidden = !roleMenuOpen;
+    if (roleMenuOpen) renderRoleMenu();
+    notifyFrameResize();
+  }
+
+  function renderRoleMenu() {
+    if (!roleMenuEl) return;
+    roleMenuEl.innerHTML = "";
+    const labelEl = document.createElement("span");
+    labelEl.className = "yd-role-menu-label";
+    labelEl.textContent = "署名：";
+    roleMenuEl.appendChild(labelEl);
+
+    const currentLow = sanitizeSpeaker(replyRoleInput && replyRoleInput.value).toLowerCase();
+    const items = [
+      { value: "master", text: "master", removable: false },
+      { value: "批注", text: "正文批注", removable: false },
+    ];
+    loadCustomSpeakers().forEach(function (name) {
+      items.push({ value: name, text: name, removable: true });
+    });
+
+    items.forEach(function (item) {
+      const chip = document.createElement("span");
+      const active = currentLow === item.value.toLowerCase();
+      chip.className = "yd-role-chip" + (active ? " is-active" : "");
+
+      const pickBtn = document.createElement("button");
+      pickBtn.type = "button";
+      pickBtn.className = "yd-role-chip-pick";
+      pickBtn.textContent = item.text;
+      pickBtn.title = "选用署名：" + item.value;
+      pickBtn.addEventListener("mousedown", function (ev) { ev.preventDefault(); });
+      pickBtn.addEventListener("click", function () {
+        if (replyRoleInput) replyRoleInput.value = item.value;
+        saveLastSpeaker(item.value);
+        setRoleMenuOpen(false);
+        if (replyInput) replyInput.focus();
+      });
+      chip.appendChild(pickBtn);
+
+      if (item.removable) {
+        const delBtn = document.createElement("button");
+        delBtn.type = "button";
+        delBtn.className = "yd-role-chip-del";
+        delBtn.textContent = "×";
+        delBtn.title = "从记忆中移除 " + item.value;
+        delBtn.setAttribute("aria-label", "移除记忆署名 " + item.value);
+        delBtn.addEventListener("mousedown", function (ev) { ev.preventDefault(); });
+        delBtn.addEventListener("click", function (ev) {
+          ev.stopPropagation();
+          removeCustomSpeaker(item.value);
+        });
+        chip.appendChild(delBtn);
+      }
+
+      roleMenuEl.appendChild(chip);
+    });
+  }
 
   function notifyFrameResize() {
     try {
@@ -450,15 +737,22 @@
     }, 2600);
   }
 
+  function htmlToPlainText(raw) {
+    const str = String(raw || "");
+    if (!/<(?:br|\/(?:p|div|li))>/i.test(str)) return str;
+    const norm = str.replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|li)>/gi, "\n");
+    try {
+      if (typeof DOMParser !== "undefined") {
+        const doc = new DOMParser().parseFromString(norm, "text/html");
+        if (doc && doc.body) return doc.body.textContent || "";
+      }
+    } catch (e) {}
+    return norm.replace(/<[^>]+>/g, "");
+  }
+
   let initialRaw = "";
   if (rawEl) {
-    initialRaw = typeof rawEl.value === "string" ? rawEl.value : (rawEl.textContent || "");
-    if (/<(?:br|\/(?:p|div|li))>/i.test(initialRaw)) {
-      const norm = initialRaw.replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|li)>/gi, "\n");
-      const tmp = document.createElement("div");
-      tmp.innerHTML = norm;
-      initialRaw = tmp.textContent || "";
-    }
+    initialRaw = htmlToPlainText(typeof rawEl.value === "string" ? rawEl.value : (rawEl.textContent || ""));
   }
 
   let currentBlockText = initialRaw.trim();
@@ -489,17 +783,49 @@
     }).join("\n");
   }
 
-  function getRoleMeta(speaker) {
-    const s = speaker.trim();
+  function collectAuthorPersonas() {
+    const map = { "莉莉丝": true, "lilith": true, "泠音": true, "lingyin": true };
+    try {
+      const hw = getHostWin();
+      const th = window.TavernHelper || (hw && hw.TavernHelper) || null;
+      const getPreset = window.getPreset || (th && th.getPreset) || (hw && hw.getPreset) || null;
+      const preset = getPreset ? getPreset("in_use") : null;
+      const prompts = (preset && preset.prompts) || [];
+      prompts.forEach(function (p) {
+        if (!p || p.marker) return;
+        const m = String(p.name || "").trim().match(/^\[AI人设\]\s*(.+?)\s*\[(单选|多选)\]/);
+        if (m && m[1]) {
+          const pName = sanitizeSpeaker(m[1]);
+          if (pName) map[pName.toLowerCase()] = true;
+        }
+      });
+    } catch (e) {}
+    return map;
+  }
+
+  function buildRoleContext() {
+    const readerMap = { "master": true, "读者": true };
+    loadCustomSpeakers().forEach(function (n) {
+      readerMap[n.toLowerCase()] = true;
+    });
+    return {
+      authors: collectAuthorPersonas(),
+      readers: readerMap,
+    };
+  }
+
+  function getRoleMeta(speaker, roleCtx) {
+    const s = String(speaker || "").trim();
     const low = s.toLowerCase();
-    if (s === "莉莉丝" || low === "lilith" || s === "泠音" || low === "lingyin") {
-      return { cls: "is-author", badge: "作者", avatar: s.charAt(0).toUpperCase() };
+    const ctx = roleCtx || buildRoleContext();
+    if (ctx.authors[low]) {
+      return { cls: "is-author", badge: "作者", avatar: (s.charAt(0) || "作").toUpperCase() };
     }
     if (s === "批注") {
       return { cls: "is-author", badge: "批注", avatar: s.charAt(0) };
     }
-    if (low === "master" || s === "读者") {
-      return { cls: "is-master", badge: "读者", avatar: low === "master" ? "M" : s.charAt(0) };
+    if (ctx.readers[low]) {
+      return { cls: "is-master", badge: "读者", avatar: low === "master" ? "M" : (s.charAt(0) || "读").toUpperCase() };
     }
     return { cls: "is-guest", badge: "客评", avatar: (s.charAt(0) || "?").toUpperCase() };
   }
@@ -543,12 +869,17 @@
               break;
             }
             let isCommentCard = false;
+            let isDeletedCard = false;
             try {
-              if (fr.contentDocument && fr.contentDocument.querySelector('[data-yd-card="comment"]')) {
-                isCommentCard = true;
+              if (fr.contentDocument) {
+                if (fr.contentDocument.querySelector('[data-yd-card="comment-deleted"]')) {
+                  isDeletedCard = true;
+                } else if (fr.contentDocument.querySelector('[data-yd-card="comment"]')) {
+                  isCommentCard = true;
+                }
               }
             } catch (e) {}
-            if (!isCommentCard) {
+            if (!isCommentCard && !isDeletedCard) {
               try {
                 const rawDoc = fr.getAttribute("srcdoc") || fr.srcdoc || "";
                 if (rawDoc.indexOf('data-yd-card="comment"') !== -1) {
@@ -611,6 +942,9 @@
     if (hw) hw.__YD_COMMENT_WRITE_LOCK__ = true;
     if (replyBtn) replyBtn.disabled = true;
     if (replyInput) replyInput.disabled = true;
+    if (replyRoleInput) replyRoleInput.disabled = true;
+    if (roleToggleBtn) roleToggleBtn.disabled = true;
+    setRoleMenuOpen(false);
 
     try {
       const ctx = detectMessageContext();
@@ -636,7 +970,7 @@
       const after = msgObj.message.slice(targetRange.end);
       let updatedMsg = before + nextBlockText + after;
       if (!nextBlockText) {
-        updatedMsg = before.replace(/\n{2,}$/, "\n") + after.replace(/^\n{2,}/, "\n");
+        updatedMsg = before.replace(/(?:\r?\n){2,}$/, "\n") + after.replace(/^(?:\r?\n){2,}/, "\n");
       }
 
       await ctx.adapter.setChatMessages([{ message_id: ctx.mesId, message: updatedMsg }], { refresh: "none" });
@@ -654,19 +988,35 @@
       if (hw) hw.__YD_COMMENT_WRITE_LOCK__ = false;
       if (replyBtn) replyBtn.disabled = false;
       if (replyInput) replyInput.disabled = false;
+      if (replyRoleInput) replyRoleInput.disabled = false;
+      if (roleToggleBtn) roleToggleBtn.disabled = false;
     }
   }
 
   function render() {
     const floors = parseFloors(currentBlockText);
-    if (countEl) countEl.textContent = floors.length + " 楼";
+    const isDeleted = !currentBlockText || floors.length === 0;
+    if (cardEl) {
+      cardEl.setAttribute("data-yd-card", isDeleted ? "comment-deleted" : "comment");
+      cardEl.classList.toggle("is-empty", isDeleted);
+    }
+    if (countEl) countEl.textContent = isDeleted ? "已清空" : (floors.length + " 楼");
     if (previewEl) {
-      previewEl.textContent = floors.length ? (floors[0].speaker + "：" + floors[0].text) : "";
+      previewEl.textContent = isDeleted ? "该批注串已清空" : (floors[0].speaker + "：" + floors[0].text);
     }
 
     listEl.innerHTML = "";
+    if (isDeleted) {
+      const note = document.createElement("div");
+      note.className = "yd-empty-note";
+      note.textContent = "该批注串已清空，刷新消息后自动移除";
+      listEl.appendChild(note);
+      notifyFrameResize();
+      return;
+    }
+    const roleCtx = buildRoleContext();
     floors.forEach(function (floor, idx) {
-      const roleMeta = getRoleMeta(floor.speaker);
+      const roleMeta = getRoleMeta(floor.speaker, roleCtx);
 
       const row = document.createElement("div");
       row.className = "yd-floor " + roleMeta.cls;
@@ -728,16 +1078,10 @@
         const editInput = document.createElement("textarea");
         editInput.className = "yd-edit-input";
         editInput.value = floor.text;
+        editInput.placeholder = "修改批注内容（回车保存，Esc 取消）";
         editBox.appendChild(editInput);
 
-        const editBar = document.createElement("div");
-        editBar.className = "yd-edit-bar";
-
-        const saveBtn = document.createElement("button");
-        saveBtn.type = "button";
-        saveBtn.className = "yd-mini-btn";
-        saveBtn.textContent = "保存";
-        saveBtn.addEventListener("click", function () {
+        function saveEditedFloor() {
           const val = editInput.value.trim();
           if (!val) {
             showToast("⚠️ 点评内容不能为空，如需移除请点删除");
@@ -747,7 +1091,28 @@
             return j === idx ? { speaker: item.speaker, text: val } : item;
           });
           persistBlockUpdate(serializeFloors(nextFloors), "✅ 已保存修改");
+        }
+
+        editInput.addEventListener("keydown", function (ev) {
+          if (ev.isComposing) return;
+          if (ev.key === "Enter" && !ev.shiftKey) {
+            ev.preventDefault();
+            saveEditedFloor();
+          } else if (ev.key === "Escape") {
+            ev.preventDefault();
+            editingFloorIdx = -1;
+            render();
+          }
         });
+
+        const editBar = document.createElement("div");
+        editBar.className = "yd-edit-bar";
+
+        const saveBtn = document.createElement("button");
+        saveBtn.type = "button";
+        saveBtn.className = "yd-mini-btn";
+        saveBtn.textContent = "保存";
+        saveBtn.addEventListener("click", saveEditedFloor);
         editBar.appendChild(saveBtn);
 
         const cancelBtn = document.createElement("button");
@@ -776,18 +1141,68 @@
   }
 
   function handleAppend() {
+    if (!currentBlockText) {
+      showToast("⚠️ 该批注串已清空，请刷新消息后再试");
+      return;
+    }
     const val = replyInput ? replyInput.value.replace(/\r?\n+/g, " ").trim() : "";
     if (!val) {
       showToast("⚠️ 请输入内容后再追加");
       return;
     }
-    const speakerTag = replyRoleSelect && replyRoleSelect.value ? replyRoleSelect.value : "master";
+    const speakerTag = sanitizeSpeaker(replyRoleInput && replyRoleInput.value) || "master";
+    if (replyRoleInput) replyRoleInput.value = speakerTag;
     const floors = parseFloors(currentBlockText);
     floors.push({ speaker: speakerTag, text: val });
     persistBlockUpdate(serializeFloors(floors), "💬 已追加 " + speakerTag + " 记录", function () {
+      saveLastSpeaker(speakerTag);
+      rememberCustomSpeaker(speakerTag, collectAuthorPersonas());
+      if (roleMenuOpen) renderRoleMenu();
       if (replyInput) replyInput.value = "";
     });
   }
+
+  if (replyRoleInput) {
+    replyRoleInput.value = loadLastSpeaker();
+    replyRoleInput.addEventListener("focus", function () {
+      setRoleMenuOpen(true);
+    });
+    replyRoleInput.addEventListener("input", function () {
+      if (roleMenuOpen) renderRoleMenu();
+    });
+    replyRoleInput.addEventListener("blur", function () {
+      const clean = sanitizeSpeaker(replyRoleInput.value) || "master";
+      replyRoleInput.value = clean;
+      saveLastSpeaker(clean);
+    });
+    replyRoleInput.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        setRoleMenuOpen(false);
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        const clean = sanitizeSpeaker(replyRoleInput.value) || "master";
+        replyRoleInput.value = clean;
+        saveLastSpeaker(clean);
+        setRoleMenuOpen(false);
+        if (replyInput) replyInput.focus();
+      }
+    });
+  }
+
+  if (roleToggleBtn) {
+    roleToggleBtn.addEventListener("mousedown", function (ev) { ev.preventDefault(); });
+    roleToggleBtn.addEventListener("click", function (ev) {
+      ev.stopPropagation();
+      setRoleMenuOpen(!roleMenuOpen);
+    });
+  }
+
+  document.addEventListener("pointerdown", function (ev) {
+    if (!roleMenuOpen) return;
+    if (roleWrap && roleWrap.contains(ev.target)) return;
+    if (roleMenuEl && roleMenuEl.contains(ev.target)) return;
+    setRoleMenuOpen(false);
+  });
 
   if (replyBtn) {
     replyBtn.addEventListener("click", handleAppend);
@@ -804,6 +1219,7 @@
   function toggleCollapse() {
     if (!cardEl || !collapseBtn) return;
     const collapsed = cardEl.classList.toggle("is-collapsed");
+    if (collapsed && roleMenuOpen) setRoleMenuOpen(false);
     collapseBtn.textContent = collapsed ? "▸" : "▾";
     collapseBtn.setAttribute("aria-expanded", String(!collapsed));
     notifyFrameResize();

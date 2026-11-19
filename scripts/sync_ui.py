@@ -8,6 +8,7 @@ BASE = Path(__file__).resolve().parent.parent
 PKG_PATH = BASE / "package.json"
 MANIFEST_PATH = BASE / "raw_data_cache" / "preset_manifest.json"
 UI_DIR = BASE / "raw_data_cache" / "ui"
+MAIN_GUIDE_PATH = BASE / "raw_data_cache" / "prompts" / "01_系统框架" / "main.json"
 BANNED_WORDS_PATH = BASE / "raw_data_cache" / "banned_words_default.txt"
 BANNED_REGEX_ID = "b2c3d4e5-2106-4e8a-9b10-111122220006"
 BANNED_REGEX_NAME = "历史禁词清洗"
@@ -142,7 +143,21 @@ def main() -> None:
     ]
     print(f"[sync_ui] Synced prompt_order (100000, 100001) <- prompt_index ({len(expected_order)} modules)")
 
-    MANIFEST_PATH.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    if MAIN_GUIDE_PATH.exists():
+        main_raw = MAIN_GUIDE_PATH.read_text(encoding="utf-8")
+        main_mod = json.loads(main_raw)
+        next_content = re.sub(
+            r"(ST-PresetAssistant\)\s*v)[0-9A-Za-z._-]+",
+            rf"\g<1>{version}",
+            main_mod.get("content", ""),
+            count=1,
+        )
+        if next_content != main_mod.get("content", ""):
+            main_mod["content"] = next_content
+            MAIN_GUIDE_PATH.write_text(json.dumps(main_mod, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+            print(f"[sync_ui] Synced main.json guide header -> v{version}")
+
+    MANIFEST_PATH.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
     print("[sync_ui] preset_manifest.json updated successfully.")
 
 

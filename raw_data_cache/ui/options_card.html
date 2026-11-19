@@ -276,13 +276,29 @@
 </div>
 <script>
 (function () {
-  function getHostDoc() {
+  function getHostWin() {
     try {
       if (window.parent && window.parent !== window && window.parent.document) {
-        return window.parent.document;
+        return window.parent;
       }
     } catch (e) {}
-    return document;
+    return window;
+  }
+
+  function getHostDoc() {
+    const hw = getHostWin();
+    return hw && hw.document ? hw.document : document;
+  }
+
+  function getHostStorage() {
+    try {
+      const hw = getHostWin();
+      if (hw && hw.localStorage) return hw.localStorage;
+    } catch (e) {}
+    try {
+      if (window.localStorage) return window.localStorage;
+    } catch (e) {}
+    return null;
   }
 
   function syncHostTheme() {
@@ -332,7 +348,23 @@
     }
   } catch (e) {}
 
-  let mode = "fill";
+  const MODE_STORAGE_KEY = "yd_assistant_options_mode_v1";
+  function loadSavedMode() {
+    try {
+      const st = getHostStorage();
+      const raw = st ? st.getItem(MODE_STORAGE_KEY) : "";
+      if (raw === "send" || raw === "fill") return raw;
+    } catch (e) {}
+    return "fill";
+  }
+  function saveMode(nextMode) {
+    try {
+      const st = getHostStorage();
+      if (st) st.setItem(MODE_STORAGE_KEY, nextMode);
+    } catch (e) {}
+  }
+
+  let mode = loadSavedMode();
   let lastSendAt = 0;
   let toastTimer = null;
 
@@ -349,10 +381,12 @@
   }
 
   document.querySelectorAll(".yd-mode-btn").forEach(function (btn) {
+    btn.classList.toggle("active", (btn.getAttribute("data-mode") || "fill") === mode);
     btn.addEventListener("click", function () {
       document.querySelectorAll(".yd-mode-btn").forEach(function (b) { b.classList.remove("active"); });
       btn.classList.add("active");
       mode = btn.getAttribute("data-mode") || "fill";
+      saveMode(mode);
     });
   });
 
@@ -371,15 +405,22 @@
     titleWrapEl.addEventListener("click", toggleOptCollapse);
   }
 
+  function htmlToPlainText(raw) {
+    const str = String(raw || "");
+    if (!/<(?:br|\/(?:p|div|li))>/i.test(str)) return str;
+    const norm = str.replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|li)>/gi, "\n");
+    try {
+      if (typeof DOMParser !== "undefined") {
+        const doc = new DOMParser().parseFromString(norm, "text/html");
+        if (doc && doc.body) return doc.body.textContent || "";
+      }
+    } catch (e) {}
+    return norm.replace(/<[^>]+>/g, "");
+  }
+
   let rawText = "";
   if (rawEl) {
-    rawText = typeof rawEl.value === "string" ? rawEl.value : (rawEl.textContent || "");
-    if (/<(?:br|\/(?:p|div|li))>/i.test(rawText)) {
-      const normalized = rawText.replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|li)>/gi, "\n");
-      const tmp = document.createElement("div");
-      tmp.innerHTML = normalized;
-      rawText = tmp.textContent || "";
-    }
+    rawText = htmlToPlainText(typeof rawEl.value === "string" ? rawEl.value : (rawEl.textContent || ""));
   }
   rawText = rawText.trim();
 
@@ -389,7 +430,10 @@
     const items = [];
     const prefixRe = /^(?:([A-Za-z0-9]+)\s*[.、:：)\]]|[-*•·])\s*(.+)$/;
     const titleRe = /^(?:\[([^\]\n]+)\]|【([^】\n]+)】)\s*[：:.\-—]*\s*(.*)$/;
-    const colonTitleRe = /^([^：:\n，。！？“"‘']{1,12})[：:]\s*(.+)$/;
+    const colonTitleRe = /^([^：:\n，。！？“"‘']{1,16})(?:：\s*|:(?!\d|\/\/)\s*)(.+)$/;
+    const stripTitleBold = function (s) {
+      return String(s || "").trim().replace(/^(?:\*\*|__)(.+?)(?:\*\*|__)$/, function (_, inner) { return inner; }).trim();
+    };
 
     rawLines.forEach(function (line) {
       const pm = line.match(prefixRe);
@@ -400,13 +444,16 @@
         let desc = body;
         const tm = body.match(titleRe);
         if (tm) {
-          title = (tm[1] || tm[2] || "").trim();
+          title = stripTitleBold(tm[1] || tm[2] || "");
           desc = (tm[3] || "").trim();
         } else {
           const cm = body.match(colonTitleRe);
-          if (cm && !/^[“"‘']/.test(cm[1].trim())) {
-            title = cm[1].trim();
-            desc = cm[2].trim();
+          if (cm) {
+            const cleanCandidate = stripTitleBold(cm[1]);
+            if (cleanCandidate && !/^[“"‘']/.test(cm[1].trim()) && !/^\d+$/.test(cleanCandidate)) {
+              title = cleanCandidate;
+              desc = cm[2].trim();
+            }
           }
         }
         items.push({ badge: badge, title: title, desc: desc || title || body });

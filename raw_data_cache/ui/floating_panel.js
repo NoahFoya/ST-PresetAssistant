@@ -5,7 +5,7 @@
 (function (root) {
   "use strict";
 
-  const PRESET_VERSION = "0.3.0";
+  const PRESET_VERSION = "0.5.0";
   const GITHUB_REPO = "NoahFoya/ST-PresetAssistant";
   const GITHUB_CHANGELOG_URL = "https://github.com/" + GITHUB_REPO + "/blob/main/CHANGELOG.md";
   const GITHUB_PACKAGE_URLS = [
@@ -50,8 +50,137 @@
 
   const PANEL_TABS = [
     { key: "preset", label: "预设设置" },
+    { key: "params", label: "参数设置" },
     { key: "regex", label: "正则设置" },
     { key: "assistant", label: "助手设置" },
+  ];
+
+  const REASONING_EFFORT_OPTIONS = [
+    { value: "auto", label: "auto" },
+    { value: "low", label: "low" },
+    { value: "medium", label: "medium" },
+    { value: "high", label: "high" },
+    { value: "max", label: "max" },
+  ];
+
+  const HELP_TOPICS = {
+    think: [
+      { k: "预填充思考", v: "Gemini 4 及部分推理端点禁止请求以 Assistant 消息结尾，开启后可能触发 HTTP 400 报错；若报错请关闭此开关。" },
+      { k: "输出思考面板", v: "在正文中生成 <draft> 推理区；若所用模型已开启原生内置思考，可按需关闭以避免重复推演。" },
+    ],
+    profiles: [
+      { k: "作用范围", v: "模型方案仅修改推理强度、回复上限、采样与惩罚参数；不会改动上下文长度、流式开关或任何提示词。" },
+      { k: "HTTP 400 排查", v: "部分 Gemini / Vertex 端点不支持惩罚或 Min-P 参数，点「清零惩罚项」即可；若 Claude 新版报 temperature 与 top_p 互斥，请在酒馆 API 连接「排除请求体参数」中填入 top_p。" },
+      { k: "清零惩罚项", v: "将 Top-K、Min-P、Top-A、频率惩罚、存在惩罚归 0，并将重复惩罚复位为 1.0。" },
+    ],
+    budget: [
+      { k: "思考深度", v: "控制模型内置思维链的推演投入（auto 由模型自定；low 减少过度思考与说教；high 适合复杂推演）。" },
+      { k: "最大回复长度", v: "单位为 tokens。模型原生思考会占用该额度，写长文或高思考时建议保持 16384–32768 防止中途截断。" },
+      { k: "最大上下文长度", v: "单位为 tokens。重度长对话建议保留 200K–2M（实际有效窗口以所连模型及端点上限为准），切换模型方案不会覆盖你的设置。" },
+      { k: "返回思考内容", v: "控制是否在返回体中请求显示模型原生思维链内容。" },
+    ],
+    sampling: [
+      { k: "温度 (Temperature)", v: "控制输出随机性与文风发散度；数值越高越跳跃，越低越稳重。" },
+      { k: "Top-P", v: "核采样概率阈值（1.0 表示不限制）；Gemini 4 等部分新模型会忽略温度与 Top-P，Claude 新版通常不建议与温度同时修改。" },
+    ],
+    advanced: [
+      { k: "采样过滤", v: "Top-K 限制候选词数量，Min-P 与 Top-A 按概率动态截断低概率词（0 表示关闭）。" },
+      { k: "重复与惩罚", v: "频率、存在、重复惩罚用于抑制词句重复；严格端点若报 400 可点上方「清零惩罚项」。" },
+    ],
+    banned: [
+      { k: "作用", v: "发送给模型前，从 AI 历史回复中剔除这些词；不改聊天存档与界面显示。" },
+      { k: "定位", v: "用于切断复读传染的辅助手段，不是根治方法。" },
+      { k: "录入建议", v: "优先录入修饰语与填充词；谓语型词条剔除后可能留下残句。" },
+      { k: "不生效范围", v: "你的输入、模型当前新生成的文本。" },
+    ],
+  };
+
+  const DEFAULT_PARAM_SETTINGS = {
+    reasoning_effort: "auto",
+    max_completion_tokens: 16384,
+    max_context: 2000000,
+    temperature: 1.0,
+    top_p: 1.0,
+    top_k: 0,
+    min_p: 0,
+    top_a: 0,
+    frequency_penalty: 0,
+    presence_penalty: 0,
+    repetition_penalty: 1.0,
+    request_thoughts: true,
+    should_stream: true,
+  };
+
+  // 模型方案仅管理推理/回复上限/采样/惩罚/思维链开关，绝不修改 max_context、should_stream 或任何提示词条目
+  const PARAM_PROFILES = [
+    {
+      id: "gemini4_low",
+      label: "Gemini4-low",
+      settings: {
+        reasoning_effort: "low",
+        max_completion_tokens: 16384,
+        temperature: 1.0,
+        top_p: 1.0,
+        top_k: 0,
+        min_p: 0,
+        top_a: 0,
+        frequency_penalty: 0,
+        presence_penalty: 0,
+        repetition_penalty: 1.0,
+        request_thoughts: true,
+      },
+    },
+    {
+      id: "gemini4_high",
+      label: "Gemini4-high",
+      settings: {
+        reasoning_effort: "high",
+        max_completion_tokens: 32768,
+        temperature: 1.0,
+        top_p: 1.0,
+        top_k: 0,
+        min_p: 0,
+        top_a: 0,
+        frequency_penalty: 0,
+        presence_penalty: 0,
+        repetition_penalty: 1.0,
+        request_thoughts: true,
+      },
+    },
+    {
+      id: "claude",
+      label: "Claude",
+      settings: {
+        reasoning_effort: "auto",
+        max_completion_tokens: 16384,
+        temperature: 1.0,
+        top_p: 1.0,
+        top_k: 0,
+        min_p: 0,
+        top_a: 0,
+        frequency_penalty: 0,
+        presence_penalty: 0,
+        repetition_penalty: 1.0,
+        request_thoughts: true,
+      },
+    },
+    {
+      id: "deepseek",
+      label: "DeepSeek",
+      settings: {
+        reasoning_effort: "auto",
+        max_completion_tokens: 16384,
+        temperature: 1.3,
+        top_p: 0.95,
+        top_k: 0,
+        min_p: 0,
+        top_a: 0,
+        frequency_penalty: 0,
+        presence_penalty: 0,
+        repetition_penalty: 1.0,
+        request_thoughts: true,
+      },
+    },
   ];
 
   const REGEX_BEAUTIFY_PREFIX = "[美化]";
@@ -233,7 +362,8 @@
   }
 
   function mergePresetRegexes(tavernList, presetScripts) {
-    const liveMap = {};
+    const liveById = {};
+    const liveByName = {};
     const order = [];
     const liveArr = Array.isArray(tavernList) ? tavernList : [];
     const presetArr = Array.isArray(presetScripts) ? presetScripts : [];
@@ -241,25 +371,29 @@
     liveArr.forEach(function (item) {
       const norm = normalizeRegexEntry(item);
       if (!norm) return;
-      const key = norm.id || norm.name;
-      liveMap[key] = norm;
+      if (norm.id && !liveById[norm.id]) liveById[norm.id] = norm;
+      if (norm.name && !liveByName[norm.name]) liveByName[norm.name] = norm;
       order.push(norm);
     });
 
     if (presetArr.length > 0) {
       const result = [];
-      const used = {};
+      const used = [];
       presetArr.forEach(function (item) {
         const norm = normalizeRegexEntry(item);
         if (!norm) return;
-        const match = (norm.id && liveMap[norm.id]) || liveMap[norm.name];
-        const merged = match ? { id: norm.id || match.id, name: match.name || norm.name, enabled: match.enabled } : norm;
-        used[merged.id || merged.name] = true;
+        const match = (norm.id && liveById[norm.id]) || (norm.name && liveByName[norm.name]) || null;
+        const merged = {
+          id: (match && match.id) || norm.id,
+          presetId: norm.id || "",
+          name: (match && match.name) || norm.name,
+          enabled: match ? match.enabled : norm.enabled,
+        };
+        if (match && used.indexOf(match) === -1) used.push(match);
         result.push(merged);
       });
       order.forEach(function (item) {
-        const k = item.id || item.name;
-        if (!used[k]) result.push(item);
+        if (used.indexOf(item) === -1) result.push(item);
       });
       return result;
     }
@@ -290,25 +424,58 @@
     return groups;
   }
 
-  function applyRegexToggleToTavernList(list, regexId, nextEnabled) {
-    return (Array.isArray(list) ? list : []).map(function (item) {
-      if (item && String(item.id || "") === String(regexId)) {
+  function resolveRegexTarget(target) {
+    if (target && typeof target === "object") {
+      const ids = [];
+      [target.id, target.presetId].forEach(function (v) {
+        const s = String(v || "").trim();
+        if (s && ids.indexOf(s) === -1) ids.push(s);
+      });
+      return { ids: ids, name: String(target.name || "").trim() };
+    }
+    const sid = String(target || "").trim();
+    return { ids: sid ? [sid] : [], name: "" };
+  }
+
+  function findRegexTargetIndices(list, target) {
+    const spec = resolveRegexTarget(target);
+    const arr = Array.isArray(list) ? list : [];
+    const byId = [];
+    const byName = [];
+    arr.forEach(function (item, idx) {
+      if (!item) return;
+      const itemId = String(item.id || "").trim();
+      const itemName = String(item.script_name || item.scriptName || "").trim();
+      if (itemId && spec.ids.indexOf(itemId) !== -1) {
+        byId.push(idx);
+      } else if (spec.name && itemName === spec.name) {
+        byName.push(idx);
+      }
+    });
+    return byId.length > 0 ? byId : byName;
+  }
+
+  function applyRegexToggleToTavernList(list, target, nextEnabled) {
+    const arr = Array.isArray(list) ? list : [];
+    const hitIndices = findRegexTargetIndices(arr, target);
+    if (!hitIndices.length) return arr.slice();
+    return arr.map(function (item, idx) {
+      if (hitIndices.indexOf(idx) !== -1) {
         return Object.assign({}, item, { enabled: Boolean(nextEnabled) });
       }
       return item;
     });
   }
 
-  function applyRegexToggleToPreset(preset, regexId, nextEnabled) {
+  function applyRegexToggleToPreset(preset, target, nextEnabled) {
     if (!preset || !preset.extensions || !Array.isArray(preset.extensions.regex_scripts)) return false;
-    let changed = false;
-    preset.extensions.regex_scripts.forEach(function (item) {
-      if (item && String(item.id || "") === String(regexId)) {
-        item.disabled = !Boolean(nextEnabled);
-        changed = true;
-      }
+    const scripts = preset.extensions.regex_scripts;
+    const hitIndices = findRegexTargetIndices(scripts, target);
+    if (!hitIndices.length) return false;
+    hitIndices.forEach(function (idx) {
+      scripts[idx].disabled = !Boolean(nextEnabled);
     });
-    return changed;
+    return true;
   }
 
   function escapeRegexLiteral(text) {
@@ -350,11 +517,18 @@
   }
 
   function applyBannedRegexToTavernList(list, nextFindRegex) {
-    return (Array.isArray(list) ? list : []).map(function (item) {
+    const arr = Array.isArray(list) ? list : [];
+    let found = false;
+    let sampleScope = null;
+    const mapped = arr.map(function (item) {
       if (!item) return item;
+      if (!sampleScope && typeof item.scope === "string" && item.scope) {
+        sampleScope = item.scope;
+      }
       const itemId = String(item.id || "");
       const itemName = String(item.script_name || item.scriptName || "");
       if (itemId === BANNED_REGEX_ID || itemName === BANNED_REGEX_NAME) {
+        found = true;
         const next = Object.assign({}, item);
         if ("find_regex" in next || !("findRegex" in next)) next.find_regex = nextFindRegex;
         if ("findRegex" in next) next.findRegex = nextFindRegex;
@@ -364,6 +538,33 @@
       }
       return item;
     });
+    if (!found) {
+      const fallbackEntry = {
+        id: BANNED_REGEX_ID,
+        script_name: BANNED_REGEX_NAME,
+        enabled: true,
+        find_regex: nextFindRegex,
+        replace_string: "",
+        trim_strings: [],
+        source: {
+          user_input: false,
+          ai_output: true,
+          slash_command: false,
+          world_info: false,
+          reasoning: false,
+        },
+        destination: {
+          display: false,
+          prompt: true,
+        },
+        run_on_edit: true,
+        min_depth: null,
+        max_depth: null,
+      };
+      if (sampleScope) fallbackEntry.scope = sampleScope;
+      mapped.push(fallbackEntry);
+    }
+    return mapped;
   }
 
   function applyBannedRegexToPreset(preset, nextFindRegex) {
@@ -571,6 +772,7 @@
     if (!target) return false;
 
     const targetMeta = parsePromptEntry(target);
+    if (!targetMeta) return false;
     const nextState = !target.enabled;
 
     if (targetMeta.selectType === "single" && sec && Array.isArray(sec.items)) {
@@ -595,6 +797,171 @@
 
   function clampNumber(val, min, max) {
     return Math.min(Math.max(val, min), max);
+  }
+
+  const PARAM_BOUNDS = {
+    max_completion_tokens: { min: 256, max: 131072, step: 1, integer: true },
+    max_context: { min: 4096, max: 2000000, step: 1, integer: true },
+    temperature: { min: 0, max: 2, step: 0.01, integer: false },
+    top_p: { min: 0, max: 1, step: 0.01, integer: false },
+    top_k: { min: 0, max: 500, step: 1, integer: true },
+    min_p: { min: 0, max: 1, step: 0.01, integer: false },
+    top_a: { min: 0, max: 1, step: 0.01, integer: false },
+    frequency_penalty: { min: -2, max: 2, step: 0.05, integer: false },
+    presence_penalty: { min: -2, max: 2, step: 0.05, integer: false },
+    repetition_penalty: { min: 1, max: 2, step: 0.05, integer: false },
+  };
+
+  const VALID_REASONING_EFFORTS = {
+    auto: true,
+    min: true,
+    low: true,
+    medium: true,
+    high: true,
+    max: true,
+  };
+
+  function normalizeParamValue(key, rawVal, fallbackVal) {
+    if (key === "reasoning_effort") {
+      const low = String(rawVal || "").trim().toLowerCase();
+      return VALID_REASONING_EFFORTS[low] ? low : (fallbackVal || DEFAULT_PARAM_SETTINGS.reasoning_effort);
+    }
+    if (key === "request_thoughts" || key === "should_stream") {
+      return typeof rawVal === "boolean" ? rawVal : Boolean(fallbackVal);
+    }
+    const spec = PARAM_BOUNDS[key];
+    const num = Number(rawVal);
+    if (!spec || rawVal === null || rawVal === "" || !isFinite(num)) {
+      return fallbackVal;
+    }
+    const clamped = clampNumber(num, spec.min, spec.max);
+    return spec.integer ? Math.round(clamped) : Math.round(clamped * 1000) / 1000;
+  }
+
+  function pickDefined(obj, keys) {
+    if (!obj || typeof obj !== "object") return undefined;
+    for (let i = 0; i < keys.length; i++) {
+      if (obj[keys[i]] !== undefined && obj[keys[i]] !== null) {
+        return obj[keys[i]];
+      }
+    }
+    return undefined;
+  }
+
+  function resolveSettingsTarget(preset, createIfMissing) {
+    if (!preset || typeof preset !== "object") return null;
+    if (preset.settings && typeof preset.settings === "object") return preset.settings;
+    if ("openai_max_tokens" in preset || "temperature" in preset) return preset;
+    if (createIfMissing) {
+      preset.settings = {};
+      return preset.settings;
+    }
+    return {};
+  }
+
+  function readPresetSettings(preset) {
+    const raw = resolveSettingsTarget(preset, false) || {};
+    return {
+      reasoning_effort: normalizeParamValue("reasoning_effort", pickDefined(raw, ["reasoning_effort"]), DEFAULT_PARAM_SETTINGS.reasoning_effort),
+      max_completion_tokens: normalizeParamValue("max_completion_tokens", pickDefined(raw, ["max_completion_tokens", "openai_max_tokens"]), DEFAULT_PARAM_SETTINGS.max_completion_tokens),
+      max_context: normalizeParamValue("max_context", pickDefined(raw, ["max_context", "openai_max_context"]), DEFAULT_PARAM_SETTINGS.max_context),
+      temperature: normalizeParamValue("temperature", pickDefined(raw, ["temperature"]), DEFAULT_PARAM_SETTINGS.temperature),
+      top_p: normalizeParamValue("top_p", pickDefined(raw, ["top_p"]), DEFAULT_PARAM_SETTINGS.top_p),
+      top_k: normalizeParamValue("top_k", pickDefined(raw, ["top_k"]), DEFAULT_PARAM_SETTINGS.top_k),
+      min_p: normalizeParamValue("min_p", pickDefined(raw, ["min_p"]), DEFAULT_PARAM_SETTINGS.min_p),
+      top_a: normalizeParamValue("top_a", pickDefined(raw, ["top_a"]), DEFAULT_PARAM_SETTINGS.top_a),
+      frequency_penalty: normalizeParamValue("frequency_penalty", pickDefined(raw, ["frequency_penalty"]), DEFAULT_PARAM_SETTINGS.frequency_penalty),
+      presence_penalty: normalizeParamValue("presence_penalty", pickDefined(raw, ["presence_penalty"]), DEFAULT_PARAM_SETTINGS.presence_penalty),
+      repetition_penalty: normalizeParamValue("repetition_penalty", pickDefined(raw, ["repetition_penalty"]), DEFAULT_PARAM_SETTINGS.repetition_penalty),
+      request_thoughts: normalizeParamValue("request_thoughts", pickDefined(raw, ["request_thoughts", "show_thoughts"]), DEFAULT_PARAM_SETTINGS.request_thoughts),
+      should_stream: normalizeParamValue("should_stream", pickDefined(raw, ["should_stream", "stream_openai"]), DEFAULT_PARAM_SETTINGS.should_stream),
+    };
+  }
+
+  function writePairedSettingKey(target, primaryKey, legacyKey, val) {
+    if (primaryKey in target || !(legacyKey in target)) {
+      target[primaryKey] = val;
+    }
+    if (legacyKey in target) {
+      target[legacyKey] = val;
+    }
+  }
+
+  function writePresetSettings(preset, patch) {
+    if (!preset || typeof preset !== "object" || !patch || typeof patch !== "object") return readPresetSettings(preset);
+    const target = resolveSettingsTarget(preset, true);
+    const current = readPresetSettings(preset);
+    const aliasPairs = {
+      max_completion_tokens: ["max_completion_tokens", "openai_max_tokens"],
+      max_context: ["max_context", "openai_max_context"],
+      request_thoughts: ["request_thoughts", "show_thoughts"],
+      should_stream: ["should_stream", "stream_openai"],
+    };
+
+    Object.keys(patch).forEach(function (k) {
+      if (!(k in DEFAULT_PARAM_SETTINGS)) return;
+      const val = normalizeParamValue(k, patch[k], current[k]);
+      if (aliasPairs[k]) {
+        writePairedSettingKey(target, aliasPairs[k][0], aliasPairs[k][1], val);
+      } else {
+        target[k] = val;
+      }
+    });
+    return readPresetSettings(preset);
+  }
+
+  function matchParamProfile(settings) {
+    const s = settings && typeof settings === "object" ? settings : DEFAULT_PARAM_SETTINGS;
+    for (let i = 0; i < PARAM_PROFILES.length; i++) {
+      const prof = PARAM_PROFILES[i];
+      const spec = prof.settings;
+      const keys = Object.keys(spec);
+      let matched = true;
+      for (let j = 0; j < keys.length; j++) {
+        const k = keys[j];
+        const a = s[k];
+        const b = spec[k];
+        if (typeof b === "number") {
+          if (Math.abs(Number(a) - b) > 1e-4) {
+            matched = false;
+            break;
+          }
+        } else if (a !== b) {
+          matched = false;
+          break;
+        }
+      }
+      if (matched) return prof;
+    }
+    return null;
+  }
+
+  function applyParamProfile(preset, profileId) {
+    const prof = PARAM_PROFILES.find(function (p) { return p.id === profileId; });
+    if (!prof) return null;
+    writePresetSettings(preset, prof.settings);
+    return prof;
+  }
+
+  function zeroSamplingPenalties(preset) {
+    return writePresetSettings(preset, {
+      top_k: 0,
+      min_p: 0,
+      top_a: 0,
+      frequency_penalty: 0,
+      presence_penalty: 0,
+      repetition_penalty: 1.0,
+    });
+  }
+
+  function resetDefaultParamSettings(preset) {
+    return writePresetSettings(preset, DEFAULT_PARAM_SETTINGS);
+  }
+
+  function formatPillPosition(xRatio, yRatio) {
+    const rx = typeof xRatio === "number" && isFinite(xRatio) ? clampNumber(xRatio, 0, 1) : 0.92;
+    const ry = typeof yRatio === "number" && isFinite(yRatio) ? clampNumber(yRatio, 0, 1) : 0.24;
+    return "当前位置：距左 " + Math.round(rx * 100) + "% · 距顶 " + Math.round(ry * 100) + "%";
   }
 
   function computePillPosition(xRatio, yRatio, vw, vh, pillW, pillH) {
@@ -641,6 +1008,30 @@
     return { left: left, top: top };
   }
 
+  function computePopoverPosition(anchorRect, containerRect, popW, popH, margin) {
+    const m = typeof margin === "number" ? margin : 10;
+    const cw = Math.max((containerRect && containerRect.width) || 344, m * 2 + 120);
+    const ch = Math.max((containerRect && containerRect.height) || 460, m * 2 + 80);
+    const maxW = Math.max(120, cw - m * 2);
+    const effW = Math.min(popW || maxW, maxW);
+    const effH = Math.min(popH || 140, ch - m * 2);
+
+    const cLeft = (containerRect && containerRect.left) || 0;
+    const cTop = (containerRect && containerRect.top) || 0;
+    const aLeft = ((anchorRect && anchorRect.left) || cLeft) - cLeft;
+    const aTop = ((anchorRect && anchorRect.top) || cTop) - cTop;
+    const aBottom = ((anchorRect && anchorRect.bottom) || (cTop + aTop + 18)) - cTop;
+
+    const spaceBelow = ch - aBottom - m;
+    const spaceAbove = aTop - m;
+    const placeAbove = spaceBelow < effH + 6 && spaceAbove > spaceBelow;
+    const rawTop = placeAbove ? (aTop - effH - 6) : (aBottom + 6);
+    const top = Math.round(clampNumber(rawTop, m, Math.max(m, ch - effH - m)));
+    const left = Math.round(clampNumber(aLeft - 8, m, Math.max(m, cw - effW - m)));
+
+    return { left: left, top: top, width: Math.round(effW), placement: placeAbove ? "top" : "bottom" };
+  }
+
   const CoreEngine = {
     COLOR_SWATCHES: COLOR_SWATCHES,
     DEFAULT_PERSONA_COLORS: DEFAULT_PERSONA_COLORS,
@@ -650,6 +1041,11 @@
     GITHUB_CHANGELOG_URL: GITHUB_CHANGELOG_URL,
     GITHUB_PACKAGE_URLS: GITHUB_PACKAGE_URLS,
     PANEL_TABS: PANEL_TABS,
+    REASONING_EFFORT_OPTIONS: REASONING_EFFORT_OPTIONS,
+    HELP_TOPICS: HELP_TOPICS,
+    DEFAULT_PARAM_SETTINGS: DEFAULT_PARAM_SETTINGS,
+    PARAM_PROFILES: PARAM_PROFILES,
+    PARAM_BOUNDS: PARAM_BOUNDS,
     BANNED_REGEX_ID: BANNED_REGEX_ID,
     BANNED_REGEX_NAME: BANNED_REGEX_NAME,
     MAX_BANNED_WORDS: MAX_BANNED_WORDS,
@@ -686,9 +1082,19 @@
     writePresetThemeBinding: writePresetThemeBinding,
     getPersonaTheme: getPersonaTheme,
     applyDynamicToggle: applyDynamicToggle,
+    clampNumber: clampNumber,
+    normalizeParamValue: normalizeParamValue,
+    readPresetSettings: readPresetSettings,
+    writePresetSettings: writePresetSettings,
+    matchParamProfile: matchParamProfile,
+    applyParamProfile: applyParamProfile,
+    zeroSamplingPenalties: zeroSamplingPenalties,
+    resetDefaultParamSettings: resetDefaultParamSettings,
+    formatPillPosition: formatPillPosition,
     computePillPosition: computePillPosition,
     posToRatio: posToRatio,
     computeDrawerPosition: computeDrawerPosition,
+    computePopoverPosition: computePopoverPosition,
   };
 
   if (typeof module !== "undefined" && module.exports) {
@@ -750,7 +1156,7 @@
         const tab = parsed.activeTab;
         return {
           open: Boolean(parsed.open),
-          activeTab: (tab === "regex" || tab === "assistant") ? tab : "preset",
+          activeTab: (tab === "params" || tab === "regex" || tab === "assistant") ? tab : "preset",
           xRatio: typeof parsed.xRatio === "number" ? clampNumber(parsed.xRatio, 0, 1) : 0.92,
           yRatio: typeof parsed.yRatio === "number" ? clampNumber(parsed.yRatio, 0, 1) : 0.24,
         };
@@ -898,7 +1304,7 @@
       `#${ROOT_EL_ID} .yd-icon-btn:hover { border-color: var(--yd-accent-border); color: var(--yd-accent); background: var(--yd-accent-soft); }`,
       `#${ROOT_EL_ID} .yd-icon-btn:active { transform: scale(0.97); }`,
       `#${ROOT_EL_ID} .yd-tabs { display: flex; gap: 4px; padding: 6px 11px; border-bottom: 1px solid var(--yd-border); background: color-mix(in srgb, var(--yd-fg) 3%, transparent); flex-shrink: 0; }`,
-      `#${ROOT_EL_ID} .yd-tab { flex: 1; border: 1px solid transparent; background: transparent; color: color-mix(in srgb, var(--yd-fg) 72%, transparent); border-radius: 7px; padding: 5px 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: color 0.18s ease, background 0.2s ease, border-color 0.2s ease, transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease; text-align: center; }`,
+      `#${ROOT_EL_ID} .yd-tab { flex: 1; min-width: 0; white-space: nowrap; border: 1px solid transparent; background: transparent; color: color-mix(in srgb, var(--yd-fg) 72%, transparent); border-radius: 7px; padding: 5px 4px; font-size: 11.5px; font-weight: 600; cursor: pointer; font-family: inherit; transition: color 0.18s ease, background 0.2s ease, border-color 0.2s ease, transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease; text-align: center; }`,
       `#${ROOT_EL_ID} .yd-tab:hover { color: var(--yd-fg); background: var(--yd-surface); }`,
       `#${ROOT_EL_ID} .yd-tab:active { transform: scale(0.98); }`,
       `#${ROOT_EL_ID} .yd-tab.is-active { background: linear-gradient(135deg, color-mix(in srgb, var(--yd-accent) 20%, transparent), color-mix(in srgb, var(--yd-accent) 10%, transparent)); border-color: var(--yd-accent-border); color: var(--yd-accent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 6px rgba(0,0,0,0.1); }`,
@@ -915,7 +1321,7 @@
       `#${ROOT_EL_ID} .yd-body::-webkit-scrollbar-thumb { background: var(--yd-accent-border); border-radius: 999px; }`,
       `#${ROOT_EL_ID} .yd-body::-webkit-scrollbar-thumb:hover { background: var(--yd-accent); }`,
       `#${ROOT_EL_ID} .yd-body::-webkit-scrollbar-button { display: none; height: 0; width: 0; }`,
-      `#${ROOT_EL_ID} .yd-sec { display: flex; flex-direction: column; gap: 6px; }`,
+      `#${ROOT_EL_ID} .yd-sec { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }`,
       `#${ROOT_EL_ID} .yd-sec-title { font-size: 11.5px; font-weight: 700; color: var(--yd-accent); letter-spacing: 0.03em; }`,
       `#${ROOT_EL_ID} .yd-sec-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; }`,
       `#${ROOT_EL_ID} .yd-sec-head-left { display: flex; align-items: center; gap: 5px; min-width: 0; }`,
@@ -925,8 +1331,19 @@
       `#${ROOT_EL_ID} .yd-help-btn:hover, #${ROOT_EL_ID} .yd-help-btn.is-active { background: var(--yd-accent-soft); border-color: var(--yd-accent); }`,
       `#${ROOT_EL_ID} .yd-mini-link { border: 1px solid var(--yd-border); background: var(--yd-surface); color: var(--yd-fg); border-radius: 5px; padding: 2px 7px; font-size: 11px; cursor: pointer; font-family: inherit; opacity: 0.86; transition: border-color 0.16s ease, color 0.16s ease, opacity 0.16s ease; }`,
       `#${ROOT_EL_ID} .yd-mini-link:hover { border-color: var(--yd-accent-border); color: var(--yd-accent); opacity: 1; }`,
-      `#${ROOT_EL_ID} .yd-help-card { padding: 8px 10px; border-radius: 8px; border: 1px dashed var(--yd-accent-border); background: color-mix(in srgb, var(--yd-accent) 7%, var(--yd-surface)); font-size: 11.5px; line-height: 1.52; color: color-mix(in srgb, var(--yd-fg) 90%, transparent); display: flex; flex-direction: column; gap: 3px; animation: yd-sec-enter 0.18s ease-out; }`,
-      `#${ROOT_EL_ID} .yd-help-card strong { color: var(--yd-accent); font-weight: 600; }`,
+      `#${ROOT_EL_ID} .yd-help-card, #${ROOT_EL_ID} .yd-help-popover {`,
+      `  position: absolute; z-index: 30; display: none; flex-direction: column; gap: 4px;`,
+      `  padding: 9px 11px; border-radius: 9px;`,
+      `  border: 1px solid var(--yd-accent-border);`,
+      `  background: color-mix(in srgb, var(--yd-bg) 96%, transparent);`,
+      `  color: color-mix(in srgb, var(--yd-fg) 94%, transparent);`,
+      `  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 10px 26px rgba(0,0,0,0.36), 0 0 14px var(--yd-glow);`,
+      `  backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%);`,
+      `  font-size: 11.5px; line-height: 1.52; max-height: calc(100% - 20px); overflow-y: auto;`,
+      `  animation: yd-sec-enter 0.15s ease-out;`,
+      `}`,
+      `#${ROOT_EL_ID} .yd-help-popover.is-open { display: flex; }`,
+      `#${ROOT_EL_ID} .yd-help-popover strong { color: var(--yd-accent); font-weight: 600; }`,
       `#${ROOT_EL_ID} .yd-banned-form { display: flex; gap: 5px; align-items: center; }`,
       `#${ROOT_EL_ID} .yd-input { flex: 1; min-width: 0; height: 28px; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--yd-border); background: var(--yd-surface); color: var(--yd-fg); font-family: inherit; font-size: 12px; outline: none; transition: border-color 0.16s ease; }`,
       `#${ROOT_EL_ID} .yd-input:focus { border-color: var(--yd-accent); }`,
@@ -970,6 +1387,23 @@
       `#${ROOT_EL_ID} .yd-color-input {`,
       `  position: absolute; inset: -4px; width: 28px; height: 28px; opacity: 0; cursor: pointer; border: none; padding: 0;`,
       `}`,
+      `#${ROOT_EL_ID} .yd-param-card { display: flex; flex-direction: column; gap: 7px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--yd-border); background: var(--yd-surface); }`,
+      `#${ROOT_EL_ID} .yd-param-row { display: flex; flex-direction: column; gap: 5px; }`,
+      `#${ROOT_EL_ID} .yd-param-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }`,
+      `#${ROOT_EL_ID} .yd-param-label { font-size: 11.5px; font-weight: 600; color: var(--yd-fg); opacity: 0.9; }`,
+      `#${ROOT_EL_ID} .yd-param-slider-wrap { display: flex; align-items: center; gap: 8px; }`,
+      `#${ROOT_EL_ID} .yd-range { flex: 1; min-width: 0; accent-color: var(--yd-accent); cursor: pointer; height: 4px; margin: 0; }`,
+      `#${ROOT_EL_ID} .yd-num-input {`,
+      `  width: 78px; height: 26px; padding: 2px 6px; border-radius: 6px;`,
+      `  border: 1px solid var(--yd-border); background: color-mix(in srgb, var(--yd-bg) 55%, transparent); color: var(--yd-fg);`,
+      `  font-family: inherit; font-size: 11.5px; text-align: right; outline: none; font-variant-numeric: tabular-nums;`,
+      `}`,
+      `#${ROOT_EL_ID} .yd-num-input:focus { border-color: var(--yd-accent); }`,
+      `#${ROOT_EL_ID} .yd-param-inline-num { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }`,
+      `#${ROOT_EL_ID} .yd-param-grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 8px; }`,
+      `#${ROOT_EL_ID} .yd-param-field { display: flex; align-items: center; justify-content: space-between; gap: 5px; }`,
+      `#${ROOT_EL_ID} .yd-param-field .yd-param-label { font-size: 11px; font-weight: 500; opacity: 0.82; }`,
+      `#${ROOT_EL_ID} .yd-param-field .yd-num-input { width: 64px; }`,
       `#${ROOT_EL_ID} .yd-toast {`,
       `  display: none; font-size: 11.5px; padding: 6px 10px;`,
       `  border-top: 1px solid var(--yd-border); background: var(--yd-accent-soft); color: var(--yd-accent);`,
@@ -978,9 +1412,10 @@
       `@media (max-width: 600px) {`,
       `  #${ROOT_EL_ID} .yd-drawer { width: calc(100vw - 16px); }`,
       `  #${ROOT_EL_ID} .yd-chip { min-height: 32px; padding: 6px 10px; }`,
-      `  #${ROOT_EL_ID} .yd-tab { min-height: 32px; padding: 6px; }`,
+      `  #${ROOT_EL_ID} .yd-tab { min-height: 32px; padding: 6px 3px; font-size: 11px; }`,
       `  #${ROOT_EL_ID} .yd-icon-btn { min-height: 28px; padding: 4px 10px; }`,
       `  #${ROOT_EL_ID} .yd-input { height: 32px; font-size: 16px; }`,
+      `  #${ROOT_EL_ID} .yd-num-input { height: 30px; font-size: 14px; }`,
       `  #${ROOT_EL_ID} .yd-btn-sm { height: 32px; padding: 0 12px; }`,
       `  #${ROOT_EL_ID} .yd-help-btn { width: 22px; height: 22px; font-size: 12px; }`,
       `  #${ROOT_EL_ID} .yd-tag-del { padding: 2px 6px; font-size: 15px; }`,
@@ -1129,11 +1564,16 @@
     body.className = "yd-body";
     const toast = hd.createElement("div");
     toast.className = "yd-toast";
+    const helpPopover = hd.createElement("div");
+    helpPopover.className = "yd-help-popover";
+    helpPopover.setAttribute("role", "tooltip");
+    helpPopover.setAttribute("data-yd-help-popover", "true");
 
     drawer.appendChild(head);
     drawer.appendChild(tabsBar);
     drawer.appendChild(body);
     drawer.appendChild(toast);
+    drawer.appendChild(helpPopover);
 
     rootEl.appendChild(pill);
     rootEl.appendChild(drawer);
@@ -1175,13 +1615,80 @@
     applyRelativePosition();
 
     let toastTimer = null;
-    let isSelfUpdating = false;
+    let selfUpdateCount = 0;
+    let bannedQueue = Promise.resolve();
     let updateCheckResult = null;
     let hasCheckedUpdateOnLoad = false;
-    let bannedHelpOpen = false;
+    let activeHelpTopic = null;
+    let paramAdvOpen = true;
+    let cleaned = false;
+    let presetChangedSub = null;
+
+    function syncHelpButtons() {
+      const btns = drawer.querySelectorAll(".yd-help-btn[data-yd-help-toggle]");
+      btns.forEach(function (b) {
+        const key = b.getAttribute("data-yd-help-toggle");
+        const active = activeHelpTopic === key;
+        b.classList.toggle("is-active", active);
+        b.setAttribute("aria-expanded", String(active));
+      });
+    }
+
+    function closeHelpPopover() {
+      if (!activeHelpTopic && !helpPopover.classList.contains("is-open")) return;
+      activeHelpTopic = null;
+      helpPopover.classList.remove("is-open");
+      helpPopover.removeAttribute("data-yd-help-topic");
+      syncHelpButtons();
+    }
+
+    function openHelpPopover(topicKey, anchorBtn) {
+      if (activeHelpTopic === topicKey) {
+        closeHelpPopover();
+        return;
+      }
+      const items = topicKey && HELP_TOPICS[topicKey];
+      if (!items) return;
+      activeHelpTopic = topicKey;
+      helpPopover.innerHTML = "";
+      helpPopover.setAttribute("data-yd-help-topic", topicKey);
+      items.forEach(function (item) {
+        const line = hd.createElement("div");
+        const strong = hd.createElement("strong");
+        strong.textContent = item.k + "：";
+        line.appendChild(strong);
+        line.appendChild(hd.createTextNode(item.v));
+        helpPopover.appendChild(line);
+      });
+
+      helpPopover.style.visibility = "hidden";
+      helpPopover.classList.add("is-open");
+      const dRect = drawer.getBoundingClientRect();
+      const bRect = anchorBtn.getBoundingClientRect();
+      const maxPopW = Math.min(312, Math.max(180, (dRect.width || 344) - 20));
+      helpPopover.style.width = maxPopW + "px";
+      const popH = helpPopover.offsetHeight || 120;
+      const pos = computePopoverPosition(bRect, dRect, maxPopW, popH, 10);
+      helpPopover.style.left = pos.left + "px";
+      helpPopover.style.top = pos.top + "px";
+      helpPopover.style.width = pos.width + "px";
+      helpPopover.setAttribute("data-yd-placement", pos.placement);
+      helpPopover.style.visibility = "visible";
+      syncHelpButtons();
+    }
+
+    function beginSelfUpdate() {
+      selfUpdateCount += 1;
+    }
+
+    function endSelfUpdate() {
+      setTimeout(function () {
+        selfUpdateCount = Math.max(0, selfUpdateCount - 1);
+      }, 160);
+    }
 
     async function runInitialUpdateCheck() {
-      if (hasCheckedUpdateOnLoad) return;
+      if (hasCheckedUpdateOnLoad || cleaned) return;
       hasCheckedUpdateOnLoad = true;
       let curVer = PRESET_VERSION;
       try {
@@ -1191,6 +1698,7 @@
       } catch (e) {}
       const testFetcher = window.__YD_TEST_FETCH__ || (hw && hw.__YD_TEST_FETCH__) || null;
       const res = await checkRemoteUpdateOnce(curVer, testFetcher);
+      if (cleaned) return;
       updateCheckResult = res;
       if (res && res.hasUpdate && res.remoteVersion) {
         const nextVer = formatVerTag(res.remoteVersion);
@@ -1207,6 +1715,7 @@
     }
 
     function showToast(msg) {
+      if (cleaned) return;
       toast.textContent = msg;
       toast.classList.add("show");
       if (toastTimer) clearTimeout(toastTimer);
@@ -1242,33 +1751,91 @@
     }
 
     async function mutatePreset(updaterFn, toastMsg) {
+      if (cleaned) return;
       const api = resolvePresetApi();
       if (!api) {
         showToast("未检测到预设接口");
         return;
       }
-      isSelfUpdating = true;
+      beginSelfUpdate();
       try {
         await api.updatePresetWith("in_use", function (preset) {
           updaterFn(preset);
           return preset;
         }, { render: "debounced" });
+        if (cleaned) return;
         await renderFromPreset({ preserveScroll: true, reposition: false });
         if (toastMsg) showToast(toastMsg);
       } catch (err) {
         showToast("更新失败：" + (err && err.message ? err.message : String(err)));
       } finally {
-        setTimeout(function () { isSelfUpdating = false; }, 160);
+        endSelfUpdate();
       }
     }
 
-    function renderSection(titleText, buildFn, containerClass) {
+    function buildHelpHead(secEl, titleText, topicKey, badgeText, extraRightNodes) {
+      const items = topicKey && HELP_TOPICS[topicKey];
+      const hasRight = Boolean(extraRightNodes && extraRightNodes.length);
+      if (!items && !badgeText && !hasRight) {
+        const t = hd.createElement("div");
+        t.className = "yd-sec-title";
+        t.textContent = titleText;
+        secEl.appendChild(t);
+        return null;
+      }
+
+      const headRow = hd.createElement("div");
+      headRow.className = "yd-sec-head";
+
+      const headLeft = hd.createElement("div");
+      headLeft.className = "yd-sec-head-left";
+      const tEl = hd.createElement("span");
+      tEl.className = "yd-sec-title";
+      tEl.textContent = titleText;
+      headLeft.appendChild(tEl);
+
+      if (badgeText) {
+        const countEl = hd.createElement("span");
+        countEl.className = "yd-sec-count";
+        countEl.textContent = badgeText;
+        headLeft.appendChild(countEl);
+      }
+
+      if (items) {
+        const isOpen = activeHelpTopic === topicKey;
+        const helpBtn = hd.createElement("button");
+        helpBtn.type = "button";
+        helpBtn.className = "yd-help-btn" + (isOpen ? " is-active" : "");
+        helpBtn.textContent = "?";
+        helpBtn.title = "查看" + titleText + "说明";
+        helpBtn.setAttribute("aria-label", titleText + "说明");
+        helpBtn.setAttribute("aria-expanded", String(isOpen));
+        helpBtn.setAttribute("data-yd-help-toggle", topicKey);
+        headLeft.appendChild(helpBtn);
+
+        helpBtn.addEventListener("click", function (ev) {
+          ev.stopPropagation();
+          openHelpPopover(topicKey, helpBtn);
+        });
+      }
+
+      headRow.appendChild(headLeft);
+      if (hasRight) {
+        const headRight = hd.createElement("div");
+        headRight.className = "yd-sec-head-right";
+        extraRightNodes.forEach(function (node) {
+          headRight.appendChild(node);
+        });
+        headRow.appendChild(headRight);
+      }
+      secEl.appendChild(headRow);
+      return headRow;
+    }
+
+    function renderSection(titleText, buildFn, containerClass, helpTopicKey) {
       const sec = hd.createElement("div");
       sec.className = "yd-sec";
-      const t = hd.createElement("div");
-      t.className = "yd-sec-title";
-      t.textContent = titleText;
-      sec.appendChild(t);
+      buildHelpHead(sec, titleText, helpTopicKey || null, "", null);
       const wrap = hd.createElement("div");
       wrap.className = containerClass || "yd-chips";
       sec.appendChild(wrap);
@@ -1287,27 +1854,29 @@
     }
 
     async function toggleRegexItem(rxItem) {
+      if (cleaned) return;
       const api = resolvePresetApi();
       const regexApi = resolveRegexApi();
       const nextEnabled = !rxItem.enabled;
-      isSelfUpdating = true;
+      beginSelfUpdate();
       try {
         if (regexApi && regexApi.updateTavernRegexesWith) {
           await regexApi.updateTavernRegexesWith(function (list) {
-            return applyRegexToggleToTavernList(list, rxItem.id, nextEnabled);
+            return applyRegexToggleToTavernList(list, rxItem, nextEnabled);
           }, { type: "preset", name: "in_use" });
         }
         if (api && api.updatePresetWith) {
           await api.updatePresetWith("in_use", function (preset) {
-            applyRegexToggleToPreset(preset, rxItem.id, nextEnabled);
+            applyRegexToggleToPreset(preset, rxItem, nextEnabled);
             return preset;
           }, { render: "debounced" });
         }
+        if (cleaned) return;
         await renderFromPreset({ preserveScroll: true, reposition: false });
       } catch (err) {
         showToast("正则切换失败：" + (err && err.message ? err.message : String(err)));
       } finally {
-        setTimeout(function () { isSelfUpdating = false; }, 160);
+        endSelfUpdate();
       }
     }
 
@@ -1324,6 +1893,7 @@
       }
 
       sections.forEach(function (sec) {
+        const helpKey = sec.key === "思考" ? "think" : null;
         renderSection(sec.title, function (wrap) {
           sec.items.forEach(function (item) {
             const btn = hd.createElement("button");
@@ -1339,7 +1909,353 @@
             });
             wrap.appendChild(btn);
           });
+        }, null, helpKey);
+      });
+    }
+
+    function renderParamsTab(preset) {
+      const cur = readPresetSettings(preset);
+      const matched = matchParamProfile(cur);
+
+      function commitPatch(patch, toastMsg) {
+        mutatePreset(function (p) {
+          writePresetSettings(p, patch);
+        }, toastMsg);
+      }
+
+      // 1. 模型方案
+      const profSec = hd.createElement("div");
+      profSec.className = "yd-sec";
+      profSec.setAttribute("data-yd-section", "param-profiles");
+
+      const zeroBtn = hd.createElement("button");
+      zeroBtn.type = "button";
+      zeroBtn.className = "yd-mini-link";
+      zeroBtn.setAttribute("data-yd-action", "zero-penalties");
+      zeroBtn.textContent = "清零惩罚项";
+      zeroBtn.title = "清空频率/存在/重复惩罚与 Top-K/Min-P/Top-A，规避部分端点 400 报错";
+      zeroBtn.addEventListener("click", function () {
+        mutatePreset(function (p) {
+          zeroSamplingPenalties(p);
+        }, "已清零惩罚与次级采样参数");
+      });
+
+      const resetBtn = hd.createElement("button");
+      resetBtn.type = "button";
+      resetBtn.className = "yd-mini-link";
+      resetBtn.setAttribute("data-yd-action", "reset-params");
+      resetBtn.textContent = "恢复默认参数";
+      resetBtn.title = "恢复全部生成参数至预设默认值";
+      resetBtn.addEventListener("click", function () {
+        mutatePreset(function (p) {
+          resetDefaultParamSettings(p);
+        }, "已恢复默认生成参数");
+      });
+
+      const profHeadRow = buildHelpHead(
+        profSec,
+        "模型方案",
+        "profiles",
+        matched ? "" : "自定义参数",
+        [zeroBtn, resetBtn]
+      );
+      const profBadgeEl = profHeadRow ? profHeadRow.querySelector(".yd-sec-count") : null;
+      if (profBadgeEl) profBadgeEl.setAttribute("data-yd-param-badge", "true");
+
+      const chips = hd.createElement("div");
+      chips.className = "yd-chips";
+      PARAM_PROFILES.forEach(function (prof) {
+        const btn = hd.createElement("button");
+        btn.type = "button";
+        btn.className = "yd-chip" + (matched && matched.id === prof.id ? " is-active" : "");
+        btn.setAttribute("data-yd-profile", prof.id);
+        btn.textContent = prof.label;
+        btn.addEventListener("click", function () {
+          mutatePreset(function (p) {
+            applyParamProfile(p, prof.id);
+          }, "已应用「" + prof.label + "」参数方案");
         });
+        chips.appendChild(btn);
+      });
+      profSec.appendChild(chips);
+      body.appendChild(profSec);
+
+      // 2. 思考与长度
+      renderSection("思考与长度", function (card) {
+        const effortRow = hd.createElement("div");
+        effortRow.className = "yd-param-row";
+        const effortTop = hd.createElement("div");
+        effortTop.className = "yd-param-top";
+        const effortLabel = hd.createElement("span");
+        effortLabel.className = "yd-param-label";
+        effortLabel.textContent = "思考深度";
+        effortTop.appendChild(effortLabel);
+        effortRow.appendChild(effortTop);
+
+        const effortChips = hd.createElement("div");
+        effortChips.className = "yd-chips";
+        const effortOpts = cur.reasoning_effort === "min"
+          ? [{ value: "min", label: "min" }].concat(REASONING_EFFORT_OPTIONS)
+          : REASONING_EFFORT_OPTIONS;
+        effortOpts.forEach(function (opt) {
+          const btn = hd.createElement("button");
+          btn.type = "button";
+          btn.className = "yd-chip" + (cur.reasoning_effort === opt.value ? " is-active" : "");
+          btn.setAttribute("data-yd-effort", opt.value);
+          btn.textContent = opt.label;
+          btn.addEventListener("click", function () {
+            if (cur.reasoning_effort === opt.value) return;
+            commitPatch({ reasoning_effort: opt.value }, "思考深度已设为 " + opt.value);
+          });
+          effortChips.appendChild(btn);
+        });
+        effortRow.appendChild(effortChips);
+        card.appendChild(effortRow);
+
+        function buildBudgetRow(labelText, key, quickList) {
+          const row = hd.createElement("div");
+          row.className = "yd-param-row";
+          const top = hd.createElement("div");
+          top.className = "yd-param-inline-num";
+          const lbl = hd.createElement("span");
+          lbl.className = "yd-param-label";
+          lbl.textContent = labelText;
+          const numInput = hd.createElement("input");
+          numInput.type = "number";
+          numInput.className = "yd-num-input";
+          numInput.min = String(PARAM_BOUNDS[key].min);
+          numInput.max = String(PARAM_BOUNDS[key].max);
+          numInput.step = String(PARAM_BOUNDS[key].step);
+          numInput.value = String(cur[key]);
+          numInput.setAttribute("data-yd-param", key);
+          numInput.setAttribute("aria-label", labelText);
+
+          function applyInputVal() {
+            const nextVal = normalizeParamValue(key, numInput.value, cur[key]);
+            numInput.value = String(nextVal);
+            if (nextVal !== cur[key]) {
+              const patch = {};
+              patch[key] = nextVal;
+              commitPatch(patch);
+            }
+          }
+          numInput.addEventListener("change", applyInputVal);
+          numInput.addEventListener("keydown", function (ev) {
+            if (ev.key === "Enter") {
+              ev.preventDefault();
+              applyInputVal();
+            }
+          });
+          top.appendChild(lbl);
+          top.appendChild(numInput);
+          row.appendChild(top);
+
+          const chips = hd.createElement("div");
+          chips.className = "yd-chips";
+          quickList.forEach(function (q) {
+            const btn = hd.createElement("button");
+            btn.type = "button";
+            btn.className = "yd-chip" + (cur[key] === q.value ? " is-active" : "");
+            btn.setAttribute("data-yd-param-quick", key + ":" + q.value);
+            btn.textContent = q.label;
+            btn.addEventListener("click", function () {
+              if (cur[key] === q.value) return;
+              const patch = {};
+              patch[key] = q.value;
+              commitPatch(patch);
+            });
+            chips.appendChild(btn);
+          });
+          row.appendChild(chips);
+          card.appendChild(row);
+        }
+
+        buildBudgetRow("最大回复长度（tokens）", "max_completion_tokens", [
+          { value: 8192, label: "8192" },
+          { value: 16384, label: "16384" },
+          { value: 32768, label: "32768" },
+          { value: 65536, label: "65536" },
+        ]);
+        buildBudgetRow("最大上下文长度（tokens）", "max_context", [
+          { value: 200000, label: "200K" },
+          { value: 500000, label: "500K" },
+          { value: 1000000, label: "1M" },
+          { value: 2000000, label: "2M" },
+        ]);
+
+        const switchRow = hd.createElement("div");
+        switchRow.className = "yd-chips";
+        [
+          { key: "request_thoughts", label: "返回思考内容" },
+          { key: "should_stream", label: "流式输出" },
+        ].forEach(function (sw) {
+          const btn = hd.createElement("button");
+          btn.type = "button";
+          btn.className = "yd-chip" + (cur[sw.key] ? " is-active" : "");
+          btn.setAttribute("data-yd-param", sw.key);
+          btn.textContent = sw.label;
+          btn.addEventListener("click", function () {
+            const patch = {};
+            patch[sw.key] = !cur[sw.key];
+            commitPatch(patch);
+          });
+          switchRow.appendChild(btn);
+        });
+        card.appendChild(switchRow);
+      }, "yd-param-card", "budget");
+
+      // 3. 核心采样
+      renderSection("核心采样", function (card) {
+        function buildSliderRow(labelText, key, sliderStep) {
+          const bounds = PARAM_BOUNDS[key];
+          const row = hd.createElement("div");
+          row.className = "yd-param-row";
+
+          const top = hd.createElement("div");
+          top.className = "yd-param-top";
+          const lbl = hd.createElement("span");
+          lbl.className = "yd-param-label";
+          lbl.textContent = labelText;
+          top.appendChild(lbl);
+          row.appendChild(top);
+
+          const wrap = hd.createElement("div");
+          wrap.className = "yd-param-slider-wrap";
+
+          const slider = hd.createElement("input");
+          slider.type = "range";
+          slider.className = "yd-range";
+          slider.min = String(bounds.min);
+          slider.max = String(bounds.max);
+          slider.step = String(sliderStep);
+          slider.value = String(cur[key]);
+          slider.setAttribute("data-yd-slider", key);
+          slider.setAttribute("aria-label", labelText);
+
+          const numInput = hd.createElement("input");
+          numInput.type = "number";
+          numInput.className = "yd-num-input";
+          numInput.min = String(bounds.min);
+          numInput.max = String(bounds.max);
+          numInput.step = String(bounds.step);
+          numInput.value = String(cur[key]);
+          numInput.setAttribute("data-yd-param", key);
+          numInput.setAttribute("aria-label", labelText + " 数值");
+
+          slider.addEventListener("input", function () {
+            numInput.value = slider.value;
+          });
+          slider.addEventListener("change", function () {
+            const nextVal = normalizeParamValue(key, slider.value, cur[key]);
+            slider.value = String(nextVal);
+            numInput.value = String(nextVal);
+            if (Math.abs(nextVal - cur[key]) > 1e-4) {
+              const patch = {};
+              patch[key] = nextVal;
+              commitPatch(patch);
+            }
+          });
+
+          function commitNum() {
+            const nextVal = normalizeParamValue(key, numInput.value, cur[key]);
+            numInput.value = String(nextVal);
+            slider.value = String(nextVal);
+            if (Math.abs(nextVal - cur[key]) > 1e-4) {
+              const patch = {};
+              patch[key] = nextVal;
+              commitPatch(patch);
+            }
+          }
+          numInput.addEventListener("change", commitNum);
+          numInput.addEventListener("keydown", function (ev) {
+            if (ev.key === "Enter") {
+              ev.preventDefault();
+              commitNum();
+            }
+          });
+
+          wrap.appendChild(slider);
+          wrap.appendChild(numInput);
+          row.appendChild(wrap);
+          card.appendChild(row);
+        }
+
+        buildSliderRow("温度 (Temperature)", "temperature", 0.05);
+        buildSliderRow("Top-P", "top_p", 0.01);
+      }, "yd-param-card", "sampling");
+
+      // 4. 高级采样与惩罚
+      const advSec = hd.createElement("div");
+      advSec.className = "yd-sec";
+      advSec.setAttribute("data-yd-section", "param-advanced");
+
+      const advToggleBtn = hd.createElement("button");
+      advToggleBtn.type = "button";
+      advToggleBtn.className = "yd-mini-link";
+      advToggleBtn.setAttribute("data-yd-action", "toggle-advanced-params");
+      advToggleBtn.textContent = paramAdvOpen ? "收起" : "展开";
+      advToggleBtn.setAttribute("aria-expanded", String(paramAdvOpen));
+
+      buildHelpHead(advSec, "高级采样与惩罚", "advanced", "", [advToggleBtn]);
+
+      const advCard = hd.createElement("div");
+      advCard.className = "yd-param-card";
+      advCard.style.display = paramAdvOpen ? "flex" : "none";
+      const advGrid = hd.createElement("div");
+      advGrid.className = "yd-param-grid2";
+      [
+        { key: "top_k", label: "Top-K" },
+        { key: "min_p", label: "Min-P" },
+        { key: "top_a", label: "Top-A" },
+        { key: "frequency_penalty", label: "频率惩罚" },
+        { key: "presence_penalty", label: "存在惩罚" },
+        { key: "repetition_penalty", label: "重复惩罚" },
+      ].forEach(function (field) {
+        const cell = hd.createElement("div");
+        cell.className = "yd-param-field";
+        const lbl = hd.createElement("span");
+        lbl.className = "yd-param-label";
+        lbl.textContent = field.label;
+        const inp = hd.createElement("input");
+        inp.type = "number";
+        inp.className = "yd-num-input";
+        inp.min = String(PARAM_BOUNDS[field.key].min);
+        inp.max = String(PARAM_BOUNDS[field.key].max);
+        inp.step = String(PARAM_BOUNDS[field.key].step);
+        inp.value = String(cur[field.key]);
+        inp.setAttribute("data-yd-param", field.key);
+        inp.setAttribute("aria-label", field.label);
+
+        function commitField() {
+          const nextVal = normalizeParamValue(field.key, inp.value, cur[field.key]);
+          inp.value = String(nextVal);
+          if (Math.abs(nextVal - cur[field.key]) > 1e-4) {
+            const patch = {};
+            patch[field.key] = nextVal;
+            commitPatch(patch);
+          }
+        }
+        inp.addEventListener("change", commitField);
+        inp.addEventListener("keydown", function (ev) {
+          if (ev.key === "Enter") {
+            ev.preventDefault();
+            commitField();
+          }
+        });
+
+        cell.appendChild(lbl);
+        cell.appendChild(inp);
+        advGrid.appendChild(cell);
+      });
+      advCard.appendChild(advGrid);
+      advSec.appendChild(advCard);
+      body.appendChild(advSec);
+
+      advToggleBtn.addEventListener("click", function () {
+        paramAdvOpen = !paramAdvOpen;
+        advToggleBtn.textContent = paramAdvOpen ? "收起" : "展开";
+        advToggleBtn.setAttribute("aria-expanded", String(paramAdvOpen));
+        advCard.style.display = paramAdvOpen ? "flex" : "none";
       });
     }
 
@@ -1383,31 +2299,53 @@
       renderBannedWordsSection(preset);
     }
 
-    async function mutateBannedWords(nextWords, toastMsg) {
-      const api = resolvePresetApi();
-      const regexApi = resolveRegexApi();
-      const cleanWords = normalizeBannedWords(nextWords);
-      const nextFindRegex = compileBannedRegex(cleanWords);
-      isSelfUpdating = true;
-      try {
-        if (regexApi && regexApi.updateTavernRegexesWith) {
-          await regexApi.updateTavernRegexesWith(function (list) {
-            return applyBannedRegexToTavernList(list, nextFindRegex);
-          }, { type: "preset", name: "in_use" });
+    function mutateBannedWords(transformFn) {
+      bannedQueue = bannedQueue.then(async function () {
+        if (cleaned) return;
+        const api = resolvePresetApi();
+        const regexApi = resolveRegexApi();
+        if (!api || !api.updatePresetWith) {
+          showToast("未检测到预设接口");
+          return;
         }
-        if (api && api.updatePresetWith) {
+        let outcome = null;
+        beginSelfUpdate();
+        try {
+          let compiledFindRegex = null;
           await api.updatePresetWith("in_use", function (p) {
-            writePresetBannedWords(p, cleanWords);
+            const liveWords = readPresetBannedWords(p);
+            const res = transformFn(liveWords);
+            if (res && res.abort) {
+              outcome = res;
+              return p;
+            }
+            const nextRaw = res && Array.isArray(res.words) ? res.words : (Array.isArray(res) ? res : liveWords);
+            const written = writePresetBannedWords(p, nextRaw);
+            compiledFindRegex = compileBannedRegex(written);
+            outcome = { abort: false, words: written, toastMsg: res && res.toastMsg ? res.toastMsg : "" };
             return p;
           }, { render: "debounced" });
+          if (outcome && outcome.abort) {
+            if (outcome.toastMsg && !cleaned) showToast(outcome.toastMsg);
+            return;
+          }
+          if (regexApi && regexApi.updateTavernRegexesWith && compiledFindRegex !== null) {
+            await regexApi.updateTavernRegexesWith(function (list) {
+              return applyBannedRegexToTavernList(list, compiledFindRegex);
+            }, { type: "preset", name: "in_use" });
+          }
+          if (cleaned) return;
+          await renderFromPreset({ preserveScroll: true, reposition: false });
+          if (outcome && outcome.toastMsg) showToast(outcome.toastMsg);
+        } catch (err) {
+          if (!cleaned) {
+            showToast("禁词表更新失败：" + (err && err.message ? err.message : String(err)));
+          }
+        } finally {
+          endSelfUpdate();
         }
-        await renderFromPreset({ preserveScroll: true, reposition: false });
-        if (toastMsg) showToast(toastMsg);
-      } catch (err) {
-        showToast("禁词表更新失败：" + (err && err.message ? err.message : String(err)));
-      } finally {
-        setTimeout(function () { isSelfUpdating = false; }, 160);
-      }
+      });
+      return bannedQueue;
     }
 
     function renderBannedWordsSection(preset) {
@@ -1416,68 +2354,27 @@
       sec.className = "yd-sec";
       sec.setAttribute("data-yd-section", "banned-words");
 
-      const headRow = hd.createElement("div");
-      headRow.className = "yd-sec-head";
-
-      const headLeft = hd.createElement("div");
-      headLeft.className = "yd-sec-head-left";
-      const titleEl = hd.createElement("span");
-      titleEl.className = "yd-sec-title";
-      titleEl.textContent = "禁词清洗";
-      const countEl = hd.createElement("span");
-      countEl.className = "yd-sec-count";
-      countEl.textContent = words.length + "/" + MAX_BANNED_WORDS;
-      const helpBtn = hd.createElement("button");
-      helpBtn.type = "button";
-      helpBtn.className = "yd-help-btn" + (bannedHelpOpen ? " is-active" : "");
-      helpBtn.textContent = "?";
-      helpBtn.title = "查看禁词清洗说明";
-      helpBtn.setAttribute("aria-label", "禁词清洗说明");
-      helpBtn.setAttribute("aria-expanded", String(bannedHelpOpen));
-      headLeft.appendChild(titleEl);
-      headLeft.appendChild(countEl);
-      headLeft.appendChild(helpBtn);
-
-      const headRight = hd.createElement("div");
-      headRight.className = "yd-sec-head-right";
       const resetBtn = hd.createElement("button");
       resetBtn.type = "button";
       resetBtn.className = "yd-mini-link";
       resetBtn.setAttribute("data-yd-action", "reset-banned-words");
       resetBtn.textContent = "恢复默认";
       resetBtn.addEventListener("click", function () {
-        mutateBannedWords(DEFAULT_BANNED_WORDS, "已恢复默认禁词表（" + DEFAULT_BANNED_WORDS.length + " 条）");
+        mutateBannedWords(function () {
+          return {
+            words: DEFAULT_BANNED_WORDS,
+            toastMsg: "已恢复默认禁词表（" + DEFAULT_BANNED_WORDS.length + " 条）",
+          };
+        });
       });
-      headRight.appendChild(resetBtn);
 
-      headRow.appendChild(headLeft);
-      headRow.appendChild(headRight);
-      sec.appendChild(headRow);
-
-      const helpCard = hd.createElement("div");
-      helpCard.className = "yd-help-card";
-      helpCard.style.display = bannedHelpOpen ? "flex" : "none";
-      [
-        { k: "作用", v: "发送给模型前，从 AI 历史回复中剔除这些词；不改聊天存档与界面显示。" },
-        { k: "定位", v: "用于切断复读传染的辅助手段，不是根治方法。" },
-        { k: "录入建议", v: "优先录入修饰语与填充词；谓语型词条剔除后可能留下残句。" },
-        { k: "不生效范围", v: "你的输入、模型当前新生成的文本。" },
-      ].forEach(function (item) {
-        const line = hd.createElement("div");
-        const strong = hd.createElement("strong");
-        strong.textContent = item.k + "：";
-        line.appendChild(strong);
-        line.appendChild(hd.createTextNode(item.v));
-        helpCard.appendChild(line);
-      });
-      sec.appendChild(helpCard);
-
-      helpBtn.addEventListener("click", function () {
-        bannedHelpOpen = !bannedHelpOpen;
-        helpBtn.classList.toggle("is-active", bannedHelpOpen);
-        helpBtn.setAttribute("aria-expanded", String(bannedHelpOpen));
-        helpCard.style.display = bannedHelpOpen ? "flex" : "none";
-      });
+      buildHelpHead(
+        sec,
+        "禁词清洗",
+        "banned",
+        words.length + " / " + MAX_BANNED_WORDS + " 条",
+        [resetBtn]
+      );
 
       const form = hd.createElement("div");
       form.className = "yd-banned-form";
@@ -1494,19 +2391,24 @@
       addBtn.textContent = "添加";
 
       function submitNewWord() {
-        const res = addBannedWord(words, input.value);
-        if (!res.added) {
-          const msgMap = {
-            empty: "请输入要剔除的词条",
-            too_long: "单个词条最多 " + MAX_BANNED_WORD_LEN + " 字",
-            duplicate: "该词条已存在",
-            limit: "禁词表最多支持 " + MAX_BANNED_WORDS + " 条",
-          };
-          showToast(msgMap[res.reason] || "无法添加词条");
-          return;
-        }
-        input.value = "";
-        mutateBannedWords(res.words, "已添加禁词并更新清洗正则");
+        const candidate = input.value;
+        let accepted = false;
+        mutateBannedWords(function (liveWords) {
+          const res = addBannedWord(liveWords, candidate);
+          if (!res.added) {
+            const msgMap = {
+              empty: "请输入要剔除的词条",
+              too_long: "单个词条最多 " + MAX_BANNED_WORD_LEN + " 字",
+              duplicate: "该词条已存在",
+              limit: "禁词表最多支持 " + MAX_BANNED_WORDS + " 条",
+            };
+            return { abort: true, toastMsg: msgMap[res.reason] || "无法添加词条" };
+          }
+          accepted = true;
+          return { words: res.words, toastMsg: "已添加禁词并更新清洗正则" };
+        }).then(function () {
+          if (accepted && input && input.isConnected) input.value = "";
+        });
       }
 
       addBtn.addEventListener("click", submitNewWord);
@@ -1543,7 +2445,9 @@
           del.title = "删除 " + w;
           del.setAttribute("aria-label", "删除 " + w);
           del.addEventListener("click", function () {
-            mutateBannedWords(removeBannedWord(words, w), "已移除禁词：" + w);
+            mutateBannedWords(function (liveWords) {
+              return { words: removeBannedWord(liveWords, w), toastMsg: "已移除禁词：" + w };
+            });
           });
           tag.appendChild(txt);
           tag.appendChild(del);
@@ -1599,7 +2503,7 @@
         row.className = "yd-card-row";
         const coord = hd.createElement("span");
         coord.className = "yd-muted";
-        coord.textContent = "相对位置：X " + Math.round(state.xRatio * 100) + "% · Y " + Math.round(state.yRatio * 100) + "%";
+        coord.textContent = formatPillPosition(state.xRatio, state.yRatio);
         const resetBtn = hd.createElement("button");
         resetBtn.type = "button";
         resetBtn.className = "yd-chip";
@@ -1647,6 +2551,7 @@
     }
 
     async function renderFromPreset(opts) {
+      if (cleaned) return;
       const options = opts || {};
       const preserveScroll = options.preserveScroll !== false;
       const shouldReposition = options.reposition !== false;
@@ -1677,11 +2582,14 @@
       pill.setAttribute("aria-label", pillPersonaDesc);
 
       syncTabButtons();
+      closeHelpPopover();
       const prevScrollTop = preserveScroll ? body.scrollTop : 0;
       body.classList.toggle("is-entering", !preserveScroll);
       body.innerHTML = "";
 
-      if (state.activeTab === "regex") {
+      if (state.activeTab === "params") {
+        renderParamsTab(preset);
+      } else if (state.activeTab === "regex") {
         renderRegexTab(preset);
       } else if (state.activeTab === "assistant") {
         renderAssistantTab(activePersona, theme, mergedThemes, baseVerLabel);
@@ -1764,11 +2672,32 @@
     });
 
     closeBtn.addEventListener("click", function () {
+      closeHelpPopover();
       state.open = false;
       rootEl.classList.remove("is-open");
       savePanelState(state);
       applyRelativePosition();
     });
+
+    function handleOutsideHelpClick(ev) {
+      if (!activeHelpTopic) return;
+      const target = ev && ev.target;
+      if (target && (helpPopover.contains(target) || (target.closest && target.closest(".yd-help-btn")))) {
+        return;
+      }
+      closeHelpPopover();
+    }
+    function handleHelpEsc(ev) {
+      if (ev && ev.key === "Escape" && activeHelpTopic) {
+        closeHelpPopover();
+      }
+    }
+    function handleBodyScroll() {
+      if (activeHelpTopic) closeHelpPopover();
+    }
+    hd.addEventListener("click", handleOutsideHelpClick);
+    hw.addEventListener("keydown", handleHelpEsc);
+    body.addEventListener("scroll", handleBodyScroll, { passive: true });
 
     saveBtn.addEventListener("click", async function () {
       const api = resolvePresetApi();
@@ -1806,14 +2735,23 @@
       themeObs.observe(hd.documentElement, { attributes: true, attributeFilter: ["data-theme", "class", "style"] });
     }
 
-    let cleaned = false;
     function cleanupPanel() {
       if (cleaned) return;
       cleaned = true;
+      if (toastTimer) {
+        clearTimeout(toastTimer);
+        toastTimer = null;
+      }
+      if (presetChangedSub && typeof presetChangedSub.stop === "function") {
+        try { presetChangedSub.stop(); } catch (e) {}
+      }
       hw.removeEventListener("resize", handleResize);
       if (hw.visualViewport) {
         hw.visualViewport.removeEventListener("resize", handleResize);
       }
+      hd.removeEventListener("click", handleOutsideHelpClick);
+      hw.removeEventListener("keydown", handleHelpEsc);
+      body.removeEventListener("scroll", handleBodyScroll);
       if (themeObs) themeObs.disconnect();
       const el = hd.getElementById(ROOT_EL_ID);
       if (el) el.remove();
@@ -1824,8 +2762,8 @@
     const hwEvents = window.eventOn || (window.TavernHelper && window.TavernHelper.eventOn);
     const tev = window.tavern_events || (hw && hw.tavern_events);
     if (hwEvents && tev && tev.PRESET_CHANGED) {
-      hwEvents(tev.PRESET_CHANGED, function () {
-        if (!isSelfUpdating) renderFromPreset();
+      presetChangedSub = hwEvents(tev.PRESET_CHANGED, function () {
+        if (!cleaned && selfUpdateCount === 0) renderFromPreset();
       });
     }
 

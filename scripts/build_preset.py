@@ -59,7 +59,7 @@ def main() -> None:
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     out_file = OUT_DIR / f"ST-PresetAssistant_V{version}.json"
-    out_file.write_text(json.dumps(preset, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    out_file.write_text(json.dumps(preset, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
     print(f"[build_preset] Compiled {len(prompts)} modules -> {out_file}")
 
 

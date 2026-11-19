@@ -1,8 +1,8 @@
 {
   "identifier": "yd_player_control_strict",
-  "name": "[玩家控制] 完全控制 [单选]",
+  "name": "[代写边界] 禁止代写 [单选]",
   "role": "system",
-  "content": "{{setvar::player_control::\n- 玩家控制：{{user}} 完全掌控自身言行、意志与主观感受。仅在交互需要时顺承描写外界碰触落在身上的物理体感（如冷暖、痛感或受力位移）及完成动作必需的连带衔接，不代为断定 {{user}} 未表达的情绪、理解、态度、台词与后续选择；NPC 可以观察、回应和影响 {{user}}，推进中若触及需要 {{user}} 表态或抉择的节点，则在该处停笔，留由 {{user}} 自行感受与回应。\n}}",
+  "content": "{{setvar::player_control::\n- 代写边界：{{user}} 完全掌控自身言行、意志与主观感受。仅在交互需要时顺承描写外界碰触落在身上的物理体感（如冷暖、痛感或受力位移）及完成动作必需的连带衔接，不代为断定 {{user}} 未表达的情绪、理解、态度、台词与后续选择；NPC 可以观察、回应和影响 {{user}}，推进中若触及需要 {{user}} 表态或抉择的节点，则在该处停笔，留由 {{user}} 自行感受与回应。\n}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,
