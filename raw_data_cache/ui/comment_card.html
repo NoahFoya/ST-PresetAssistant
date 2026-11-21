@@ -784,7 +784,7 @@
   }
 
   function collectAuthorPersonas() {
-    const map = { "莉莉丝": true, "lilith": true, "泠音": true, "lingyin": true };
+    const map = { "莉莉丝": true, "lilith": true, "泠音": true, "lingyin": true, "ark": true };
     try {
       const hw = getHostWin();
       const th = window.TavernHelper || (hw && hw.TavernHelper) || null;
@@ -899,7 +899,7 @@
   }
 
   function maskThinkBlocks(text) {
-    return text.replace(/<draft(?=[\s>])[^>]*>[\s\S]*?<\/draft>/gi, function (m) {
+    return text.replace(/<(draft|summary|recap)(?=[\s>])[^>]*>[\s\S]*?<\/\1>/gi, function (m) {
       return m.replace(/[^\r\n]/g, " ");
     });
   }

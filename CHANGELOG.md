@@ -1,5 +1,23 @@
 # 更新日志 (Changelog)
 
+## [0.6.0] - 2026-11-21
+
+### Added
+- **新增第三位内置 AI 人设 `Ark`、场景状态栏、多角色调度与 `[总结]` 模式（全部新模块默认关闭，保持 v0.5.1 默认配置不变）**：
+  - **`[AI人设]` Ark** ([yd_persona_ark.json](raw_data_cache/prompts/01_系统框架/yd_persona_ark.json), [floating_panel.js](raw_data_cache/ui/floating_panel.js), [comment_card.html](raw_data_cache/ui/comment_card.html))：新增冷静理性的高级人工智能人设 `Ark`（默认关闭，专属主题色 `#46b8a6`），面向“管理员 / master”汇报并严守世界观真实性与正文隔离；同步注册悬浮面板内置人设表与批注卡片作者署名识别。
+  - **`[功能]` 状态栏** ([yd_feat_scene_status.json](raw_data_cache/prompts/05_执行规则/yd_feat_scene_status.json), [scene_card.html](raw_data_cache/ui/scene_card.html))：默认关闭，开启后在故事正文之前单独一行输出固定三栏 `<scene>时间｜地点｜在场人物</scene>`，搭配 `[美化] 状态栏` 单行场景条渲染，历史上下文保留以提供时空连续性。
+  - **`[思考]` 多角色调度** ([yd_cot_multi_char.json](raw_data_cache/prompts/05_执行规则/yd_cot_multi_char.json))：默认关闭，在两名及以上 NPC 同场时划分焦点与旁观角色、校准知情差异与多方互动；同步补充悬浮面板 `[思考]` 帮助弹窗说明。
+  - **`[总结]` 场景小结 / 全局梳理** ([yd_summary_scene.json](raw_data_cache/prompts/05_执行规则/yd_summary_scene.json), [yd_summary_recap.json](raw_data_cache/prompts/05_执行规则/yd_summary_recap.json), [summary_card.html](raw_data_cache/ui/summary_card.html), [recap_card.html](raw_data_cache/ui/recap_card.html))：新增互斥单选组与面板 `?` 使用提示，提供正文后 2~4 句客观总结的 `<summary>`（默认展开可折叠卡片）以及暂停续写、按四段 `【】` 骨架输出全局档案的 `<recap>`（允许正常构思，与思考面板和预填充零冲突）。
+  - **新增 3 条显示美化正则与单源模板** ([preset_manifest.json](raw_data_cache/preset_manifest.json), [sync_ui.py](scripts/sync_ui.py))：注册 `[美化] 状态栏`、`[美化] 小结`、`[美化] 梳理` 及其单源 HTML 模板（总计 8 个 UI 单源资产）。
+
+### Changed
+- **规则汇总与格式兼容解耦** ([yd_vars_init.json](raw_data_cache/prompts/01_系统框架/yd_vars_init.json), [yd_exec_rules_close.json](raw_data_cache/prompts/05_执行规则/yd_exec_rules_close.json), [yd_feat_format_compat.json](raw_data_cache/prompts/05_执行规则/yd_feat_format_compat.json), [yd_cot_unified.json](raw_data_cache/prompts/05_执行规则/yd_cot_unified.json))：
+  - 在 `yd_vars_init` 中单行清零初始化 `rule_scene_status`、`rule_summary`、`cot_multi_char`、`rule_recap` 四个新变量，并在 `yd_exec_rules_close` 中按序接入对应槽位（`rule_recap` 位于所有输出规则末尾）；
+  - 将 `yd_exec_rules_close` 收尾范围明确为“正文内部”、将 `yd_feat_format_compat` 核对范围自然扩展至 `<execution_rules>`，并将 `yd_cot_unified` 引导语去固定数字，保持模块间零硬耦合。
+- **正则跨卡片隔离与结构化测试门禁升级** ([preset_manifest.json](raw_data_cache/preset_manifest.json), [verify.py](tests/verify.py), [preview.html](tests/preview.html))：
+  - 扩展 `[美化] 批注`、`[美化] 选择` 与 `[美化] 正文` 的隔离断言，保护 `<scene>` / `<summary>` / `<recap>` 及渲染卡片内部引号不被正文对白着色误伤，同时防止 `<draft>` 内部示例标签泄漏；
+  - 将 `verify.py` 扩展至 65 个模块、8 个单源 UI 资产与新正则 V8 管道测试（新增断言均采用结构校验，不写死新模块提示词文本）。
+
 ## [0.5.1] - 2026-11-21
 
 ### Changed

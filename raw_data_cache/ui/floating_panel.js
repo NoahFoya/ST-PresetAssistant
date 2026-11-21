@@ -5,7 +5,7 @@
 (function (root) {
   "use strict";
 
-  const PRESET_VERSION = "0.5.1";
+  const PRESET_VERSION = "0.6.0";
   const GITHUB_REPO = "NoahFoya/ST-PresetAssistant";
   const GITHUB_CHANGELOG_URL = "https://github.com/" + GITHUB_REPO + "/blob/main/CHANGELOG.md";
   const GITHUB_PACKAGE_URLS = [
@@ -29,6 +29,7 @@
   const DEFAULT_PERSONA_COLORS = {
     lilith: "#d46b94",
     lingyin: "#5fa0d0",
+    ark: "#46b8a6",
     none: "#828c9c",
     custom: "#9575d8",
   };
@@ -45,6 +46,12 @@
       key: "lingyin",
       label: "泠音",
       themeKey: "lingyin",
+    },
+    yd_persona_ark: {
+      id: "yd_persona_ark",
+      key: "ark",
+      label: "Ark",
+      themeKey: "ark",
     },
   };
 
@@ -67,6 +74,11 @@
     think: [
       { k: "预填充思考", v: "Gemini 4 及部分推理端点禁止请求以 Assistant 消息结尾，开启后可能触发 HTTP 400 报错；若报错请关闭此开关。" },
       { k: "输出思考面板", v: "在正文中生成 <draft> 推理区；若所用模型已开启原生内置思考，可按需关闭以避免重复推演。" },
+      { k: "多角色调度", v: "两名及以上 NPC 同场时逐一核对各自目标、知情范围与反应差异；单 NPC 场景自动略过。" },
+    ],
+    summary: [
+      { k: "场景小结", v: "在每轮正文后附加简短 <summary> 客观摘要并随历史保留，辅助长对话记忆承接。" },
+      { k: "全局梳理", v: "单回合梳理模式：暂停续写并仅输出四段 <recap> 剧情档案；生成完成后请关闭该开关以恢复正常续写。" },
     ],
     profiles: [
       { k: "作用范围", v: "模型方案仅修改推理强度、回复上限、采样与惩罚参数；不会改动上下文长度、流式开关或任何提示词。" },
@@ -1893,7 +1905,7 @@
       }
 
       sections.forEach(function (sec) {
-        const helpKey = sec.key === "思考" ? "think" : null;
+        const helpKey = sec.key === "思考" ? "think" : (sec.key === "总结" ? "summary" : null);
         renderSection(sec.title, function (wrap) {
           sec.items.forEach(function (item) {
             const btn = hd.createElement("button");

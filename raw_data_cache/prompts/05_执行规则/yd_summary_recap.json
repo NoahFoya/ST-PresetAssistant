@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_summary_recap",
+  "name": "[总结] 全局梳理 [单选]",
+  "role": "system",
+  "content": "{{setvar::rule_recap::\n## 本轮特殊任务：全局剧情梳理\n本轮暂停续写故事，以下要求优先于上文的正文与附加输出要求：不输出状态栏、故事正文、批注与行动选项，也不受参考篇幅限制；基于 `<story_setting>` 与 `<chat_history>` 中已确立的内容，甄别客观事实、角色认知与已过时的旧状态，按以下结构输出 `<recap>...</recap>`，客观准确，不臆造未发生的情节：\n<recap>\n【主线进展】\n- 按时间脉络分条梳理已发生的关键事件、转折与当前局势，略去无关琐碎\n【人物关系与状态】\n- 逐一列出重要角色的当前立场、对 {{user}} 及彼此的态度、关系阶段、伤势体力与关键随身物件\n【未解的伏笔与约定】\n- 尚未兑现的承诺、悬而未决的矛盾、待查证的线索及尚未揭晓的隐秘（注明各自知情范围）\n【当前定格画面】\n- 准确交代此刻的时间、地点、在场人物、站位姿态与上一轮结尾尚未落定的话头或动作\n</recap>\n}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": false,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

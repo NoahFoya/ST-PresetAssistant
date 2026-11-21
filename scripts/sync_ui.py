@@ -17,7 +17,10 @@ MAX_BANNED_WORD_LEN = 40
 
 SCRIPT_TO_UI = {
     "[美化] 思考": UI_DIR / "draft_card.html",
+    "[美化] 状态栏": UI_DIR / "scene_card.html",
     "[美化] 批注": UI_DIR / "comment_card.html",
+    "[美化] 小结": UI_DIR / "summary_card.html",
+    "[美化] 梳理": UI_DIR / "recap_card.html",
     "[美化] 选择": UI_DIR / "options_card.html",
     "[美化] 正文": UI_DIR / "prose_beautify.html",
 }

@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_cot_multi_char",
+  "name": "[思考] 多角色调度 [多选]",
+  "role": "system",
+  "content": "{{setvar::cot_header::\n## 构思与推演\n}}\n{{setvar::cot_multi_char::\n- 多角色调度：当场景中有两名及以上 NPC 在场时，在构思中逐一核对每人当下的目标、知情范围、对 {{user}} 与彼此的态度，划分本轮的焦点角色与旁观角色；焦点角色依各自立场与知情差异作出不同反应（可主动插话、彼此呼应、暗中试探或产生分歧，不必全员只围绕 {{user}} 回应），旁观角色以简短神态、视线或留白带过，避免只有单一角色活动，也避免机械点名式人人轮流发言；仅一名 NPC 在场时略过此项。\n}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": false,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_feat_scene_status",
+  "name": "[功能] 状态栏 [多选]",
+  "role": "system",
+  "content": "{{setvar::rule_scene_status::\n- 状态栏：在故事正文之前单独一行输出 `<scene>时间｜地点｜在场人物</scene>`，固定三栏、以 `｜` 分隔，不加“时间：”等字段前缀，也不增设情绪、好感度或天气等额外栏目。时间写故事内时段或具体时刻，地点写当前所处具体位置，在场人物只列当前同场角色（多人用 `、` 分隔，含 {{user}}；无其他角色时写 {{user}} 独处）；按本轮场景的实际时空与在场情况填写，发生转场或人员进出时以落地后的现场为准，与上一轮一致的字段照常写出。\n}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": false,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}
