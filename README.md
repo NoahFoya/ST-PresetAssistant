@@ -14,7 +14,7 @@
 
 ## 安装与升级
 
-1. **下载预设**：在仓库根目录下载最新的 [`ST-PresetAssistant_V0.6.0.json`](ST-PresetAssistant_V0.6.0.json)（历史正式版本归档于 [`history/`](history/)；若在 `dev` 分支查看，产物位于 [`presets/`](presets/)）。
+1. **下载预设**：在仓库根目录下载最新的 [`ST-PresetAssistant_V0.6.0.json`](ST-PresetAssistant_V0.6.0.json)（历史正式版本归档于 [`history/`](history/)）。
 2. **导入启用**：打开 SillyTavern 顶部 **AI 响应配置（预设）** 面板导入 JSON 文件，并在下拉列表中选择 **`ST-预设助手`**。
 3. **版本升级**：预设在酒馆内的名称固定为 **`ST-预设助手`**。后续升级直接导入新版 JSON 并覆盖原预设即可，不会产生重复条目。
 
