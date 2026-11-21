@@ -2,7 +2,7 @@
   "identifier": "yd_exec_rules_close",
   "name": "⚙️ 执行规则 - 汇总",
   "role": "system",
-  "content": "<execution_rules>\n\n## 规则优先级\n当各项要求在具体场景中存在张力时，依次按以下顺位裁决；同顺位内以更贴合当下情境与人物真实性为准：\n- 第一顺位：既定世界观、人物设定与已确立的故事事实。\n- 第二顺位：{{user}} 控制权、NPC 自主性与当前叙事视角的信息边界。\n- 第三顺位：当前事件的因果链条、人物即时情绪与长期状态衔接。\n- 第四顺位：<narrative_rules> 的表达规范、文风基调与语言质感。\n- 第五顺位：参考篇幅、剧情节奏与描写侧重。\n- 第六顺位：其余附加输出内容。\n\n## 输出要求{{getvar::player_control}}{{getvar::target_length}}\n- 以场景完整与互动连贯为先，按当下的情绪张力与互动推进自然把控正文篇幅，不注水拖沓。\n- 随场景脉络在恰当的画面、余韵或阶段节点自然收束，正文内部不另加总结、主题升华或下集预告。{{getvar::rule_format_compat}}{{getvar::rule_scene_status}}{{getvar::rule_inline_comment}}{{getvar::rule_summary}}{{getvar::rule_action_options}}{{getvar::rule_repeat_check}}{{getvar::cot_header}}{{getvar::cot_output_rule}}{{getvar::cot_body}}{{getvar::cot_multi_char}}{{getvar::rule_recap}}\n</execution_rules>",
+  "content": "<execution_rules>\n\n## 规则优先级\n当各项要求在具体场景中存在张力时，依次按以下顺位裁决；同顺位内以更贴合当下情境与人物真实性为准：\n- 第一顺位：既定世界观、人物设定与已确立的故事事实。\n- 第二顺位：{{user}} 控制权、NPC 自主性与当前叙事视角的信息边界。\n- 第三顺位：当前事件的因果链条、人物即时情绪与长期状态衔接。\n- 第四顺位：<narrative_rules> 的表达规范、文风基调与语言质感。\n- 第五顺位：参考篇幅、剧情节奏与描写侧重。\n- 第六顺位：其余附加输出内容。\n\n## 输出要求\n{{getvar::player_control}}\n{{getvar::target_length}}\n- 以场景完整与互动连贯为先，按当下的情绪张力与互动推进自然把控正文篇幅，不注水拖沓。\n- 随场景脉络在恰当的画面、余韵或阶段节点自然收束，正文内部不另加总结、主题升华或下集预告。\n{{getvar::rule_format_compat}}\n{{getvar::rule_scene_status}}\n{{getvar::rule_inline_comment}}\n{{getvar::rule_summary}}\n{{getvar::rule_action_options}}\n{{getvar::rule_repeat_check}}\n\n{{getvar::cot_header}}\n{{getvar::cot_output_rule}}\n{{getvar::cot_body}}\n{{getvar::cot_multi_char}}\n</execution_rules>",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

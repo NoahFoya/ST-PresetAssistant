@@ -2,7 +2,7 @@
   "identifier": "yd_vars_init",
   "name": "⚙️ 变量初始化",
   "role": "system",
-  "content": "{{setvar::persona_ack::明白，我会按照给出的设定，合理展开接下来的故事。}}{{setvar::general_spec::}}{{setvar::style::}}{{setvar::pov::}}{{setvar::pace::}}{{setvar::focus::}}{{setvar::vocab::}}{{setvar::vocab_diversity::}}{{setvar::player_control::}}{{setvar::target_length::}}{{setvar::rule_format_compat::}}{{setvar::rule_scene_status::}}{{setvar::rule_inline_comment::}}{{setvar::rule_summary::}}{{setvar::rule_action_options::}}{{setvar::rule_repeat_check::}}{{setvar::cot_header::}}{{setvar::cot_output_rule::}}{{setvar::cot_body::}}{{setvar::cot_multi_char::}}{{setvar::rule_recap::}}",
+  "content": "{{setvar::persona_ack::明白，我会按照给出的设定，合理展开接下来的故事。}}{{setvar::general_spec::}}{{setvar::style::}}{{setvar::pov::}}{{setvar::pace::}}{{setvar::focus::}}{{setvar::vocab::}}{{setvar::vocab_diversity::}}{{setvar::player_control::}}{{setvar::target_length::}}{{setvar::rule_format_compat::}}{{setvar::rule_scene_status::}}{{setvar::rule_inline_comment::}}{{setvar::rule_summary::}}{{setvar::rule_action_options::}}{{setvar::rule_repeat_check::}}{{setvar::cot_header::}}{{setvar::cot_output_rule::}}{{setvar::cot_body::}}{{setvar::cot_multi_char::}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

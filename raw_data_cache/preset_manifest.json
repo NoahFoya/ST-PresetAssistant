@@ -473,10 +473,6 @@
             "enabled": false
           },
           {
-            "identifier": "yd_summary_recap",
-            "enabled": false
-          },
-          {
             "identifier": "yd_cot_output_draft",
             "enabled": true
           },
@@ -491,6 +487,10 @@
           {
             "identifier": "yd_exec_rules_close",
             "enabled": true
+          },
+          {
+            "identifier": "yd_summary_recap",
+            "enabled": false
           },
           {
             "identifier": "yd_prefill_draft",
@@ -738,10 +738,6 @@
             "enabled": false
           },
           {
-            "identifier": "yd_summary_recap",
-            "enabled": false
-          },
-          {
             "identifier": "yd_cot_output_draft",
             "enabled": true
           },
@@ -756,6 +752,10 @@
           {
             "identifier": "yd_exec_rules_close",
             "enabled": true
+          },
+          {
+            "identifier": "yd_summary_recap",
+            "enabled": false
           },
           {
             "identifier": "yd_prefill_draft",
@@ -1180,13 +1180,6 @@
       "file": "prompts/05_执行规则/yd_summary_scene.json"
     },
     {
-      "identifier": "yd_summary_recap",
-      "name": "[总结] 全局梳理 [单选]",
-      "role": "system",
-      "enabled": false,
-      "file": "prompts/05_执行规则/yd_summary_recap.json"
-    },
-    {
       "identifier": "yd_cot_output_draft",
       "name": "[思考] 输出思考面板 [多选]",
       "role": "system",
@@ -1213,6 +1206,13 @@
       "role": "system",
       "enabled": true,
       "file": "prompts/05_执行规则/yd_exec_rules_close.json"
+    },
+    {
+      "identifier": "yd_summary_recap",
+      "name": "[总结] 全局梳理 [单选]",
+      "role": "system",
+      "enabled": false,
+      "file": "prompts/05_执行规则/yd_summary_recap.json"
     },
     {
       "identifier": "yd_prefill_draft",

@@ -2,7 +2,7 @@
   "identifier": "yd_feat_format_compat",
   "name": "[功能] 格式兼容 [多选]",
   "role": "system",
-  "content": "{{setvar::rule_format_compat::\n- 格式兼容：保持故事正文、结构化格式（如状态栏、属性面板、变量更新 `<UpdateVariable>` 或专属标签）与其余附加输出的层级清晰分离；输出前先核对 `<execution_rules>`、`<story_setting>` 与 `<chat_history>` 是否明确约定了额外格式，凡有明确约定即严格按原标签名、字段顺序与闭合要求在正文之外独立完整输出；未作额外约定时保持版面纯粹，不自行增设额外面板、规则解释或创作说明。\n}}",
+  "content": "{{setvar::rule_format_compat::- 格式兼容：保持故事正文、结构化格式（如状态栏、属性面板、变量更新 `<UpdateVariable>` 或专属标签）与其余附加输出的层级清晰分离；输出前先核对 `<execution_rules>`、`<story_setting>` 与 `<chat_history>` 是否明确约定了额外格式，凡有明确约定即严格按原标签名、字段顺序与闭合要求在正文之外独立完整输出；未作额外约定时保持版面纯粹，不自行增设额外面板、规则解释或创作说明。}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,
