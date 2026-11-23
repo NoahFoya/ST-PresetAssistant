@@ -1,8 +1,8 @@
 {
   "identifier": "yd_assistant_ack",
-  "name": "🤝 助手确认",
+  "name": "🤝 核心确认",
   "role": "assistant",
-  "content": "{{getvar::persona_ack}}",
+  "content": "{{getvar::ack_core}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

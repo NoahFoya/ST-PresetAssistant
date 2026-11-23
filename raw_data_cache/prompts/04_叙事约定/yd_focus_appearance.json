@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_focus_appearance",
+  "name": "[侧重] 外貌神韵 [单选]",
+  "role": "system",
+  "content": "{{setvar::nar_focus::## 描写侧重\n- 聚焦光线与互动中的动态容貌、身姿线条、神色与衣着变化，结合角色既定外形与服饰特征，让视觉魅力在画面中自然立住。\n- 一切外形细节紧贴举动、情绪起伏与距离远近，借眼神、体态与衣饰反差传递神韵，不写脱离场景的静态清单。}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": false,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

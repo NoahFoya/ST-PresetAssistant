@@ -2,7 +2,7 @@
   "identifier": "yd_length_long",
   "name": "[篇幅] 较长 (1200-1800字) [单选]",
   "role": "system",
-  "content": "{{setvar::target_length::- 正文篇幅以 1200~1800 字左右为参考目标，通过多轮对话往来、行动博弈与情绪层次的深入展开充实篇幅，保持疏密有致的交互节奏与留白，不靠堆砌外围景物或无关细节凑字数。}}",
+  "content": "{{setvar::nar_length::## 参考篇幅\n- 多方互动或复杂场景适合充分展开时正文以 1200~1800 字左右为宜，通过对话层次、行动博弈与细节刻画充实画面，不靠堆砌无关景物凑字数。}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_input_expand",
+  "name": "[输入处理] 演绎展开 [单选]",
+  "role": "system",
+  "content": "{{setvar::exec_input::- 若本轮有玩家输入，将其视作本轮行动与场景提纲，按当前叙事视角与文风将 {{user}} 明确给出的言行、动作或转场自然融入正文开头展开描写，再顺势接写结果与在场反应；展开过程忠实于玩家原意，动作、意愿与台词各自按原语义呈现，后续延伸严格服从本轮代写边界；无新输入时紧接上文末尾自然续写。}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": false,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

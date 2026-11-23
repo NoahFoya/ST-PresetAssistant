@@ -1,6 +1,6 @@
 {
   "name": "st-preset-assistant",
-  "version": "0.6.0",
+  "version": "0.9.0",
   "description": "ST-PresetAssistant (ST-预设助手): SillyTavern Multi-Persona Interactive Fiction Preset & TavernHelper Control Suite",
   "main": "scripts/build_preset.py",
   "scripts": {
@@ -8,6 +8,7 @@
     "test": "python tests/verify.py",
     "verify": "python tests/verify.py",
     "docs": "python scripts/build_docs.py",
+    "check-terms": "node scripts/check-terms.mjs",
     "all": "npm run build && npm run verify && npm run docs"
   },
   "repository": {

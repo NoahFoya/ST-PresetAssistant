@@ -1,12 +1,12 @@
 {
   "identifier": "yd_player_control_extend",
-  "name": "[代写边界] 允许延伸 [单选]",
+  "name": "[代写边界] 有限延伸 [单选]",
   "role": "system",
-  "content": "{{setvar::player_control::- 代写边界：在贴合 {{user}} 既定人设与本轮行动意图的前提下，允许自然顺延描写 {{user}} 的连贯动作衔接、自然微反应、情绪波动与感官体验，使互动画面更流畅完整；但不替 {{user}} 擅自做出重大立场转变、关键抉择或说出背离人设的长段对白，推进中若触及需要 {{user}} 表态或抉择的节点，则在该处停笔，留由 {{user}} 自行决定。}}",
+  "content": "{{setvar::exec_control::- 仅在 {{user}} 本轮明确给出的行为与意图范围内适度顺延：可补全无风险的动作过程与空间衔接、顺着明确意图的简短日常应答、外界刺激引发的直接体感，以及承接玩家已表达态度的自然反应；未由玩家表达的心理立场、情绪结论、涉及代价风险的选择、实质表态、答应或拒绝他人提议以及新的独立行动均留给 {{user}} 自行决定。}}\n{{setvar::exec_ending::- 到达需要玩家决定的节点之前，可依当前节奏与参考篇幅通过环境细节、现场线索与在场角色的自主反应充分展开画面；一旦落到需要 {{user}} 作出独立行动、表态或选择的节点，或本轮幕间与当前阶段自然告一段落时，顺势落在具体的动作、对白、画面或现场新动静中自然收束，将后续发展留给玩家，篇幅可自然短于参考范围。}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,
-  "enabled": false,
+  "enabled": true,
   "injection_position": 0,
   "injection_depth": 4,
   "injection_order": 100

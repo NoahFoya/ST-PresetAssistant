@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_cot_light",
+  "name": "[主思考] 叙事推理-轻量 [单选]",
+  "role": "system",
+  "content": "{{setvar::cot_header::## 构思与推演}}\n{{setvar::cot_main::### 叙事推理\n- 你先核清上一幕现场的时空、姿态、衣着与随身物品，以及本轮属于玩家指令与事实修正、叙事安排还是角色言行。\n- 对照本轮输入处理与代写边界，划清在场角色自主推进、{{user}} 可写范围与合乎边界的收束节点。\n- 校验角色情绪、性格偏好、知情范围、事件结果及必要时的变故先兆，保持过程衔接一致。\n- 把握视角、语感、详略翻新与自然落点。}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": false,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

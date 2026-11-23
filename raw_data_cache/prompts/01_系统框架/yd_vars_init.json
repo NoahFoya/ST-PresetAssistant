@@ -2,7 +2,7 @@
   "identifier": "yd_vars_init",
   "name": "⚙️ 变量初始化",
   "role": "system",
-  "content": "{{setvar::persona_ack::明白，我会按照给出的设定，合理展开接下来的故事。}}{{setvar::general_spec::}}{{setvar::style::}}{{setvar::pov::}}{{setvar::pace::}}{{setvar::focus::}}{{setvar::vocab::}}{{setvar::vocab_diversity::}}{{setvar::player_control::}}{{setvar::target_length::}}{{setvar::rule_format_compat::}}{{setvar::rule_scene_status::}}{{setvar::rule_inline_comment::}}{{setvar::rule_summary::}}{{setvar::rule_action_options::}}{{setvar::rule_repeat_check::}}{{setvar::cot_header::}}{{setvar::cot_output_rule::}}{{setvar::cot_body::}}{{setvar::cot_multi_char::}}",
+  "content": "{{setvar::persona_name::Assistant}}{{setvar::ack_core::明白，将立足虚构设定与角色真实动机推进互动故事，守好玩家角色控制权并贴合故事原本的口吻。}}{{setvar::ack_setting::已了解世界背景、人物设定与既有关系，将据此展开各方言行与符合各自认知的反应。}}{{setvar::ack_history::已衔接前文脉络、人物最新状态与当前现场情形，将紧接此刻继续续写。}}{{setvar::ack_exec::已确认本轮执行要求，将专注当前故事创作并完整写完本轮内容，最后另起一行输出 <ToBeContinue>。}}{{setvar::nar_pov::}}{{setvar::nar_style::}}{{setvar::nar_pace::}}{{setvar::nar_focus::}}{{setvar::nar_length::}}{{setvar::nar_spec::}}{{setvar::nar_nsfw::}}{{setvar::nar_nsfw_detail::}}{{setvar::exec_input::}}{{setvar::exec_control::}}{{setvar::exec_ending::- 正文到达需要 {{user}} 决定的节点或当前阶段自然告一段落时，即落在具体的动作、对白、画面或现场新动静中自然收束，篇幅可自然短于参考范围。}}{{setvar::cot_header::}}{{setvar::cot_main::}}{{setvar::cot_multi_char::}}{{setvar::cot_subtext::}}{{setvar::cot_foreshadowing::}}{{setvar::cot_anti_sycophancy::}}{{setvar::cot_anti_repeat::}}{{setvar::cot_draft::}}{{setvar::cot_comment::}}{{setvar::out_header::}}{{setvar::out_scene::}}{{setvar::out_summary::}}{{setvar::out_options::}}{{setvar::out_format_compat::}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

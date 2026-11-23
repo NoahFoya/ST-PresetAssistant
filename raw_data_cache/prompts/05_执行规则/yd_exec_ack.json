@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_exec_ack",
+  "name": "🤝 执行确认",
+  "role": "assistant",
+  "content": "{{getvar::ack_exec}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": true,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

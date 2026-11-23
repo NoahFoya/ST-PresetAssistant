@@ -2,7 +2,7 @@
   "identifier": "yd_length_medium",
   "name": "[篇幅] 适中 (800-1200字) [单选]",
   "role": "system",
-  "content": "{{setvar::target_length::- 正文篇幅以 800~1200 字左右为参考目标，围绕当下的核心互动与情绪流动展开，在重点交锋处写足感受与反应，过渡处保持简练利落。}}",
+  "content": "{{setvar::nar_length::## 参考篇幅\n- 正常展开时正文以 800~1200 字左右为宜，围绕当下的核心互动与情绪流动展开，重点处写足细节，过渡处简练利落。}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

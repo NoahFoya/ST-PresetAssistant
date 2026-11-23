@@ -1,6 +1,6 @@
 {
   "identifier": "yd_prefill_draft",
-  "name": "[思考] 预填充思考 [多选]",
+  "name": "[思考工具] 预填充思考 [多选]&输出思考面板",
   "role": "assistant",
   "content": "<draft>\n",
   "system_prompt": false,

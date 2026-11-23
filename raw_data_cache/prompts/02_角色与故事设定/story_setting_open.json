@@ -1,8 +1,8 @@
 {
   "identifier": "story_setting_open",
   "name": "📖 故事设定 - 开始",
-  "role": "system",
-  "content": "<story_setting>",
+  "role": "user",
+  "content": "<story_setting>\n以下是故事的世界背景、人物设定与参考资料：",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

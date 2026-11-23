@@ -1,8 +1,8 @@
 {
   "identifier": "chat_history_open",
   "name": "💬 历史会话 - 开始",
-  "role": "system",
-  "content": "<chat_history>",
+  "role": "user",
+  "content": "<chat_history>\n以下是目前为止的对话记录：",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

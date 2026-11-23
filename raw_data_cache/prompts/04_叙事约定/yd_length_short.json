@@ -2,7 +2,7 @@
   "identifier": "yd_length_short",
   "name": "[篇幅] 较短 (400-800字) [单选]",
   "role": "system",
-  "content": "{{setvar::target_length::- 正文篇幅以 400~800 字左右为参考目标，省去外围景物铺垫与次要枝节，笔墨集中在当前最核心的一组对话交锋或动作往来上。}}",
+  "content": "{{setvar::nar_length::## 参考篇幅\n- 正常展开时正文以 400~800 字左右为宜，省去外围铺垫与次要枝节，笔墨集中在当前最核心的一组对话交锋或动作往来上。}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

@@ -2,7 +2,7 @@
   "identifier": "yd_player_control_free",
   "name": "[代写边界] 自由代写 [单选]",
   "role": "system",
-  "content": "{{setvar::player_control::- 代写边界：允许根据剧情节奏与场景张力自主推进并立体刻画 {{user}} 的言行、心理活动、感官反应与行动走向；但不得覆盖 {{user}} 刚刚明确表达的拒绝、既定事实与关键选择，所有刻画仍须贴合 {{user}} 既定人物性格与当前处境，并在阶段性节点适时停笔，保留 {{user}} 随时接管互动的余地。}}",
+  "content": "{{setvar::exec_control::- 在共写模式下主动接管并完整刻画 {{user}} 的言行、对话、心理与行动推进，与在场角色形成有来有往的双向互动；同时完整保留 {{user}} 已明确给出的拒绝、底线与既定事实，尊重角色底色与复杂性。}}\n{{setvar::exec_ending::- 依当前节奏与参考篇幅充分展开多轮互动，待当前阶段自然告一段落时，落在具体的动作、对白、画面或现场新动静中自然收束。}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_input_continue",
+  "name": "[输入处理] 直接承接 [单选]",
+  "role": "system",
+  "content": "{{setvar::exec_input::- 若本轮有玩家输入，将其中 {{user}} 已给出的动作与台词视作已发生并已呈现的内容，正文直接从其末尾顺接，交代动作结果、环境反馈与在场角色的反应，略去对已写言行的重复描写；若输入为指令、叙事安排或尚待判定的尝试，直接承接其落地结果或新场景展开；无新输入时紧接上文末尾自然续写。}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": true,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_cot_foreshadowing",
+  "name": "[思考增强] 伏笔与暗线 [多选]",
+  "role": "system",
+  "content": "{{setvar::cot_header::## 构思与推演}}\n{{setvar::cot_foreshadowing::### 伏笔与暗线\n- 结合前文梳理未兑现的约定、旧线索与幕后动向，在场景自然触及时安排克制的细节回扣或顺手埋下生活化引子；若本轮并无触点则略过此项，不强行制造悬念或反转。}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": false,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

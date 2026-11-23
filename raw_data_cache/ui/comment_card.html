@@ -133,10 +133,6 @@
   .yd-floor:hover {
     border-color: color-mix(in srgb, var(--SmartThemeEmColor) 28%, transparent);
   }
-  .yd-floor.is-master {
-    background: color-mix(in srgb, var(--SmartThemeBodyColor) 7.5%, transparent);
-    border-color: color-mix(in srgb, var(--SmartThemeEmColor) 26%, transparent);
-  }
   .yd-floor-meta {
     display: flex;
     align-items: center;
@@ -144,52 +140,15 @@
     margin-bottom: 4px;
     flex-wrap: wrap;
   }
-  .yd-avatar {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.74em;
-    font-weight: 700;
-    flex-shrink: 0;
-    background: color-mix(in srgb, var(--SmartThemeBodyColor) 12%, transparent);
-    color: var(--SmartThemeBodyColor);
-  }
-  .yd-floor.is-author .yd-avatar {
-    background: color-mix(in srgb, var(--SmartThemeEmColor) 22%, transparent);
-    color: var(--SmartThemeEmColor);
-  }
-  .yd-floor.is-master .yd-avatar {
-    background: color-mix(in srgb, var(--SmartThemeBodyColor) 20%, transparent);
-    color: var(--SmartThemeBodyColor);
-  }
-  .yd-speaker {
-    font-weight: 600;
-    font-size: 0.88em;
-    color: var(--SmartThemeBodyColor);
-  }
-  .yd-floor.is-author .yd-speaker {
-    color: var(--SmartThemeEmColor);
-  }
   .yd-badge {
-    font-size: 0.7em;
-    padding: 0 6px;
-    line-height: 1.55;
+    font-size: 0.72em;
+    font-weight: 600;
+    padding: 0 7px;
+    line-height: 1.6;
     border-radius: 4px;
-    background: color-mix(in srgb, var(--SmartThemeBodyColor) 8%, transparent);
-    color: color-mix(in srgb, var(--SmartThemeBodyColor) 72%, transparent);
-    border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 14%, transparent);
-  }
-  .yd-floor.is-author .yd-badge {
-    background: color-mix(in srgb, var(--SmartThemeEmColor) 15%, transparent);
+    background: color-mix(in srgb, var(--SmartThemeEmColor) 14%, transparent);
     color: var(--SmartThemeEmColor);
-    border-color: color-mix(in srgb, var(--SmartThemeEmColor) 32%, transparent);
-  }
-  .yd-floor.is-master .yd-badge {
-    background: color-mix(in srgb, var(--SmartThemeBodyColor) 14%, transparent);
-    color: var(--SmartThemeBodyColor);
+    border: 1px solid color-mix(in srgb, var(--SmartThemeEmColor) 30%, transparent);
   }
   .yd-floor-num {
     margin-left: auto;
@@ -227,13 +186,17 @@
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 92%, transparent);
     white-space: pre-wrap;
     word-break: break-word;
-    padding-left: 26px;
   }
   .yd-edit-box {
-    padding-left: 26px;
     display: flex;
     flex-direction: column;
     gap: 6px;
+  }
+  .yd-edit-tag-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
   }
   .yd-edit-input {
     width: 100%;
@@ -253,8 +216,69 @@
     display: flex;
     gap: 6px;
   }
-  .yd-reply-bar {
+  .yd-reply-wrap {
     margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed color-mix(in srgb, var(--SmartThemeBodyColor) 13%, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .yd-tag-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  .yd-tag-label {
+    font-size: 0.76em;
+    color: color-mix(in srgb, var(--SmartThemeBodyColor) 58%, transparent);
+    flex-shrink: 0;
+  }
+  .yd-tag-chip {
+    background: transparent;
+    border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 16%, transparent);
+    color: color-mix(in srgb, var(--SmartThemeBodyColor) 72%, transparent);
+    font-size: 0.74em;
+    padding: 2px 8px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    line-height: 1.45;
+    transition: all 0.14s ease;
+  }
+  .yd-tag-chip:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--SmartThemeEmColor) 50%, transparent);
+    color: var(--SmartThemeEmColor);
+  }
+  .yd-tag-chip.is-active {
+    background: color-mix(in srgb, var(--SmartThemeEmColor) 16%, transparent);
+    border-color: color-mix(in srgb, var(--SmartThemeEmColor) 55%, transparent);
+    color: var(--SmartThemeEmColor);
+    font-weight: 600;
+  }
+  .yd-tag-chip:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .yd-tag-input {
+    width: 88px;
+    min-width: 72px;
+    height: 24px;
+    padding: 2px 7px;
+    border-radius: 5px;
+    border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 16%, transparent);
+    background: color-mix(in srgb, var(--SmartThemeBodyColor) 2.5%, transparent);
+    color: var(--SmartThemeBodyColor);
+    font-family: inherit;
+    font-size: 0.78em;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+  .yd-tag-input:focus {
+    border-color: color-mix(in srgb, var(--SmartThemeEmColor) 60%, transparent);
+  }
+  .yd-reply-bar {
     display: flex;
     gap: 6px;
     align-items: center;
@@ -276,140 +300,12 @@
   .yd-reply-input:focus {
     border-color: color-mix(in srgb, var(--SmartThemeEmColor) 60%, transparent);
   }
-  .yd-role-wrap {
-    display: inline-flex;
-    align-items: center;
-    width: 112px;
-    flex-shrink: 0;
-    height: 30px;
-    border-radius: 5px;
-    border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 16%, transparent);
-    background: color-mix(in srgb, var(--SmartThemeBodyColor) 4%, transparent);
-    overflow: hidden;
-    transition: border-color 0.15s ease;
-  }
-  .yd-role-wrap:focus-within,
-  .yd-role-wrap.is-open {
-    border-color: color-mix(in srgb, var(--SmartThemeEmColor) 60%, transparent);
-  }
-  .yd-reply-role {
-    flex: 1;
-    min-width: 0;
-    height: 100%;
-    padding: 0 6px;
-    border: none;
-    background: transparent;
-    color: var(--SmartThemeBodyColor);
-    font-family: inherit;
-    font-size: 0.8em;
-    outline: none;
-  }
-  .yd-reply-role:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-  }
-  .yd-role-toggle {
-    width: 22px;
-    height: 100%;
-    flex-shrink: 0;
-    border: none;
-    border-left: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 12%, transparent);
-    background: transparent;
-    color: color-mix(in srgb, var(--SmartThemeBodyColor) 66%, transparent);
-    font-size: 0.72em;
-    line-height: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    padding: 0;
-    font-family: inherit;
-    transition: color 0.15s ease, background 0.15s ease, transform 0.16s ease;
-  }
-  .yd-role-toggle:hover:not(:disabled) {
-    color: var(--SmartThemeEmColor);
-    background: color-mix(in srgb, var(--SmartThemeEmColor) 10%, transparent);
-  }
-  .yd-role-toggle:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-  }
-  .yd-role-wrap.is-open .yd-role-toggle {
-    color: var(--SmartThemeEmColor);
-    background: color-mix(in srgb, var(--SmartThemeEmColor) 12%, transparent);
-  }
-  .yd-role-menu {
-    margin-top: 6px;
-    padding: 6px 8px;
-    border-radius: 6px;
-    border: 1px dashed color-mix(in srgb, var(--SmartThemeEmColor) 34%, transparent);
-    background: color-mix(in srgb, var(--SmartThemeBodyColor) 3.4%, transparent);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    align-items: center;
-    animation: yd-card-reveal 0.16s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .yd-role-menu[hidden] {
-    display: none;
-  }
-  .yd-role-menu-label {
-    font-size: 0.74em;
-    color: color-mix(in srgb, var(--SmartThemeBodyColor) 56%, transparent);
-    margin-right: 2px;
-  }
-  .yd-role-chip {
-    display: inline-flex;
-    align-items: center;
-    border-radius: 999px;
-    border: 1px solid color-mix(in srgb, var(--SmartThemeBodyColor) 16%, transparent);
-    background: color-mix(in srgb, var(--SmartThemeBodyColor) 4%, transparent);
-    color: var(--SmartThemeBodyColor);
-    font-size: 0.78em;
-    overflow: hidden;
-    transition: border-color 0.14s ease, background 0.14s ease;
-  }
-  .yd-role-chip.is-active {
-    border-color: color-mix(in srgb, var(--SmartThemeEmColor) 68%, transparent);
-    background: color-mix(in srgb, var(--SmartThemeEmColor) 15%, transparent);
-    color: var(--SmartThemeEmColor);
-    font-weight: 600;
-  }
-  .yd-role-chip-pick {
-    border: none;
-    background: transparent;
-    color: inherit;
-    font-family: inherit;
-    font-size: inherit;
-    font-weight: inherit;
-    padding: 2px 8px;
-    cursor: pointer;
-    line-height: 1.45;
-  }
-  .yd-role-chip-pick:hover {
-    color: var(--SmartThemeEmColor);
-  }
-  .yd-role-chip-del {
-    border: none;
-    background: transparent;
-    color: color-mix(in srgb, var(--SmartThemeBodyColor) 54%, transparent);
-    font-family: inherit;
-    font-size: 0.96em;
-    line-height: 1;
-    padding: 2px 6px 2px 1px;
-    cursor: pointer;
-    transition: color 0.14s ease;
-  }
-  .yd-role-chip-del:hover {
-    color: #c94a4a;
-  }
   .yd-empty-note {
     font-size: 0.84em;
     color: color-mix(in srgb, var(--SmartThemeBodyColor) 64%, transparent);
     padding: 6px 2px;
   }
-  .yd-talk-card.is-empty .yd-reply-bar,
-  .yd-talk-card.is-empty .yd-role-menu {
+  .yd-talk-card.is-empty .yd-reply-wrap {
     display: none;
   }
   .yd-reply-btn {
@@ -448,17 +344,16 @@
     .yd-talk-body { padding: 8px 10px 10px 10px; }
     .yd-collapse-btn { width: 28px; height: 28px; font-size: 0.88em; }
     .yd-mini-btn { padding: 4px 10px; min-height: 28px; font-size: 0.78em; }
-    .yd-reply-input, .yd-edit-input, .yd-reply-role { font-size: 16px; }
+    .yd-tag-chip { padding: 3px 9px; min-height: 26px; font-size: 0.78em; }
+    .yd-reply-input, .yd-edit-input, .yd-tag-input { font-size: 16px; }
+    .yd-tag-input { height: 28px; width: 104px; }
   }
   @media (max-width: 520px) {
-    .yd-floor-text, .yd-edit-box { padding-left: 0; }
     .yd-reply-bar { flex-wrap: wrap; }
     .yd-reply-input { flex: 1 1 100%; height: 36px; }
-    .yd-role-wrap { flex: 1 1 auto; width: auto; height: 34px; }
-    .yd-role-toggle { width: 28px; font-size: 0.86em; }
     .yd-reply-btn { height: 34px; padding: 0 14px; }
   }
-  .yd-mini-btn:active, .yd-reply-btn:active, .yd-collapse-btn:active {
+  .yd-mini-btn:active, .yd-reply-btn:active, .yd-collapse-btn:active, .yd-tag-chip:active {
     transform: scale(0.97);
   }
   @media (prefers-reduced-motion: reduce) {
@@ -479,15 +374,20 @@
   </div>
   <div class="yd-talk-body" id="yd-talk-body">
     <div class="yd-floor-list" id="yd-floor-list"></div>
-    <div class="yd-reply-bar">
-      <div class="yd-role-wrap" id="yd-role-wrap">
-        <input type="text" class="yd-reply-role" id="yd-reply-role" maxlength="24" value="master" aria-label="追加署名" placeholder="署名" autocomplete="off" title="点击选择或输入自定义署名（自动记忆）" />
-        <button type="button" class="yd-role-toggle" id="yd-role-toggle" aria-label="展开或收起署名候选" aria-expanded="false" title="选择历史记忆署名">▾</button>
+    <div class="yd-reply-wrap" id="yd-reply-wrap">
+      <div class="yd-tag-row" id="yd-tag-row">
+        <span class="yd-tag-label">标签</span>
+        <button type="button" class="yd-tag-chip is-active" data-yd-tag="点评">点评</button>
+        <button type="button" class="yd-tag-chip" data-yd-tag="伏笔">伏笔</button>
+        <button type="button" class="yd-tag-chip" data-yd-tag="吐槽">吐槽</button>
+        <button type="button" class="yd-tag-chip" data-yd-tag="笔记">笔记</button>
+        <input type="text" class="yd-tag-input" id="yd-tag-input" maxlength="12" value="点评" placeholder="自定义标签" aria-label="批注标签" />
       </div>
-      <input type="text" class="yd-reply-input" id="yd-reply-input" placeholder="追加点评或正文批注（全楼层支持直接编辑改写）..." />
-      <button type="button" class="yd-reply-btn" id="yd-reply-btn">追加</button>
+      <div class="yd-reply-bar">
+        <input type="text" class="yd-reply-input" id="yd-reply-input" placeholder="输入批注内容（将按所选标签写入 ※ 标签：...）..." />
+        <button type="button" class="yd-reply-btn" id="yd-reply-btn">添加</button>
+      </div>
     </div>
-    <div class="yd-role-menu" id="yd-role-menu" hidden></div>
     <div class="yd-talk-toast" id="yd-talk-toast"></div>
   </div>
   <textarea id="yd-talk-raw" style="display:none;" readonly>$1</textarea>
@@ -528,6 +428,7 @@
     } catch (e) {}
   }
 
+  const QUICK_TAGS = ["点评", "伏笔", "吐槽", "笔记"];
   const cardEl = document.getElementById("yd-talk-card");
   const headEl = document.getElementById("yd-talk-head");
   const rawEl = document.getElementById("yd-talk-raw");
@@ -535,173 +436,41 @@
   const countEl = document.getElementById("yd-talk-count");
   const previewEl = document.getElementById("yd-talk-preview");
   const collapseBtn = document.getElementById("yd-collapse-btn");
+  const tagRowEl = document.getElementById("yd-tag-row");
+  const tagInput = document.getElementById("yd-tag-input");
   const replyInput = document.getElementById("yd-reply-input");
-  const roleWrap = document.getElementById("yd-role-wrap");
-  const replyRoleInput = document.getElementById("yd-reply-role");
-  const roleToggleBtn = document.getElementById("yd-role-toggle");
-  const roleMenuEl = document.getElementById("yd-role-menu");
   const replyBtn = document.getElementById("yd-reply-btn");
   const toastEl = document.getElementById("yd-talk-toast");
 
-  const LAST_SPEAKER_KEY = "yd_assistant_comment_last_speaker_v1";
-  const CUSTOM_SPEAKERS_KEY = "yd_assistant_comment_custom_speakers_v1";
-  const MAX_CUSTOM_SPEAKERS = 8;
-  let lastSavedSpeaker = null;
-  let roleMenuOpen = false;
-
-  function getHostStorage() {
-    try {
-      const hw = getHostWin();
-      if (hw && hw.localStorage) return hw.localStorage;
-    } catch (e) {}
-    try {
-      if (window.localStorage) return window.localStorage;
-    } catch (e) {}
-    return null;
-  }
-
-  function sanitizeSpeaker(raw) {
+  function sanitizeTag(raw) {
     return String(raw || "")
-      .replace(/[:：\r\n]+/g, "")
+      .replace(/[:：\r\n，。！？；、“”‘’「」『』()（）]+/g, "")
       .trim()
-      .slice(0, 24);
+      .slice(0, 12);
   }
 
-  function loadLastSpeaker() {
-    try {
-      const st = getHostStorage();
-      const clean = st ? sanitizeSpeaker(st.getItem(LAST_SPEAKER_KEY)) : "";
-      if (clean) return clean;
-    } catch (e) {}
-    return "master";
-  }
-
-  function saveLastSpeaker(name) {
-    const clean = sanitizeSpeaker(name);
-    if (!clean || clean === lastSavedSpeaker) return;
-    lastSavedSpeaker = clean;
-    try {
-      const st = getHostStorage();
-      if (st) st.setItem(LAST_SPEAKER_KEY, clean);
-    } catch (e) {}
-  }
-
-  function loadCustomSpeakers() {
-    try {
-      const st = getHostStorage();
-      const raw = st ? st.getItem(CUSTOM_SPEAKERS_KEY) : null;
-      if (raw) {
-        const arr = JSON.parse(raw);
-        if (Array.isArray(arr)) {
-          const out = [];
-          arr.forEach(function (item) {
-            const clean = sanitizeSpeaker(item);
-            if (clean && out.indexOf(clean) === -1) out.push(clean);
-          });
-          return out.slice(0, MAX_CUSTOM_SPEAKERS);
-        }
-      }
-    } catch (e) {}
-    return [];
-  }
-
-  function saveCustomSpeakersList(list) {
-    try {
-      const st = getHostStorage();
-      if (st) st.setItem(CUSTOM_SPEAKERS_KEY, JSON.stringify(list.slice(0, MAX_CUSTOM_SPEAKERS)));
-    } catch (e) {}
-  }
-
-  function rememberCustomSpeaker(name, authorSet) {
-    const clean = sanitizeSpeaker(name);
-    if (!clean) return;
-    const low = clean.toLowerCase();
-    if (low === "master" || clean === "读者" || clean === "批注") return;
-    if (authorSet && authorSet[low]) return;
-    const prev = loadCustomSpeakers().filter(function (item) {
-      return item.toLowerCase() !== low;
-    });
-    prev.unshift(clean);
-    saveCustomSpeakersList(prev);
-  }
-
-  function removeCustomSpeaker(name) {
-    const clean = sanitizeSpeaker(name);
-    if (!clean) return;
-    const low = clean.toLowerCase();
-    const next = loadCustomSpeakers().filter(function (item) {
-      return item.toLowerCase() !== low;
-    });
-    saveCustomSpeakersList(next);
-    if (replyRoleInput && sanitizeSpeaker(replyRoleInput.value).toLowerCase() === low) {
-      replyRoleInput.value = "master";
-      saveLastSpeaker("master");
+  function syncQuickChipState(containerEl, activeTag) {
+    if (!containerEl) return;
+    const clean = sanitizeTag(activeTag);
+    const chips = containerEl.querySelectorAll(".yd-tag-chip");
+    for (let i = 0; i < chips.length; i++) {
+      const chipTag = chips[i].getAttribute("data-yd-tag") || "";
+      chips[i].classList.toggle("is-active", clean !== "" && chipTag === clean);
     }
-    renderRoleMenu();
-    render();
   }
 
-  function setRoleMenuOpen(open) {
-    roleMenuOpen = Boolean(open);
-    if (roleWrap) roleWrap.classList.toggle("is-open", roleMenuOpen);
-    if (roleToggleBtn) roleToggleBtn.setAttribute("aria-expanded", String(roleMenuOpen));
-    if (roleMenuEl) roleMenuEl.hidden = !roleMenuOpen;
-    if (roleMenuOpen) renderRoleMenu();
-    notifyFrameResize();
-  }
-
-  function renderRoleMenu() {
-    if (!roleMenuEl) return;
-    roleMenuEl.innerHTML = "";
-    const labelEl = document.createElement("span");
-    labelEl.className = "yd-role-menu-label";
-    labelEl.textContent = "署名：";
-    roleMenuEl.appendChild(labelEl);
-
-    const currentLow = sanitizeSpeaker(replyRoleInput && replyRoleInput.value).toLowerCase();
-    const items = [
-      { value: "master", text: "master", removable: false },
-      { value: "批注", text: "正文批注", removable: false },
-    ];
-    loadCustomSpeakers().forEach(function (name) {
-      items.push({ value: name, text: name, removable: true });
-    });
-
-    items.forEach(function (item) {
-      const chip = document.createElement("span");
-      const active = currentLow === item.value.toLowerCase();
-      chip.className = "yd-role-chip" + (active ? " is-active" : "");
-
-      const pickBtn = document.createElement("button");
-      pickBtn.type = "button";
-      pickBtn.className = "yd-role-chip-pick";
-      pickBtn.textContent = item.text;
-      pickBtn.title = "选用署名：" + item.value;
-      pickBtn.addEventListener("mousedown", function (ev) { ev.preventDefault(); });
-      pickBtn.addEventListener("click", function () {
-        if (replyRoleInput) replyRoleInput.value = item.value;
-        saveLastSpeaker(item.value);
-        setRoleMenuOpen(false);
-        if (replyInput) replyInput.focus();
+  function bindTagSelector(rowEl, inputEl) {
+    if (!rowEl || !inputEl) return;
+    const chips = rowEl.querySelectorAll(".yd-tag-chip");
+    for (let i = 0; i < chips.length; i++) {
+      chips[i].addEventListener("click", function () {
+        const chosen = this.getAttribute("data-yd-tag") || "点评";
+        inputEl.value = chosen;
+        syncQuickChipState(rowEl, chosen);
       });
-      chip.appendChild(pickBtn);
-
-      if (item.removable) {
-        const delBtn = document.createElement("button");
-        delBtn.type = "button";
-        delBtn.className = "yd-role-chip-del";
-        delBtn.textContent = "×";
-        delBtn.title = "从记忆中移除 " + item.value;
-        delBtn.setAttribute("aria-label", "移除记忆署名 " + item.value);
-        delBtn.addEventListener("mousedown", function (ev) { ev.preventDefault(); });
-        delBtn.addEventListener("click", function (ev) {
-          ev.stopPropagation();
-          removeCustomSpeaker(item.value);
-        });
-        chip.appendChild(delBtn);
-      }
-
-      roleMenuEl.appendChild(chip);
+    }
+    inputEl.addEventListener("input", function () {
+      syncQuickChipState(rowEl, inputEl.value);
     });
   }
 
@@ -760,17 +529,27 @@
   let isWriting = false;
 
   function parseFloors(blockText) {
-    const lines = blockText.split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean);
+    const lines = String(blockText || "").split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean);
     const floors = [];
-    const lineRe = /^※\s*([^：\r\n:]{1,24})[：:]\s*(.*)$/;
+    const tagRe = /^※\s*([^：\r\n:]{1,12})[：:]\s*(.*)$/;
     lines.forEach(function (line) {
-      const m = line.match(lineRe);
-      if (m) {
-        floors.push({ speaker: m[1].trim(), text: m[2].trim() });
+      if (line.indexOf("※") === 0) {
+        const m = line.match(tagRe);
+        if (m) {
+          const rawCand = m[1].trim();
+          const hasPunct = /[，。！？；、“”‘’「」『』()（）]/.test(rawCand);
+          const cleanTag = (!hasPunct && !/^\d+$/.test(rawCand)) ? sanitizeTag(rawCand) : "";
+          const bodyText = m[2].trim();
+          if (cleanTag && bodyText) {
+            floors.push({ tag: cleanTag, text: bodyText });
+            return;
+          }
+        }
+        floors.push({ tag: "", text: line.replace(/^※\s*/, "").trim() });
       } else if (floors.length > 0) {
         floors[floors.length - 1].text += "\n" + line;
       } else {
-        floors.push({ speaker: "批注", text: line.replace(/^※\s*/, "") });
+        floors.push({ tag: "", text: line });
       }
     });
     return floors;
@@ -778,56 +557,10 @@
 
   function serializeFloors(floors) {
     return floors.map(function (f) {
+      const cleanTag = sanitizeTag(f.tag);
       const cleanBody = String(f.text || "").replace(/\r?\n+/g, " ").trim();
-      return "※ " + f.speaker + "：" + cleanBody;
+      return cleanTag ? ("※ " + cleanTag + "：" + cleanBody) : ("※ " + cleanBody);
     }).join("\n");
-  }
-
-  function collectAuthorPersonas() {
-    const map = { "莉莉丝": true, "lilith": true, "泠音": true, "lingyin": true, "ark": true };
-    try {
-      const hw = getHostWin();
-      const th = window.TavernHelper || (hw && hw.TavernHelper) || null;
-      const getPreset = window.getPreset || (th && th.getPreset) || (hw && hw.getPreset) || null;
-      const preset = getPreset ? getPreset("in_use") : null;
-      const prompts = (preset && preset.prompts) || [];
-      prompts.forEach(function (p) {
-        if (!p || p.marker) return;
-        const m = String(p.name || "").trim().match(/^\[AI人设\]\s*(.+?)\s*\[(单选|多选)\]/);
-        if (m && m[1]) {
-          const pName = sanitizeSpeaker(m[1]);
-          if (pName) map[pName.toLowerCase()] = true;
-        }
-      });
-    } catch (e) {}
-    return map;
-  }
-
-  function buildRoleContext() {
-    const readerMap = { "master": true, "读者": true };
-    loadCustomSpeakers().forEach(function (n) {
-      readerMap[n.toLowerCase()] = true;
-    });
-    return {
-      authors: collectAuthorPersonas(),
-      readers: readerMap,
-    };
-  }
-
-  function getRoleMeta(speaker, roleCtx) {
-    const s = String(speaker || "").trim();
-    const low = s.toLowerCase();
-    const ctx = roleCtx || buildRoleContext();
-    if (ctx.authors[low]) {
-      return { cls: "is-author", badge: "作者", avatar: (s.charAt(0) || "作").toUpperCase() };
-    }
-    if (s === "批注") {
-      return { cls: "is-author", badge: "批注", avatar: s.charAt(0) };
-    }
-    if (ctx.readers[low]) {
-      return { cls: "is-master", badge: "读者", avatar: low === "master" ? "M" : (s.charAt(0) || "读").toUpperCase() };
-    }
-    return { cls: "is-guest", badge: "客评", avatar: (s.charAt(0) || "?").toUpperCase() };
   }
 
   function resolveTavernAdapter() {
@@ -906,7 +639,7 @@
 
   function findCommentBlocksInMessage(msgText) {
     const masked = maskThinkBlocks(msgText);
-    const re = /(?:^|\n)([ \t]*※[ \t]*[^：\r\n:]{1,24}[：:][^\r\n]*(?:\r?\n[ \t]*※[ \t]*[^：\r\n:]{1,24}[：:][^\r\n]*)*)(?=[ \t]*(?:\r?\n|$))/g;
+    const re = /(?:^|\n)([ \t]*※[ \t]*[^\r\n]+(?:\r?\n[ \t]*※[ \t]*[^\r\n]+)*)(?=[ \t]*(?:\r?\n|$))/g;
     const ranges = [];
     let match;
     while ((match = re.exec(masked)) !== null) {
@@ -935,16 +668,22 @@
     throw new Error("未能定位当前批注串在消息中的位置");
   }
 
+  function setControlsDisabled(disabled) {
+    if (replyBtn) replyBtn.disabled = disabled;
+    if (replyInput) replyInput.disabled = disabled;
+    if (tagInput) tagInput.disabled = disabled;
+    if (tagRowEl) {
+      const chips = tagRowEl.querySelectorAll(".yd-tag-chip");
+      for (let i = 0; i < chips.length; i++) chips[i].disabled = disabled;
+    }
+  }
+
   async function persistBlockUpdate(nextBlockText, okMsg, onSuccess) {
     const hw = getHostWin();
     if (isWriting || (hw && hw.__YD_COMMENT_WRITE_LOCK__)) return false;
     isWriting = true;
     if (hw) hw.__YD_COMMENT_WRITE_LOCK__ = true;
-    if (replyBtn) replyBtn.disabled = true;
-    if (replyInput) replyInput.disabled = true;
-    if (replyRoleInput) replyRoleInput.disabled = true;
-    if (roleToggleBtn) roleToggleBtn.disabled = true;
-    setRoleMenuOpen(false);
+    setControlsDisabled(true);
 
     try {
       const ctx = detectMessageContext();
@@ -986,10 +725,7 @@
     } finally {
       isWriting = false;
       if (hw) hw.__YD_COMMENT_WRITE_LOCK__ = false;
-      if (replyBtn) replyBtn.disabled = false;
-      if (replyInput) replyInput.disabled = false;
-      if (replyRoleInput) replyRoleInput.disabled = false;
-      if (roleToggleBtn) roleToggleBtn.disabled = false;
+      setControlsDisabled(false);
     }
   }
 
@@ -1002,7 +738,9 @@
     }
     if (countEl) countEl.textContent = isDeleted ? "已清空" : (floors.length + " 楼");
     if (previewEl) {
-      previewEl.textContent = isDeleted ? "该批注串已清空" : (floors[0].speaker + "：" + floors[0].text);
+      previewEl.textContent = isDeleted
+        ? "该批注串已清空"
+        : (floors[0].tag ? (floors[0].tag + "：" + floors[0].text) : floors[0].text);
     }
 
     listEl.innerHTML = "";
@@ -1014,29 +752,17 @@
       notifyFrameResize();
       return;
     }
-    const roleCtx = buildRoleContext();
-    floors.forEach(function (floor, idx) {
-      const roleMeta = getRoleMeta(floor.speaker, roleCtx);
 
+    floors.forEach(function (floor, idx) {
       const row = document.createElement("div");
-      row.className = "yd-floor " + roleMeta.cls;
+      row.className = "yd-floor";
 
       const meta = document.createElement("div");
       meta.className = "yd-floor-meta";
 
-      const avatar = document.createElement("span");
-      avatar.className = "yd-avatar";
-      avatar.textContent = roleMeta.avatar;
-      meta.appendChild(avatar);
-
-      const speaker = document.createElement("span");
-      speaker.className = "yd-speaker";
-      speaker.textContent = floor.speaker;
-      meta.appendChild(speaker);
-
       const badge = document.createElement("span");
       badge.className = "yd-badge";
-      badge.textContent = roleMeta.badge;
+      badge.textContent = floor.tag || "批注";
       meta.appendChild(badge);
 
       const num = document.createElement("span");
@@ -1068,12 +794,39 @@
       actions.appendChild(delBtn);
 
       meta.appendChild(actions);
-
       row.appendChild(meta);
 
       if (editingFloorIdx === idx) {
         const editBox = document.createElement("div");
         editBox.className = "yd-edit-box";
+
+        const editTagRow = document.createElement("div");
+        editTagRow.className = "yd-edit-tag-row";
+
+        const editTagLabel = document.createElement("span");
+        editTagLabel.className = "yd-tag-label";
+        editTagLabel.textContent = "标签";
+        editTagRow.appendChild(editTagLabel);
+
+        const initialTag = floor.tag || "";
+        QUICK_TAGS.forEach(function (qt) {
+          const chip = document.createElement("button");
+          chip.type = "button";
+          chip.className = "yd-tag-chip" + (initialTag === qt ? " is-active" : "");
+          chip.setAttribute("data-yd-tag", qt);
+          chip.textContent = qt;
+          editTagRow.appendChild(chip);
+        });
+
+        const editTagInput = document.createElement("input");
+        editTagInput.type = "text";
+        editTagInput.className = "yd-tag-input";
+        editTagInput.maxLength = 12;
+        editTagInput.value = initialTag;
+        editTagInput.placeholder = "可留空或自填";
+        editTagRow.appendChild(editTagInput);
+        bindTagSelector(editTagRow, editTagInput);
+        editBox.appendChild(editTagRow);
 
         const editInput = document.createElement("textarea");
         editInput.className = "yd-edit-input";
@@ -1084,16 +837,17 @@
         function saveEditedFloor() {
           const val = editInput.value.trim();
           if (!val) {
-            showToast("⚠️ 点评内容不能为空，如需移除请点删除");
+            showToast("⚠️ 批注内容不能为空，如需移除请点删除");
             return;
           }
+          const nextTag = sanitizeTag(editTagInput.value);
           const nextFloors = floors.map(function (item, j) {
-            return j === idx ? { speaker: item.speaker, text: val } : item;
+            return j === idx ? { tag: nextTag, text: val } : item;
           });
           persistBlockUpdate(serializeFloors(nextFloors), "✅ 已保存修改");
         }
 
-        editInput.addEventListener("keydown", function (ev) {
+        function handleEditKeydown(ev) {
           if (ev.isComposing) return;
           if (ev.key === "Enter" && !ev.shiftKey) {
             ev.preventDefault();
@@ -1103,7 +857,9 @@
             editingFloorIdx = -1;
             render();
           }
-        });
+        }
+        editTagInput.addEventListener("keydown", handleEditKeydown);
+        editInput.addEventListener("keydown", handleEditKeydown);
 
         const editBar = document.createElement("div");
         editBar.className = "yd-edit-bar";
@@ -1147,68 +903,25 @@
     }
     const val = replyInput ? replyInput.value.replace(/\r?\n+/g, " ").trim() : "";
     if (!val) {
-      showToast("⚠️ 请输入内容后再追加");
+      showToast("⚠️ 请输入批注内容后再添加");
       return;
     }
-    const speakerTag = sanitizeSpeaker(replyRoleInput && replyRoleInput.value) || "master";
-    if (replyRoleInput) replyRoleInput.value = speakerTag;
+    const chosenTag = sanitizeTag(tagInput ? tagInput.value : "") || "点评";
     const floors = parseFloors(currentBlockText);
-    floors.push({ speaker: speakerTag, text: val });
-    persistBlockUpdate(serializeFloors(floors), "💬 已追加 " + speakerTag + " 记录", function () {
-      saveLastSpeaker(speakerTag);
-      rememberCustomSpeaker(speakerTag, collectAuthorPersonas());
-      if (roleMenuOpen) renderRoleMenu();
+    floors.push({ tag: chosenTag, text: val });
+    persistBlockUpdate(serializeFloors(floors), "💬 已添加「" + chosenTag + "」", function () {
       if (replyInput) replyInput.value = "";
     });
   }
 
-  if (replyRoleInput) {
-    replyRoleInput.value = loadLastSpeaker();
-    replyRoleInput.addEventListener("focus", function () {
-      setRoleMenuOpen(true);
-    });
-    replyRoleInput.addEventListener("input", function () {
-      if (roleMenuOpen) renderRoleMenu();
-    });
-    replyRoleInput.addEventListener("blur", function () {
-      const clean = sanitizeSpeaker(replyRoleInput.value) || "master";
-      replyRoleInput.value = clean;
-      saveLastSpeaker(clean);
-    });
-    replyRoleInput.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") {
-        setRoleMenuOpen(false);
-      } else if (e.key === "Enter") {
-        e.preventDefault();
-        const clean = sanitizeSpeaker(replyRoleInput.value) || "master";
-        replyRoleInput.value = clean;
-        saveLastSpeaker(clean);
-        setRoleMenuOpen(false);
-        if (replyInput) replyInput.focus();
-      }
-    });
-  }
-
-  if (roleToggleBtn) {
-    roleToggleBtn.addEventListener("mousedown", function (ev) { ev.preventDefault(); });
-    roleToggleBtn.addEventListener("click", function (ev) {
-      ev.stopPropagation();
-      setRoleMenuOpen(!roleMenuOpen);
-    });
-  }
-
-  document.addEventListener("pointerdown", function (ev) {
-    if (!roleMenuOpen) return;
-    if (roleWrap && roleWrap.contains(ev.target)) return;
-    if (roleMenuEl && roleMenuEl.contains(ev.target)) return;
-    setRoleMenuOpen(false);
-  });
+  bindTagSelector(tagRowEl, tagInput);
 
   if (replyBtn) {
     replyBtn.addEventListener("click", handleAppend);
   }
   if (replyInput) {
     replyInput.addEventListener("keydown", function (e) {
+      if (e.isComposing) return;
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         handleAppend();
@@ -1219,7 +932,6 @@
   function toggleCollapse() {
     if (!cardEl || !collapseBtn) return;
     const collapsed = cardEl.classList.toggle("is-collapsed");
-    if (collapsed && roleMenuOpen) setRoleMenuOpen(false);
     collapseBtn.textContent = collapsed ? "▸" : "▾";
     collapseBtn.setAttribute("aria-expanded", String(!collapsed));
     notifyFrameResize();

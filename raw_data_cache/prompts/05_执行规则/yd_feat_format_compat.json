@@ -1,8 +1,8 @@
 {
   "identifier": "yd_feat_format_compat",
-  "name": "[功能] 格式兼容 [多选]",
+  "name": "[附加输出] 外部格式兼容 [多选]",
   "role": "system",
-  "content": "{{setvar::rule_format_compat::- 格式兼容：保持故事正文、结构化格式（如状态栏、属性面板、变量更新 `<UpdateVariable>` 或专属标签）与其余附加输出的层级清晰分离；输出前先核对 `<execution_rules>`、`<story_setting>` 与 `<chat_history>` 是否明确约定了额外格式，凡有明确约定即严格按原标签名、字段顺序与闭合要求在正文之外独立完整输出；未作额外约定时保持版面纯粹，不自行增设额外面板、规则解释或创作说明。}}",
+  "content": "{{setvar::out_header::## 附加输出}}\n{{setvar::out_format_compat::### 外部格式兼容\n- 核查设定或前文是否约定了额外格式（如属性面板、变量更新 `<UpdateVariable>` 或专属标签），有则确保正文与各类附加格式各自成块、互不混杂，严格按原标签名、字段顺序与闭合要求在正文外完整输出；若与其余附加输出功能重叠，优先保留设定或前文约定的格式；未作约定时保持正文与既定结构纯净。}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

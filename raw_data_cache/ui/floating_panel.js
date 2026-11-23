@@ -5,7 +5,7 @@
 (function (root) {
   "use strict";
 
-  const PRESET_VERSION = "0.6.0";
+  const PRESET_VERSION = "0.9.0";
   const GITHUB_REPO = "NoahFoya/ST-PresetAssistant";
   const GITHUB_CHANGELOG_URL = "https://github.com/" + GITHUB_REPO + "/blob/main/CHANGELOG.md";
   const GITHUB_PACKAGE_URLS = [
@@ -19,7 +19,7 @@
 
   const COLOR_SWATCHES = [
     { hex: "#d46b94", name: "绯红" },
-    { hex: "#5fa0d0", name: "冰青" },
+    { hex: "#3b9eff", name: "科技蓝" },
     { hex: "#c69352", name: "琥珀" },
     { hex: "#59a985", name: "翠玉" },
     { hex: "#9575d8", name: "紫藤" },
@@ -28,8 +28,8 @@
 
   const DEFAULT_PERSONA_COLORS = {
     lilith: "#d46b94",
-    lingyin: "#5fa0d0",
-    ark: "#46b8a6",
+    lingyin: "#9575d8",
+    ark: "#3b9eff",
     none: "#828c9c",
     custom: "#9575d8",
   };
@@ -38,19 +38,19 @@
     yd_persona_lilith: {
       id: "yd_persona_lilith",
       key: "lilith",
-      label: "莉莉丝",
+      label: "莉莉丝：肉文写手",
       themeKey: "lilith",
     },
     yd_persona_lingyin: {
       id: "yd_persona_lingyin",
       key: "lingyin",
-      label: "泠音",
+      label: "泠音：剧情小说",
       themeKey: "lingyin",
     },
     yd_persona_ark: {
       id: "yd_persona_ark",
       key: "ark",
-      label: "Ark",
+      label: "Ark：角色扮演",
       themeKey: "ark",
     },
   };
@@ -71,25 +71,45 @@
   ];
 
   const HELP_TOPICS = {
-    think: [
-      { k: "预填充思考", v: "Gemini 4 及部分推理端点禁止请求以 Assistant 消息结尾，开启后可能触发 HTTP 400 报错；若报错请关闭此开关。" },
-      { k: "输出思考面板", v: "在正文中生成 <draft> 推理区；若所用模型已开启原生内置思考，可按需关闭以避免重复推演。" },
-      { k: "多角色调度", v: "两名及以上 NPC 同场时逐一核对各自目标、知情范围与反应差异；单 NPC 场景自动略过。" },
+    input_mode: [
+      { k: "直接承接", v: "把玩家本轮输入的言行视作已发生并已呈现的事实，正文不重复描写玩家刚写过的内容，直接从末尾接写结果、环境反馈与在场反应。" },
+      { k: "演绎展开", v: "把玩家本轮输入视作行动或场景提纲，先按当前视角与文风自然写进正文开头，再顺势接写结果与在场反应（适合简短指令型输入）。" },
+    ],
+    think_main: [
+      { k: "叙事推理-重度", v: "按四个核心要点逐步核查现场与输入定性、输入处理与代写边界、人物性格偏好与事件结果及表达落点，适合重视交互掌控与叙事质感的长线故事。" },
+      { k: "叙事推理-轻量", v: "简明罗列现场承接、边界与落点、事件结果及表达翻新四个要点，留给模型更轻快灵活的思考空间，也适合配合长上下文或原生思考模型降低输出耗时。" },
+    ],
+    think_addon: [
+      { k: "多角色调度", v: "两名及以上 NPC 同场时划分焦点角色与旁观角色，焦点角色依各自立场与知情差异作出不同反应，避免机械轮流发言；单 NPC 场景自动略过。" },
+      { k: "心理潜台词", v: "当角色心怀顾虑、有所隐瞒或存在立场冲突时深挖言外之意与表里错位；直爽人物与平缓日常保持自然直白。" },
+      { k: "伏笔与暗线", v: "结合前文盘点未兑现约定、旧线索与幕后推进，在自然触及时克制回扣或埋下生活化钩子，不强行制造反转。" },
+      { k: "防谄媚读心", v: "落笔前核查各角色反应是否立足自身性格、立场与实际已知信息，剔除无依据讨好、降底线或跳过观察沟通迎合未言明期待的写法。" },
+      { k: "防复读套话", v: "构思前对照近几轮回复排查重复倾向，避开换词复述同一情绪结论、沿用相同段式套路或高频描写套话，从新细节与视角翻新表达。" },
+    ],
+    think_tool: [
+      { k: "输出思考面板", v: "在正文前生成 <draft> 推理区；若所用模型已开启原生内置思考且上下文较长、首字偏慢或觉得双重思考冗长，可按需关闭，主思考与思考增强仍会指导模型内部思考。" },
+      { k: "正文批注", v: "按需使用的思考与记忆记录工具：构思前会先查看历史留存的过往批注，仅在遇到值得点评、吐槽、标记伏笔或备忘笔记之处才在正文段落间或文末以 ※ 标签：内容 记下，无须记述时自然省略。" },
+      { k: "预填充思考", v: "Gemini 4 及部分推理模型接口禁止请求以 Assistant 消息结尾，开启后可能触发 HTTP 400 报错；若报错请关闭此开关。" },
+    ],
+    extra_output: [
+      { k: "场景状态栏", v: "在正文之前单独一行输出 <scene>时间｜地点｜在场人物</scene>，辅助追踪时空与同场人物变化。" },
+      { k: "剧情选项", v: "正文之后、<ToBeContinue> 之前另起一行给出 2~4 个平等可选、有实质差异的后续方向，可混搭角色动向与时间推进、转场、切视角等叙事推进项。" },
+      { k: "外部格式兼容", v: "核查设定或前文约定的外部面板、变量更新或专属标签，确保各类格式各自成块且与内置附加输出不冲突。" },
     ],
     summary: [
       { k: "场景小结", v: "在每轮正文后附加简短 <summary> 客观摘要并随历史保留，辅助长对话记忆承接。" },
-      { k: "全局梳理", v: "单回合梳理模式：暂停续写并仅输出四段 <recap> 剧情档案；生成完成后请关闭该开关以恢复正常续写。" },
+      { k: "全局梳理", v: "单次梳理模式：暂停续写并仅输出四段 <recap> 剧情档案（超出 30 轮的早期梳理默认由「历史梳理清理」自动退场）；开启后悬浮球与面板顶部将给出提醒，本轮生成结束后会自动关闭以恢复正常续写。" },
     ],
     profiles: [
       { k: "作用范围", v: "模型方案仅修改推理强度、回复上限、采样与惩罚参数；不会改动上下文长度、流式开关或任何提示词。" },
-      { k: "HTTP 400 排查", v: "部分 Gemini / Vertex 端点不支持惩罚或 Min-P 参数，点「清零惩罚项」即可；若 Claude 新版报 temperature 与 top_p 互斥，请在酒馆 API 连接「排除请求体参数」中填入 top_p。" },
+      { k: "HTTP 400 排查", v: "部分 Gemini / Vertex 接口不支持惩罚或 Min-P 参数，点「清零惩罚项」即可；若 Claude 新版报 temperature 与 top_p 互斥，请在酒馆 API 连接「排除请求体参数」中填入 top_p。" },
       { k: "清零惩罚项", v: "将 Top-K、Min-P、Top-A、频率惩罚、存在惩罚归 0，并将重复惩罚复位为 1.0。" },
     ],
     budget: [
       { k: "思考深度", v: "控制模型内置思维链的推演投入（auto 由模型自定；low 减少过度思考与说教；high 适合复杂推演）。" },
       { k: "最大回复长度", v: "单位为 tokens。模型原生思考会占用该额度，写长文或高思考时建议保持 16384–32768 防止中途截断。" },
-      { k: "最大上下文长度", v: "单位为 tokens。重度长对话建议保留 200K–2M（实际有效窗口以所连模型及端点上限为准），切换模型方案不会覆盖你的设置。" },
-      { k: "返回思考内容", v: "控制是否在返回体中请求显示模型原生思维链内容。" },
+      { k: "最大上下文长度", v: "单位为 tokens。长对话建议保留 200K–2M（实际有效窗口以所连模型及接口上限为准），切换模型方案不会覆盖你的设置。" },
+      { k: "返回思考内容", v: "控制是否在回复结果中请求显示模型原生思维链内容。" },
     ],
     sampling: [
       { k: "温度 (Temperature)", v: "控制输出随机性与文风发散度；数值越高越跳跃，越低越稳重。" },
@@ -97,7 +117,7 @@
     ],
     advanced: [
       { k: "采样过滤", v: "Top-K 限制候选词数量，Min-P 与 Top-A 按概率动态截断低概率词（0 表示关闭）。" },
-      { k: "重复与惩罚", v: "频率、存在、重复惩罚用于抑制词句重复；严格端点若报 400 可点上方「清零惩罚项」。" },
+      { k: "重复与惩罚", v: "频率、存在、重复惩罚用于抑制词句重复；校验较严格的接口若报 400 可点上方「清零惩罚项」。" },
     ],
     banned: [
       { k: "作用", v: "发送给模型前，从 AI 历史回复中剔除这些词；不改聊天存档与界面显示。" },
@@ -108,8 +128,8 @@
   };
 
   const DEFAULT_PARAM_SETTINGS = {
-    reasoning_effort: "auto",
-    max_completion_tokens: 16384,
+    reasoning_effort: "high",
+    max_completion_tokens: 32768,
     max_context: 2000000,
     temperature: 1.0,
     top_p: 1.0,
@@ -163,7 +183,7 @@
       id: "claude",
       label: "Claude",
       settings: {
-        reasoning_effort: "auto",
+        reasoning_effort: "medium",
         max_completion_tokens: 16384,
         temperature: 1.0,
         top_p: 1.0,
@@ -201,34 +221,17 @@
   const MAX_BANNED_WORDS = 80;
   const MAX_BANNED_WORD_LEN = 40;
   const DEFAULT_BANNED_WORDS = [
-    "生理性的",
-    "生理性",
-    "生理泪水",
+    "本能般",
     "硬生生",
-    "条件反射般",
-    "某种意义上",
-    "喉咙里滚出轻笑",
-    "嘴角勾起一抹弧度",
-    "嘴角勾起弧度",
-    "死死咬住下唇",
-    "眼底闪过一丝",
-    "眼底闪过一抹",
-    "空气瞬间凝固",
-    "倒吸一口凉气",
-    "灭顶的快感",
-    "瞳孔微缩",
-    "瞳孔地震",
-    "指节泛白",
-    "喉结滚动",
-    "指腹摩挲",
-    "不可置信",
-    "不容置疑",
-    "五味杂陈",
-    "理智崩塌",
-    "眼神失焦",
-    "铁锈味",
-    "浮木",
-    "逼仄",
+    "不可置信地",
+    "不容置疑地",
+    "不由自主地",
+    "下意识地",
+    "死死地",
+    "狠狠地",
+    "莫名地",
+    "一丝丝",
+    "一抹抹",
   ];
 
   function normalizeHex(hex) {
@@ -742,7 +745,7 @@
           sourceUrl: url,
         };
       } catch (e) {
-        // 静默降级尝试下一静态源
+        // 忽略当前地址异常，改用下一备用地址
       } finally {
         if (timer) clearTimeout(timer);
       }
@@ -1220,6 +1223,13 @@
       `  color: var(--yd-fg); font-size: 13px; line-height: 1.45;`,
       `}`,
       `#${ROOT_EL_ID} * { box-sizing: border-box; }`,
+      `.yd-prose-dlg { color: color-mix(in srgb, var(--SmartThemeEmColor, #d46b94) 86%, var(--SmartThemeBodyColor, inherit)); font-weight: 500; }`,
+      `.yd-prose-dlg:empty, .yd-prose-sep[data-sep=""] { display: none; }`,
+      `.yd-prose-sep { display: block; width: 44%; height: 1px; margin: 1.05em auto; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--SmartThemeEmColor, #b85d7e) 76%, transparent), transparent); }`,
+      `#${ROOT_EL_ID} .yd-pill.has-recap { border-color: #d99b43; box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 5px 16px rgba(0,0,0,0.24), 0 0 12px rgba(217, 155, 67, 0.48); }`,
+      `#${ROOT_EL_ID} .yd-recap-banner { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 10px; margin-bottom: 10px; border-radius: 8px; border: 1px solid rgba(217, 155, 67, 0.55); background: rgba(217, 155, 67, 0.14); color: var(--yd-fg); font-size: 12px; }`,
+      `#${ROOT_EL_ID} .yd-recap-banner button { flex-shrink: 0; border: 1px solid rgba(217, 155, 67, 0.65); background: rgba(217, 155, 67, 0.22); color: inherit; border-radius: 5px; padding: 2px 8px; font-size: 11.5px; cursor: pointer; font-family: inherit; }`,
+      `#${ROOT_EL_ID} .yd-recap-banner button:hover { background: rgba(217, 155, 67, 0.34); }`,
       `@keyframes yd-sphere-breathe {`,
       `  0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 5px 16px rgba(0,0,0,0.22), 0 0 10px var(--yd-glow); }`,
       `  50% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.26), 0 6px 18px rgba(0,0,0,0.25), 0 0 15px var(--yd-accent-border); }`,
@@ -1391,7 +1401,7 @@
       `#${ROOT_EL_ID} .yd-color-wrap {`,
       `  position: relative; width: 20px; height: 20px; border-radius: 50%; overflow: hidden;`,
       `  border: 1.5px solid var(--yd-border); display: inline-flex; align-items: center; justify-content: center;`,
-      `  background: conic-gradient(#d46b94, #c69352, #59a985, #5fa0d0, #9575d8, #d46b94); cursor: pointer;`,
+      `  background: conic-gradient(#d46b94, #c69352, #59a985, #3b9eff, #9575d8, #d46b94); cursor: pointer;`,
       `  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);`,
       `}`,
       `#${ROOT_EL_ID} .yd-color-wrap:hover { transform: scale(1.08); }`,
@@ -1457,7 +1467,7 @@
     const pill = hd.createElement("button");
     pill.type = "button";
     pill.className = "yd-pill";
-    pill.title = "ST-预设助手 · 莉莉丝（点击展开，按住拖动）";
+    pill.title = "ST-预设助手 · 莉莉丝：肉文写手（点击展开，按住拖动）";
     pill.setAttribute("aria-label", "打开 ST-预设助手面板");
 
     const svgNS = "http://www.w3.org/2000/svg";
@@ -1632,9 +1642,15 @@
     let updateCheckResult = null;
     let hasCheckedUpdateOnLoad = false;
     let activeHelpTopic = null;
-    let paramAdvOpen = true;
+    const PARAM_ADV_KEY = "yd_assistant_param_adv_open_v1";
+    let paramAdvOpen = false;
+    try {
+      const savedAdv = hw.localStorage && hw.localStorage.getItem(PARAM_ADV_KEY);
+      if (savedAdv === "1" || savedAdv === "true") paramAdvOpen = true;
+    } catch (e) {}
     let cleaned = false;
     let presetChangedSub = null;
+    let recapAutoOffSub = null;
 
     function syncHelpButtons() {
       const btns = drawer.querySelectorAll(".yd-help-btn[data-yd-help-toggle]");
@@ -1904,8 +1920,16 @@
         return;
       }
 
+      const presetHelpMap = {
+        "输入处理": "input_mode",
+        "主思考": "think_main",
+        "思考增强": "think_addon",
+        "思考工具": "think_tool",
+        "附加输出": "extra_output",
+        "总结": "summary",
+      };
       sections.forEach(function (sec) {
-        const helpKey = sec.key === "思考" ? "think" : (sec.key === "总结" ? "summary" : null);
+        const helpKey = presetHelpMap[sec.key] || null;
         renderSection(sec.title, function (wrap) {
           sec.items.forEach(function (item) {
             const btn = hd.createElement("button");
@@ -1945,7 +1969,7 @@
       zeroBtn.className = "yd-mini-link";
       zeroBtn.setAttribute("data-yd-action", "zero-penalties");
       zeroBtn.textContent = "清零惩罚项";
-      zeroBtn.title = "清空频率/存在/重复惩罚与 Top-K/Min-P/Top-A，规避部分端点 400 报错";
+      zeroBtn.title = "清空频率/存在/重复惩罚与 Top-K/Min-P/Top-A，避免部分接口报 400 错误";
       zeroBtn.addEventListener("click", function () {
         mutatePreset(function (p) {
           zeroSamplingPenalties(p);
@@ -2265,6 +2289,9 @@
 
       advToggleBtn.addEventListener("click", function () {
         paramAdvOpen = !paramAdvOpen;
+        try {
+          if (hw.localStorage) hw.localStorage.setItem(PARAM_ADV_KEY, paramAdvOpen ? "1" : "0");
+        } catch (e) {}
         advToggleBtn.textContent = paramAdvOpen ? "收起" : "展开";
         advToggleBtn.setAttribute("aria-expanded", String(paramAdvOpen));
         advCard.style.display = paramAdvOpen ? "flex" : "none";
@@ -2589,8 +2616,12 @@
       const mergedThemes = Object.assign({}, loadLocalThemes(), readPresetThemes(preset));
       const theme = getPersonaTheme(activePersona, mergedThemes);
       applyThemeColors(theme);
+      const recapActive = prompts.some(function (p) {
+        return p && p.identifier === "yd_summary_recap" && p.enabled;
+      });
+      pill.classList.toggle("has-recap", recapActive);
       const pillPersonaDesc = activePersona.label ? ("ST-预设助手 · " + activePersona.label) : "ST-预设助手";
-      pill.title = pillPersonaDesc + (updateCheckResult && updateCheckResult.hasUpdate ? " · 发现新版本" : "") + "（点击展开，按住拖动）";
+      pill.title = pillPersonaDesc + (recapActive ? " · 全局梳理已开启" : "") + (updateCheckResult && updateCheckResult.hasUpdate ? " · 发现新版本" : "") + "（点击展开，按住拖动）";
       pill.setAttribute("aria-label", pillPersonaDesc);
 
       syncTabButtons();
@@ -2598,6 +2629,26 @@
       const prevScrollTop = preserveScroll ? body.scrollTop : 0;
       body.classList.toggle("is-entering", !preserveScroll);
       body.innerHTML = "";
+
+      if (recapActive) {
+        const recapBanner = hd.createElement("div");
+        recapBanner.className = "yd-recap-banner";
+        recapBanner.setAttribute("data-yd-recap-banner", "true");
+        const msgSpan = hd.createElement("span");
+        msgSpan.textContent = "全局梳理已开启（本轮生成后自动关闭）";
+        const closeRecapBtn = hd.createElement("button");
+        closeRecapBtn.type = "button";
+        closeRecapBtn.textContent = "立即关闭";
+        closeRecapBtn.addEventListener("click", function () {
+          mutatePreset(function (p) {
+            const target = (p.prompts || []).find(function (x) { return x && x.identifier === "yd_summary_recap"; });
+            if (target) target.enabled = false;
+          }, "已关闭「全局梳理」，恢复正常续写");
+        });
+        recapBanner.appendChild(msgSpan);
+        recapBanner.appendChild(closeRecapBtn);
+        body.appendChild(recapBanner);
+      }
 
       if (state.activeTab === "params") {
         renderParamsTab(preset);
@@ -2757,6 +2808,9 @@
       if (presetChangedSub && typeof presetChangedSub.stop === "function") {
         try { presetChangedSub.stop(); } catch (e) {}
       }
+      if (recapAutoOffSub && typeof recapAutoOffSub.stop === "function") {
+        try { recapAutoOffSub.stop(); } catch (e) {}
+      }
       hw.removeEventListener("resize", handleResize);
       if (hw.visualViewport) {
         hw.visualViewport.removeEventListener("resize", handleResize);
@@ -2776,6 +2830,25 @@
     if (hwEvents && tev && tev.PRESET_CHANGED) {
       presetChangedSub = hwEvents(tev.PRESET_CHANGED, function () {
         if (!cleaned && selfUpdateCount === 0) renderFromPreset();
+      });
+    }
+    if (hwEvents && tev && tev.GENERATION_ENDED) {
+      recapAutoOffSub = hwEvents(tev.GENERATION_ENDED, function () {
+        if (cleaned) return;
+        const api = resolvePresetApi();
+        if (!api) return;
+        try {
+          const cur = api.getPreset("in_use");
+          const recapItem = cur && Array.isArray(cur.prompts)
+            ? cur.prompts.find(function (x) { return x && x.identifier === "yd_summary_recap" && x.enabled; })
+            : null;
+          if (recapItem) {
+            mutatePreset(function (p) {
+              const target = (p.prompts || []).find(function (x) { return x && x.identifier === "yd_summary_recap"; });
+              if (target) target.enabled = false;
+            }, "已自动关闭「全局梳理」，恢复正常续写");
+          }
+        } catch (e) {}
       });
     }
 

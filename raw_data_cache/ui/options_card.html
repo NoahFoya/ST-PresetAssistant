@@ -261,7 +261,7 @@
     </div>
     <div class="yd-opt-controls">
       <div class="yd-opt-modes" role="group" aria-label="输入模式">
-        <button type="button" class="yd-mode-btn active" data-mode="fill" title="填入并覆盖当前输入框内容">填入</button>
+        <button type="button" class="yd-mode-btn active" data-mode="fill" title="填入输入框（已有草稿时换行追加）">填入</button>
         <button type="button" class="yd-mode-btn" data-mode="send" title="覆盖输入框内容后立即发送">发送</button>
       </div>
       <button type="button" class="yd-collapse-btn" id="yd-collapse-btn" aria-expanded="true" title="展开 / 收起">▾</button>
@@ -507,7 +507,9 @@
         const sendBtn = hostDoc.querySelector("#send_but") || document.querySelector("#send_but");
 
         if (ta) {
-          ta.value = fillText;
+          const existingDraft = String(ta.value || "").trim();
+          const appended = existingDraft.length > 0;
+          ta.value = appended ? (ta.value.replace(/\s+$/, "") + "\n" + fillText) : fillText;
           ta.dispatchEvent(new Event("input", { bubbles: true }));
           ta.dispatchEvent(new Event("change", { bubbles: true }));
           ta.focus();
@@ -523,10 +525,10 @@
               sendBtn.click();
               showToast("🚀 已发送：" + fillText);
             } else {
-              showToast("📝 发送按钮当前不可用，已改为填入输入框：" + fillText);
+              showToast(appended ? ("📝 发送按钮当前不可用，已追加至输入框：" + fillText) : ("📝 发送按钮当前不可用，已改为填入输入框：" + fillText));
             }
           } else {
-            showToast("📝 已填入输入框：" + fillText);
+            showToast(appended ? ("📝 已追加至输入框（保留原有草稿）：" + fillText) : ("📝 已填入输入框：" + fillText));
           }
         } else if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(fillText).then(function () {

@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_cot_anti_repeat",
+  "name": "[思考增强] 防复读套话 [多选]",
+  "role": "system",
+  "content": "{{setvar::cot_header::## 构思与推演}}\n{{setvar::cot_anti_repeat::### 防复读套话\n- 构思前排查近几轮回复，检出并避开换词重申同一情绪结论、沿用相同开篇收束套路或复用高频描写套话。\n- 即使局势处于沉默、僵持或缓行阶段，也通过新的环境细节、在场角色的独立反应或不同观察角度翻新写法。}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": false,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}
