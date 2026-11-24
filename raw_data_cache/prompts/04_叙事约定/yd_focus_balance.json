@@ -1,8 +1,8 @@
 {
   "identifier": "yd_focus_balance",
-  "name": "[侧重] 均衡全面 [单选]",
+  "name": "[侧重] 自然均衡 [单选]",
   "role": "system",
-  "content": "{{setvar::nar_focus::## 描写侧重\n- 以人物互动与当前核心冲突为主轴，用对话交锋推进立场碰撞，用动作、眼神、外貌神态与肢体细节承托情绪变化。\n- 心理活动点染真实动机而不替代现场行动，环境氛围随人物视角与动线自然带出，使各项描写相互呼应、各安其位。}}",
+  "content": "{{setvar::nar_open::<narrative_rules>}}\n{{setvar::nar_close::</narrative_rules>}}\n{{setvar::nar_focus::## 描写侧重\n- 依当下场景自然分配笔墨，围绕当前事件主轴与互动重心偏重对话交锋、动作神态、心理暗流或环境氛围中的一两项，其余维度简明配合或自然留白，不刻意平均铺满。}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

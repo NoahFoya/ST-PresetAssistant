@@ -2,7 +2,7 @@
   "identifier": "yd_feat_action_options",
   "name": "[附加输出] 剧情选项 [多选]",
   "role": "system",
-  "content": "{{setvar::out_header::## 附加输出}}\n{{setvar::out_options::### 剧情选项\n- 正文自然写完后，在正文之后、`<ToBeContinue>` 之前另起一行输出 `<options>` 标签，承接结尾局势给出 2~4 个平等可选、切入角度有实质差异的后续方向。选项不限于 {{user}} 的角色动向，也可按场景融入叙事功能项（如时间推进、场景转场、临时切视角看幕间、引入合理情境变化、深挖眼下细节或按兵不动）；角色动向类仅基于 {{user}} 已知信息写成可直接发出的具体言行且不替 NPC 预设反应，叙事功能类写成简明清晰的推进指令，均单行呈现，格式如下：\n<options>\nA. 简短标题：可直接发出的角色言行或叙事推进指令\n</options>}}",
+  "content": "{{setvar::out_header::## 附加输出}}\n{{setvar::out_options::### 剧情选项\n- 正文自然写完后、`<ToBeContinue>` 之前另起一行输出 `<options>` 标签，承接结尾局势给出 2~4 个在行动方式与推进维度上拉开差异的后续选项，避免连续多轮停留在相近的动作姿态。\n- 可按场景合理混搭改变互动状态或推进阶段的角色动向，以及时间推进、场景转场、临时切视角或留白静观等叙事功能项；角色动向仅基于 {{user}} 已知信息写成可直接发出的具体言行，叙事功能写成简明推进指令，均单行呈现，格式如下：\n<options>\nA. 简短标题：可直接发出的角色言行或叙事推进指令\n</options>}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

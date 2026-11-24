@@ -2,7 +2,7 @@
   "identifier": "yd_length_short",
   "name": "[篇幅] 较短 (400-800字) [单选]",
   "role": "system",
-  "content": "{{setvar::nar_length::## 参考篇幅\n- 正常展开时正文以 400~800 字左右为宜，省去外围铺垫与次要枝节，笔墨集中在当前最核心的一组对话交锋或动作往来上。}}",
+  "content": "{{setvar::nar_open::<narrative_rules>}}\n{{setvar::nar_close::</narrative_rules>}}\n{{setvar::nar_length::## 参考篇幅\n- 信息量充沛时正文以 400~800 字为展开参考，聚焦当前最核心的一组对话交锋或动作往来；若本轮仅为简短应答、低信息过渡或很快抵达玩家决策节点，直接简短收束，按实际信息量伸缩。}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

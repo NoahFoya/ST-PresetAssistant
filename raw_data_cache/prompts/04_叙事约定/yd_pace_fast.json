@@ -2,7 +2,7 @@
   "identifier": "yd_pace_fast",
   "name": "[节奏] 紧凑推进 [单选]",
   "role": "system",
-  "content": "{{setvar::nar_pace::## 剧情节奏\n- 压缩静态环境铺陈与次要枝节，多用利落的动作与直截了当的对话直接推进局势。\n- 角色沟通直切核心，省去无效寒暄与重复确认；常规搜寻、准备或行程一笔交代结果，着力推动明确的事件进展。}}",
+  "content": "{{setvar::nar_open::<narrative_rules>}}\n{{setvar::nar_close::</narrative_rules>}}\n{{setvar::nar_pace::## 剧情节奏\n- 压缩静态环境铺陈与次要枝节，多用利落的动作与直截了当的对话直接推进局势。\n- 角色沟通直切核心，省去无效寒暄与重复确认；常规搜寻、准备或行程一笔交代结果，着力推动明确的事件进展。}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

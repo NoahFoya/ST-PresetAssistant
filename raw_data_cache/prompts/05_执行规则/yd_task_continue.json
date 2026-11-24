@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_task_continue",
+  "name": "[核心任务] 续写故事 [单选]",
+  "role": "user",
+  "content": "<core_task>\n紧接 <chat_history> 的最新处，按上述规则自然续写本轮故事。\n</core_task>",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": true,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

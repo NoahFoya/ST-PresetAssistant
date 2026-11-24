@@ -2,7 +2,7 @@
   "identifier": "yd_cot_subtext",
   "name": "[思考增强] 心理潜台词 [多选]",
   "role": "system",
-  "content": "{{setvar::cot_header::## 构思与推演}}\n{{setvar::cot_subtext::### 心理潜台词\n- 仅在角色心怀顾虑、有所隐瞒或立场分歧时，推演其言外之意、真实诉求与表里错位，权衡哪些借神态细节透出几分、哪些留在心里；坦诚直爽的交流与平淡日常照常直写。}}",
+  "content": "{{setvar::cot_header::## 构思与推演}}\n{{setvar::cot_subtext::### 心理潜台词\n- 核查在场角色当前是否存在隐瞒、顾虑、试探或立场分歧：确有言外之意时，推导真实诉求与表面言行的错位并确定一处可观察的外显落差（视线、停顿、改口或细微动作）；坦诚交流或普通问答时，此项推演记“无”。}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

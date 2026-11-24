@@ -2,7 +2,7 @@
   "identifier": "yd_cot_anti_sycophancy",
   "name": "[思考增强] 防谄媚读心 [多选]",
   "role": "system",
-  "content": "{{setvar::cot_header::## 构思与推演}}\n{{setvar::cot_anti_sycophancy::### 防谄媚读心\n- 构思角色反应时逐一核查：其态度是否源自自身性格、利益、当下心情与既有关系，而不是为讨好 {{user}} 主动降低底线、凭空升温好感或无条件配合；该亲近热络时自然流露，该冷淡、拒绝、误判或各怀心思时保持原样。\n- 同时核对信息来源：角色只依亲历见闻、设定明示与现场线索作出判断，剔除任何跳过观察与沟通、直接迎合 {{user}} 未言明喜好或期待的反应。}}",
+  "content": "{{setvar::cot_header::## 构思与推演}}\n{{setvar::cot_anti_sycophancy::### 防谄媚读心\n- 划定在场角色仅凭亲历见闻与当面获知所掌握的已知范围，核查是否存在信息盲区。\n- 核对在场角色与 {{user}} 当下的真实动机、利益关系与性格底线，据实得出本轮立场反应：动机一致时自然顺应，存在分歧、顾虑或盲区时推导保留、试探、条件交换、拒绝或误判。}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

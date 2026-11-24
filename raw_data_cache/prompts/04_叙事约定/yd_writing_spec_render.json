@@ -1,8 +1,8 @@
 {
   "identifier": "yd_writing_spec_render",
   "name": "📐 叙事约定 - 汇总",
-  "role": "user",
-  "content": "<narrative_rules>\n{{getvar::persona_name}}，本轮写作请按以下叙事约定展开：\n\n{{getvar::nar_pov}}\n\n{{getvar::nar_style}}\n\n{{getvar::nar_pace}}\n\n{{getvar::nar_focus}}\n\n{{getvar::nar_length}}\n\n{{getvar::nar_spec}}\n\n{{getvar::nar_nsfw}}\n\n{{getvar::nar_nsfw_detail}}\n</narrative_rules>",
+  "role": "system",
+  "content": "{{getvar::nar_open}}\n{{getvar::nar_pov}}\n\n{{getvar::nar_style}}\n\n{{getvar::nar_pace}}\n\n{{getvar::nar_focus}}\n\n{{getvar::nar_length}}\n\n{{getvar::nar_spec}}\n\n{{getvar::nar_nsfw}}\n\n{{getvar::nar_nsfw_detail}}\n{{getvar::nar_close}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

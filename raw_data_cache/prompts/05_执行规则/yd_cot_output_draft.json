@@ -2,7 +2,7 @@
   "identifier": "yd_cot_output_draft",
   "name": "[思考工具] 输出思考面板 [多选]",
   "role": "system",
-  "content": "{{setvar::cot_header::## 构思与推演}}\n{{setvar::cot_draft::### 思考面板\n- 你在正式落笔故事正文前，先将本轮构思与核查要点简明写入 `<draft>...</draft>` 标签内，闭合 `</draft>` 后另起一行继续输出后续内容。}}",
+  "content": "{{setvar::cot_header::## 构思与推演}}\n{{setvar::cot_draft::### 思考面板\n- 在正式落笔故事正文前，将本轮「构思与推演」下全部已启用步骤的推导过程与结论，按清晰的分析与决策条目依次完整写入 `<draft>...</draft>` 标签内，将具体行文描写留给正文，闭合 `</draft>` 后另起一行开始输出后续内容。}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

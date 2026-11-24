@@ -2,7 +2,7 @@
   "identifier": "yd_focus_psychology",
   "name": "[侧重] 心理刻画 [单选]",
   "role": "system",
-  "content": "{{setvar::nar_focus::## 描写侧重\n- 重点呈现人物当下的情绪暗流、犹疑权衡与言行背后的真实动机，避免用抽象概括句替角色情绪下结论。\n- 允许直写内心时，通过具体的思绪转折、克制与动摇展现心理层次；不便直写时，改由停顿迟疑、话头改口、眼神回避与潜台词透出内心波澜。}}",
+  "content": "{{setvar::nar_open::<narrative_rules>}}\n{{setvar::nar_close::</narrative_rules>}}\n{{setvar::nar_focus::## 描写侧重\n- 重点呈现人物当下的情绪暗流、犹疑权衡与言行背后的真实动机：对当前视角可直接进入内心的角色细写思绪波动与权衡过程，对视角之外的角色通过停顿、改口、视线回避与潜台词展现心理层次，替代抽象情绪概括。}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

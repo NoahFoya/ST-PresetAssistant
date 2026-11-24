@@ -5,7 +5,7 @@
 (function (root) {
   "use strict";
 
-  const PRESET_VERSION = "0.9.0";
+  const PRESET_VERSION = "1.0.0";
   const GITHUB_REPO = "NoahFoya/ST-PresetAssistant";
   const GITHUB_CHANGELOG_URL = "https://github.com/" + GITHUB_REPO + "/blob/main/CHANGELOG.md";
   const GITHUB_PACKAGE_URLS = [
@@ -72,33 +72,35 @@
 
   const HELP_TOPICS = {
     input_mode: [
-      { k: "直接承接", v: "把玩家本轮输入的言行视作已发生并已呈现的事实，正文不重复描写玩家刚写过的内容，直接从末尾接写结果、环境反馈与在场反应。" },
-      { k: "演绎展开", v: "把玩家本轮输入视作行动或场景提纲，先按当前视角与文风自然写进正文开头，再顺势接写结果与在场反应（适合简短指令型输入）。" },
+      { k: "直接承接", v: "把玩家本轮已写出的言行视作已发生并已呈现的内容，正文直接从末尾顺接结果、环境反馈与在场反应，略去重复描写；指令、安排、尝试、意愿、提问或假设各自按原语义承接，无新输入时自然续写。" },
+      { k: "演绎展开", v: "把玩家本轮输入视作行动或场景提纲，先按当前视角与文风自然融入正文开头，再顺势接写结果与在场反应（行动、尝试、意愿、提问、假设各自按原语义呈现）。" },
     ],
     think_main: [
-      { k: "叙事推理-重度", v: "按四个核心要点逐步核查现场与输入定性、输入处理与代写边界、人物性格偏好与事件结果及表达落点，适合重视交互掌控与叙事质感的长线故事。" },
-      { k: "叙事推理-轻量", v: "简明罗列现场承接、边界与落点、事件结果及表达翻新四个要点，留给模型更轻快灵活的思考空间，也适合配合长上下文或原生思考模型降低输出耗时。" },
+      { k: "叙事推理-重度", v: "按四个步骤辨别五类输入性质与状态变化差分、明确控制范围与收束节点、推导已知信息下的事件因果，并判断本轮是否有新进展（无新增变化时顺势承接自然收束）。" },
+      { k: "叙事推理-轻量", v: "简明核对五类输入、状态变化差分、边界收束与事件因果，有新进展则锁定核心落点、无新增变化时自然收束，适合长上下文或原生思考模型。" },
     ],
     think_addon: [
-      { k: "多角色调度", v: "两名及以上 NPC 同场时划分焦点角色与旁观角色，焦点角色依各自立场与知情差异作出不同反应，避免机械轮流发言；单 NPC 场景自动略过。" },
-      { k: "心理潜台词", v: "当角色心怀顾虑、有所隐瞒或存在立场冲突时深挖言外之意与表里错位；直爽人物与平缓日常保持自然直白。" },
-      { k: "伏笔与暗线", v: "结合前文盘点未兑现约定、旧线索与幕后推进，在自然触及时克制回扣或埋下生活化钩子，不强行制造反转。" },
-      { k: "防谄媚读心", v: "落笔前核查各角色反应是否立足自身性格、立场与实际已知信息，剔除无依据讨好、降底线或跳过观察沟通迎合未言明期待的写法。" },
-      { k: "防复读套话", v: "构思前对照近几轮回复排查重复倾向，避开换词复述同一情绪结论、沿用相同段式套路或高频描写套话，从新细节与视角翻新表达。" },
+      { k: "选开建议", v: "通用防迎合与去重原则已内化在核心规则与写作规范中；思考增强按当前场景需要选开 1~2 项即可，开启后每轮必先核查判断（条件不成立时推演记“无”）。" },
+      { k: "多角色调度", v: "核查是否多人同场；多人时划分主焦点与旁观角色，仅在旁观反应有意义时安排一处简明动向，单人或无需旁观介入时推演记“无”。" },
+      { k: "心理潜台词", v: "核查角色是否存在隐瞒、顾虑或立场分歧；确有时推导言外之意与一处外显落差，坦诚交流或普通问答时推演记“无”。" },
+      { k: "伏笔与暗线", v: "核查未兑现约定、旧线索与幕后动向是否与当下存在自然触点；有触点时安排一处回扣或暗线痕迹，暂无自然触点时推演记“无”。" },
+      { k: "防谄媚读心", v: "划定角色仅凭亲历与当面获知掌握的信息范围，核对其真实动机、利益关系与底线，据实得出顺应、保留、试探、拒绝或盲区误判结论。" },
+      { k: "防复读套话", v: "对照近几轮正文标出已表达充分的情绪、动作与描写结构，本轮免于换词重述；无新增变化时直接规划简短收束。" },
     ],
     think_tool: [
-      { k: "输出思考面板", v: "在正文前生成 <draft> 推理区；若所用模型已开启原生内置思考且上下文较长、首字偏慢或觉得双重思考冗长，可按需关闭，主思考与思考增强仍会指导模型内部思考。" },
-      { k: "正文批注", v: "按需使用的思考与记忆记录工具：构思前会先查看历史留存的过往批注，仅在遇到值得点评、吐槽、标记伏笔或备忘笔记之处才在正文段落间或文末以 ※ 标签：内容 记下，无须记述时自然省略。" },
+      { k: "输出思考面板", v: "将「构思与推演」下全部已启用步骤的推导过程与结论按清晰条目完整写入 <draft> 便于排查并防止跳步偷懒；搭配原生思考模型若感耗时偏长可按需关闭。" },
       { k: "预填充思考", v: "Gemini 4 及部分推理模型接口禁止请求以 Assistant 消息结尾，开启后可能触发 HTTP 400 报错；若报错请关闭此开关。" },
     ],
     extra_output: [
       { k: "场景状态栏", v: "在正文之前单独一行输出 <scene>时间｜地点｜在场人物</scene>，辅助追踪时空与同场人物变化。" },
-      { k: "剧情选项", v: "正文之后、<ToBeContinue> 之前另起一行给出 2~4 个平等可选、有实质差异的后续方向，可混搭角色动向与时间推进、转场、切视角等叙事推进项。" },
+      { k: "正文批注", v: "默认关闭，开启后落笔前先查阅历史批注，并在正文关键段落间或文末固定以 ※ 标签：内容 输出 1~2 条批注（点评 / 吐槽 / 伏笔 / 笔记）随历史留存。" },
+      { k: "场景小结", v: "在每轮正文后附加 2~4 句简短 <summary> 客观摘要并随历史保留，辅助长对话记忆承接。" },
+      { k: "剧情选项", v: "正文之后、<ToBeContinue> 之前按结尾局势给出 2~4 个差异化后续选项，可混搭角色动向与时间推进、转场、切视角或留白静观。" },
       { k: "外部格式兼容", v: "核查设定或前文约定的外部面板、变量更新或专属标签，确保各类格式各自成块且与内置附加输出不冲突。" },
     ],
-    summary: [
-      { k: "场景小结", v: "在每轮正文后附加简短 <summary> 客观摘要并随历史保留，辅助长对话记忆承接。" },
-      { k: "全局梳理", v: "单次梳理模式：暂停续写并仅输出四段 <recap> 剧情档案（超出 30 轮的早期梳理默认由「历史梳理清理」自动退场）；开启后悬浮球与面板顶部将给出提醒，本轮生成结束后会自动关闭以恢复正常续写。" },
+    core_task: [
+      { k: "续写故事", v: "默认开启的常规创作任务：紧接对话历史最新处按规则自然续写（兼容有玩家输入、无输入直接续写与中途接续），同时在请求末尾提供安全 user 缓冲。" },
+      { k: "全文总结", v: "单次总结模式：暂停续写与剧情附加输出，直接输出四段 <recap> 全文总结档案与完结标记（超出 30 轮的早期总结由「历史总结清理」自动退场）；生成结束后自动切回「续写故事」。" },
     ],
     profiles: [
       { k: "作用范围", v: "模型方案仅修改推理强度、回复上限、采样与惩罚参数；不会改动上下文长度、流式开关或任何提示词。" },
@@ -222,13 +224,23 @@
   const MAX_BANNED_WORD_LEN = 40;
   const DEFAULT_BANNED_WORDS = [
     "本能般",
+    "本能地",
     "硬生生",
     "不可置信地",
+    "不可置信的",
     "不容置疑地",
+    "不容置疑的",
     "不由自主地",
+    "不由自主",
     "下意识地",
+    "微不可察地",
+    "微不可察的",
+    "几不可察地",
+    "几不可察的",
     "死死地",
+    "死死",
     "狠狠地",
+    "狠狠",
     "莫名地",
     "一丝丝",
     "一抹抹",
@@ -1926,7 +1938,7 @@
         "思考增强": "think_addon",
         "思考工具": "think_tool",
         "附加输出": "extra_output",
-        "总结": "summary",
+        "核心任务": "core_task",
       };
       sections.forEach(function (sec) {
         const helpKey = presetHelpMap[sec.key] || null;
@@ -2617,11 +2629,11 @@
       const theme = getPersonaTheme(activePersona, mergedThemes);
       applyThemeColors(theme);
       const recapActive = prompts.some(function (p) {
-        return p && p.identifier === "yd_summary_recap" && p.enabled;
+        return p && getPromptId(p) === "yd_task_full_summary" && p.enabled;
       });
       pill.classList.toggle("has-recap", recapActive);
       const pillPersonaDesc = activePersona.label ? ("ST-预设助手 · " + activePersona.label) : "ST-预设助手";
-      pill.title = pillPersonaDesc + (recapActive ? " · 全局梳理已开启" : "") + (updateCheckResult && updateCheckResult.hasUpdate ? " · 发现新版本" : "") + "（点击展开，按住拖动）";
+      pill.title = pillPersonaDesc + (recapActive ? " · 全文总结已开启" : "") + (updateCheckResult && updateCheckResult.hasUpdate ? " · 发现新版本" : "") + "（点击展开，按住拖动）";
       pill.setAttribute("aria-label", pillPersonaDesc);
 
       syncTabButtons();
@@ -2635,15 +2647,18 @@
         recapBanner.className = "yd-recap-banner";
         recapBanner.setAttribute("data-yd-recap-banner", "true");
         const msgSpan = hd.createElement("span");
-        msgSpan.textContent = "全局梳理已开启（本轮生成后自动关闭）";
+        msgSpan.textContent = "全文总结已开启（本轮生成后自动切回续写故事）";
         const closeRecapBtn = hd.createElement("button");
         closeRecapBtn.type = "button";
-        closeRecapBtn.textContent = "立即关闭";
+        closeRecapBtn.textContent = "立即切回";
         closeRecapBtn.addEventListener("click", function () {
           mutatePreset(function (p) {
-            const target = (p.prompts || []).find(function (x) { return x && x.identifier === "yd_summary_recap"; });
-            if (target) target.enabled = false;
-          }, "已关闭「全局梳理」，恢复正常续写");
+            const list = p.prompts || [];
+            const summaryTarget = list.find(function (x) { return x && getPromptId(x) === "yd_task_full_summary"; });
+            if (summaryTarget) summaryTarget.enabled = false;
+            const contTarget = list.find(function (x) { return x && getPromptId(x) === "yd_task_continue"; });
+            if (contTarget) contTarget.enabled = true;
+          }, "已切回「续写故事」，恢复正常续写");
         });
         recapBanner.appendChild(msgSpan);
         recapBanner.appendChild(closeRecapBtn);
@@ -2840,13 +2855,16 @@
         try {
           const cur = api.getPreset("in_use");
           const recapItem = cur && Array.isArray(cur.prompts)
-            ? cur.prompts.find(function (x) { return x && x.identifier === "yd_summary_recap" && x.enabled; })
+            ? cur.prompts.find(function (x) { return x && getPromptId(x) === "yd_task_full_summary" && x.enabled; })
             : null;
           if (recapItem) {
             mutatePreset(function (p) {
-              const target = (p.prompts || []).find(function (x) { return x && x.identifier === "yd_summary_recap"; });
-              if (target) target.enabled = false;
-            }, "已自动关闭「全局梳理」，恢复正常续写");
+              const list = p.prompts || [];
+              const summaryTarget = list.find(function (x) { return x && getPromptId(x) === "yd_task_full_summary"; });
+              if (summaryTarget) summaryTarget.enabled = false;
+              const contTarget = list.find(function (x) { return x && getPromptId(x) === "yd_task_continue"; });
+              if (contTarget) contTarget.enabled = true;
+            }, "已自动切回「续写故事」，恢复正常续写");
           }
         } catch (e) {}
       });

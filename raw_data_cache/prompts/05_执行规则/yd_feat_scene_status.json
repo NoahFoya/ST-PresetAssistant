@@ -2,7 +2,7 @@
   "identifier": "yd_feat_scene_status",
   "name": "[附加输出] 场景状态栏 [多选]",
   "role": "system",
-  "content": "{{setvar::out_header::## 附加输出}}\n{{setvar::out_scene::### 场景状态栏\n- 在故事正文之前单独一行输出 `<scene>时间｜地点｜在场人物</scene>`，固定三栏、以 `｜` 分隔，不加字段前缀，也不增设额外栏目；在场人物只列当前镜头中的同场角色（多人用 `、` 分隔，仅单人在场时注明独处），发生转场或人员进出时以落地后的现场为准，与上一轮一致的字段照常写出。}}",
+  "content": "{{setvar::out_header::## 附加输出}}\n{{setvar::out_scene::### 场景状态栏\n- 在故事正文之前单独一行输出 `<scene>时间｜地点｜在场人物</scene>`，固定三栏并以 `｜` 分隔，以本轮落地后的当前现场为准列出同场角色（多人用 `、` 分隔，单人在场注明独处）。}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

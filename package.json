@@ -1,6 +1,6 @@
 {
   "name": "st-preset-assistant",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "description": "ST-PresetAssistant (ST-预设助手): SillyTavern Multi-Persona Interactive Fiction Preset & TavernHelper Control Suite",
   "main": "scripts/build_preset.py",
   "scripts": {
