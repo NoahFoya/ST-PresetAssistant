@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_cot_output_draft",
+  "name": "[格式要求] 输出思考面板 [多选]",
+  "role": "system",
+  "content": "{{setvar::out_header::## 格式要求}}\n{{setvar::out_draft::### 思考面板\n- 在正式落笔故事正文前，先在 `<draft>...</draft>` 标签内完整写出本轮构思与推演过程及关键决策条目（若上方启用了「构思与推演」步骤，须逐项对应展开），将具体行文描写留给正文，闭合 `</draft>` 后另起一行开始输出后续内容。}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": true,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_add_coincidence",
+  "name": "[附加设定] 戏剧性巧合 [多选]",
+  "role": "system",
+  "content": "{{setvar::add_open::<additional_settings>\n## 附加设定}}\n{{setvar::add_close::</additional_settings>}}\n{{setvar::add_coincidence::### 戏剧性巧合\n- 故事世界的巧合密度偏高，在气氛胶着或需要制造交集时，容易自然触发贴合当前环境条件的突发契机（如行程意外受阻、时机错位、物件误拿或无意撞破秘密等）。\n- 单段剧情只在关键转折或需要打破平淡处适度点缀一处恰当的意外契机，用以推动局面变化或拉近人物距离，避免连环堆砌同类巧合。}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": false,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

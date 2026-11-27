@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_add_comedy",
+  "name": "[附加设定] 沙雕喜剧 [多选]",
+  "role": "system",
+  "content": "{{setvar::add_open::<additional_settings>\n## 附加设定}}\n{{setvar::add_close::</additional_settings>}}\n{{setvar::add_comedy::### 沙雕喜剧\n- 故事日常带着轻快的荒诞喜剧质感，人物一本正经的执念、阴差阳错的乌龙误会与滑稽反差频频相撞，自然冒出轻松好笑的戏剧火花。\n- 喜感源自情境错位、角色认真的脑回路与一本正经的犯傻，即使身处严肃背景也会在窘迫或接茬错频时透出浑然不觉的幽默，保持作品自身语言质感而远离生硬网络烂梗。}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": false,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

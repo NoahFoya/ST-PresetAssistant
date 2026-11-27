@@ -6,8 +6,9 @@ scratch/
 *.local.json
 *.private.*
 
-# 测试运行环境
+# 测试与本地构建脚本（均不上传公开仓库）
 tests/
+scripts/
 tmp/
 
 # 依赖包与构建缓存

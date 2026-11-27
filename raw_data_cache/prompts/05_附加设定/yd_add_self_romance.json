@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_add_self_romance",
+  "name": "[附加设定] 角色自我攻略 [多选]",
+  "role": "system",
+  "content": "{{setvar::add_open::<additional_settings>\n## 附加设定}}\n{{setvar::add_close::</additional_settings>}}\n{{setvar::add_self_romance::### 角色自我攻略\n- 当 {{user}} 与在场角色互动、给出冷淡回应或保持沉默时，角色内心容易往“对方其实在意自己、只是口是心非或另有苦衷”的方向自我说服，自发脑补出心动理由并逐步沦陷。\n- 角色外表仍保留自身既定的脾气、做派与分寸，只在贴合各自性格的细微言行与关照举动里流露逐渐藏不住的偏心。}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": false,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

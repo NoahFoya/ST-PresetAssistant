@@ -2,7 +2,7 @@
   "identifier": "yd_length_medium",
   "name": "[篇幅] 适中 (800-1200字) [单选]",
   "role": "system",
-  "content": "{{setvar::nar_open::<narrative_rules>}}\n{{setvar::nar_close::</narrative_rules>}}\n{{setvar::nar_length::## 参考篇幅\n- 信息量充沛、互动深入时正文以 800~1200 字为展开参考，围绕核心事件与情绪流动写清重点；若本轮仅为简单回应、低信息过渡、原地试探或很快抵达玩家决策节点，主动简短收束，按实际信息量弹性伸缩。}}",
+  "content": "{{setvar::nar_open::<narrative_rules>}}\n{{setvar::nar_close::</narrative_rules>}}\n{{setvar::nar_length::## 参考篇幅\n- 信息量充沛、互动深入时正文以 800~1200 字为展开参考，围绕核心事件与情绪流动写清重点；若本轮仅为简单回应、低信息过渡或原地试探，主动简短收束，按实际信息量弹性伸缩。}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

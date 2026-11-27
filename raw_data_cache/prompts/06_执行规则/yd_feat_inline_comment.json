@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_feat_inline_comment",
+  "name": "[格式要求] 正文批注 [多选]",
+  "role": "system",
+  "content": "{{setvar::out_header::## 格式要求}}\n{{setvar::out_comment::### 正文批注\n- 落笔前查阅 `<chat_history>` 中留存的过往批注，核对尚未回收的伏笔、仍然有效的状态备忘与此前互动反馈，在对应节点及时呼应或续记变化。\n- 随故事正文同步推进，仅当正文中出现以下明确节点之一时，紧随该段落或该轮交锋之后另起空行输出 1 条 `※ 标签：内容`（同处节点合并为 1 条）：① 立场、态度或局势发生鲜明转折，或出现强烈行为反差；② 出现言外之意、遮掩或话语试探等潜台词交锋；③ 新埋入、推进或当场回收伏笔与异常线索；④ 达成新约定，或发生关键物品、伤势与知情范围变动。\n- 按节点实质选用 `点评`（点破潜台词与转向判断）、`吐槽`（直白锐评错位与反差瞬间）、`伏笔`（标记线索埋设与回收）、`笔记`（记录跨轮约定与关键变更）等贴切标签。}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": false,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

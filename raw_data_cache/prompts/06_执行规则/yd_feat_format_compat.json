@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_feat_format_compat",
+  "name": "[格式要求] 外部格式兼容 [多选]",
+  "role": "system",
+  "content": "{{setvar::out_header::## 格式要求}}\n{{setvar::out_format_compat::### 外部格式兼容\n- 核查设定或前文是否约定了额外格式（如属性面板、变量更新 `<UpdateVariable>` 或专属标签），有则确保正文与各类附加格式各自成块、互不混杂，严格按原标签名、字段顺序与闭合要求在正文外完整输出；与其余格式要求功能重叠时优先保留设定或前文约定的格式。}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": true,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

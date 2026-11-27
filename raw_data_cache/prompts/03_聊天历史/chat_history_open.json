@@ -2,7 +2,7 @@
   "identifier": "chat_history_open",
   "name": "💬 历史会话 - 开始",
   "role": "system",
-  "content": "<chat_history>\n以下是目前为止的对话记录，其中已发生的实际行动与最新确立的状态默认延续，角色口头说辞、未兑现计划与主观假设不自动视作客观事实：",
+  "content": "<chat_history>\n以下是目前为止的对话记录，其中已发生的实际行动与最新确立的状态默认延续，角色口头说辞、伪装、未兑现计划与主观假设不自动视作客观事实：",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

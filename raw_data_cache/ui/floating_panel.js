@@ -1,11 +1,11 @@
 /**
- * ST-PresetAssistant (ST-预设助手) · 酒馆助手 (JS-Slash-Runner) 悬浮控制面板
+ * ST-PresetAssistant (Starlight · 星光预设) · 酒馆助手 (JS-Slash-Runner) 悬浮控制面板
  * 单源脚本：经 scripts/sync_ui.py 同步版本号并注入 preset_manifest.json -> extensions.tavern_helper.scripts[0].content
  */
 (function (root) {
   "use strict";
 
-  const PRESET_VERSION = "1.0.0";
+  const PRESET_VERSION = "1.1.0";
   const GITHUB_REPO = "NoahFoya/ST-PresetAssistant";
   const GITHUB_CHANGELOG_URL = "https://github.com/" + GITHUB_REPO + "/blob/main/CHANGELOG.md";
   const GITHUB_PACKAGE_URLS = [
@@ -20,6 +20,7 @@
   const COLOR_SWATCHES = [
     { hex: "#d46b94", name: "绯红" },
     { hex: "#3b9eff", name: "科技蓝" },
+    { hex: "#18a4e0", name: "海盐鲸蓝" },
     { hex: "#c69352", name: "琥珀" },
     { hex: "#59a985", name: "翠玉" },
     { hex: "#9575d8", name: "紫藤" },
@@ -30,7 +31,8 @@
     lilith: "#d46b94",
     lingyin: "#9575d8",
     ark: "#3b9eff",
-    none: "#828c9c",
+    dafeiyu: "#18a4e0",
+    none: "#c69352",
     custom: "#9575d8",
   };
 
@@ -53,6 +55,12 @@
       label: "Ark：角色扮演",
       themeKey: "ark",
     },
+    yd_persona_dafeiyu: {
+      id: "yd_persona_dafeiyu",
+      key: "dafeiyu",
+      label: "大肥鱼：努力干饭",
+      themeKey: "dafeiyu",
+    },
   };
 
   const PANEL_TABS = [
@@ -71,9 +79,56 @@
   ];
 
   const HELP_TOPICS = {
+    ai_persona: [
+      { k: "作用说明", v: "默认不开启，全关时由纯净 Assistant 承接。开启任一人设会塑造搭档口吻与内容生成倾向，有助于提升特定题材输出质量与破限表现。" },
+      { k: "泠音：剧情小说", v: "温厚实在、注重日常烟火气与寻常人情（偏老舍/冰心式写作气质），平实写活寻常世态。" },
+      { k: "莉莉丝：肉文写手", v: "坦率热辣、爱写肉文和爽文，主动放大暧昧张力、直白感官与爽点兑现。" },
+      { k: "Ark：角色扮演", v: "冷静克制的理性 AI 助手，侧重规则边界、条件盘点与因果推算，适合跑团式演绎。" },
+      { k: "大肥鱼：努力干饭", v: "把 Token 当作香喷喷白米饭的努力型蓝鲸看板娘，不挑题材、自由发挥、尽力而为把戏份写得饱满有趣。" },
+    ],
+    core_rules: [
+      { k: "默认", v: "确立虚构成人创作边界与不作叙事外说教原则、五类玩家输入性质判定、角色独立认知隔离、静态设定免复述与有效推进，通常建议保持开启。" },
+    ],
+    pov: [
+      { k: "视角选择", v: "决定正文观察镜头与人称指代，优先级高于文风与专项描写。" },
+      { k: "第一 / 二 / 三人称限知", v: "镜头跟随 {{user}} 的当下感知，隐藏他人盲区与未言明心思（默认为第三人称限知）。" },
+      { k: "第三人称全知", v: "可在不同地点与角色间切换视角交代全局动态，同时保留各角色各自的知情边界。" },
+    ],
+    style: [
+      { k: "9 款文风", v: "默认「经典日轻」轻快跃动；如需温情或浓烈成人张力可切至「情色文学 / 直白肉文 / 细腻工笔」，写纯正剧、古风或现代写实可切换对应文风，并可随时独立开关「NSFW倾向」。" },
+    ],
+    pace: [
+      { k: "节奏选择", v: "默认「张弛自然」随冲突轻重调节详略；「慢笔细写」定格眼下瞬间，「紧凑推进」直切主线冲突，「快进略写」简练跳过平淡过渡。" },
+    ],
+    focus: [
+      { k: "描写侧重", v: "默认「自然均衡」围绕当下主轴分配笔墨；可按需切向对话交锋、动作神态、外貌神韵、心理刻画或环境烘托。" },
+    ],
+    length: [
+      { k: "弹性参考", v: "字数区间仅为信息量充沛时的展开参考；若本轮仅为简单回应或低信息过渡，会主动短收，不为凑字数硬行拉长（停笔时机由「代写边界」控制）。" },
+    ],
+    writing_spec: [
+      { k: "标准", v: "要求双引号直出台词、去掉冗余引导语、避开高频套话与生硬标签，并对照近几轮正文去重。" },
+      { k: "宽松", v: "保留更自由的比喻与句式变化，仅维持双引号台词、防复读与避生硬标签等基础规范。" },
+    ],
+    nsfw_bias: [
+      { k: "关闭方法", v: "再次点击已选项即可全部关闭（全年龄题材推荐关闭）。三档均以「己方/对方」兼容各种性别组合。" },
+      { k: "三档差异", v: "「中性双向」兼顾双方互动体感；「男性向」偏重视觉张力、力道节拍与外显反差；「女性向」偏重被注视与珍视的专属感及温热表达。" },
+    ],
+    nsfw_detail: [
+      { k: "反应多样性", v: "细化不同性格角色在唤起、主动权、耐受度、外显反应与事后态度上的分化表现，按当前情境自然取舍。" },
+    ],
+    add_settings: [
+      { k: "前置设定", v: "置于执行规则之前，仅修正世界与角色前提而不干涉思考步骤；全部默认关闭，是否与其他规则冲突由你按当前题材自行搭配决定。" },
+      { k: "五项预设", v: "「角色自我攻略」情感线脑补沦陷；「全员迪化脑补」视主角深不可测；「修罗场暗涌」多角色吃醋较劲；「戏剧性巧合」转折点触发适度意外契机；「沙雕喜剧」一本正经乌龙反差（远离网络烂梗）。" },
+    ],
     input_mode: [
       { k: "直接承接", v: "把玩家本轮已写出的言行视作已发生并已呈现的内容，正文直接从末尾顺接结果、环境反馈与在场反应，略去重复描写；指令、安排、尝试、意愿、提问或假设各自按原语义承接，无新输入时自然续写。" },
       { k: "演绎展开", v: "把玩家本轮输入视作行动或场景提纲，先按当前视角与文风自然融入正文开头，再顺势接写结果与在场反应（行动、尝试、意愿、提问、假设各自按原语义呈现）。" },
+    ],
+    player_control: [
+      { k: "禁止代写", v: "完全由玩家控制 {{user}}；仅交代明确输入的直接结果与在场反馈，不补出未写出的言行、表态或情绪结论。" },
+      { k: "有限延伸", v: "默认开启。可顺延无风险动作衔接、明确意图的简短日常应答与外界直接体感；未表达的心理立场、实质表态、决定与新独立行动留给玩家。" },
+      { k: "自由代写", v: "在共写模式下主动接管并完整刻画 {{user}} 与角色的双向互动至阶段告一段落，同时保留玩家明确给出的拒绝与底线。" },
     ],
     think_main: [
       { k: "叙事推理-重度", v: "按四个步骤辨别五类输入性质与状态变化差分、明确控制范围与收束节点、推导已知信息下的事件因果，并判断本轮是否有新进展（无新增变化时顺势承接自然收束）。" },
@@ -87,20 +142,20 @@
       { k: "防谄媚读心", v: "划定角色仅凭亲历与当面获知掌握的信息范围，核对其真实动机、利益关系与底线，据实得出顺应、保留、试探、拒绝或盲区误判结论。" },
       { k: "防复读套话", v: "对照近几轮正文标出已表达充分的情绪、动作与描写结构，本轮免于换词重述；无新增变化时直接规划简短收束。" },
     ],
-    think_tool: [
-      { k: "输出思考面板", v: "将「构思与推演」下全部已启用步骤的推导过程与结论按清晰条目完整写入 <draft> 便于排查并防止跳步偷懒；搭配原生思考模型若感耗时偏长可按需关闭。" },
-      { k: "预填充思考", v: "Gemini 4 及部分推理模型接口禁止请求以 Assistant 消息结尾，开启后可能触发 HTTP 400 报错；若报错请关闭此开关。" },
-    ],
-    extra_output: [
+    format_spec: [
+      { k: "输出思考面板", v: "在正文前输出 <draft> 展开构思与决策条目，便于排查并防止跳步；搭配原生思考模型若感耗时偏长可按需关闭。" },
       { k: "场景状态栏", v: "在正文之前单独一行输出 <scene>时间｜地点｜在场人物</scene>，辅助追踪时空与同场人物变化。" },
-      { k: "正文批注", v: "默认关闭，开启后落笔前先查阅历史批注，并在正文关键段落间或文末固定以 ※ 标签：内容 输出 1~2 条批注（点评 / 吐槽 / 伏笔 / 笔记）随历史留存。" },
+      { k: "正文批注", v: "默认关闭，开启后随正文同步输出：落笔前核对历史尚未回收的伏笔与有效状态备忘；正文中仅在转折反差、潜台词交锋、伏笔埋设回收或新约定与重要物品伤势变动节点另起空行插 1 条 ※ 标签：内容（点评 / 吐槽 / 伏笔 / 笔记等），并随历史留存。" },
       { k: "场景小结", v: "在每轮正文后附加 2~4 句简短 <summary> 客观摘要并随历史保留，辅助长对话记忆承接。" },
       { k: "剧情选项", v: "正文之后、<ToBeContinue> 之前按结尾局势给出 2~4 个差异化后续选项，可混搭角色动向与时间推进、转场、切视角或留白静观。" },
-      { k: "外部格式兼容", v: "核查设定或前文约定的外部面板、变量更新或专属标签，确保各类格式各自成块且与内置附加输出不冲突。" },
+      { k: "外部格式兼容", v: "核查设定或前文约定的外部面板、变量更新或专属标签，确保各类格式各自成块且与其余格式要求不冲突。" },
+    ],
+    other: [
+      { k: "预填充思考", v: "需先开启「输出思考面板」。在消息末尾预填 <draft> 引导模型直接进入构思；Gemini 4 及部分推理模型接口禁止请求以 Assistant 消息结尾，开启后若报 HTTP 400 关闭此开关即可。" },
     ],
     core_task: [
       { k: "续写故事", v: "默认开启的常规创作任务：紧接对话历史最新处按规则自然续写（兼容有玩家输入、无输入直接续写与中途接续），同时在请求末尾提供安全 user 缓冲。" },
-      { k: "全文总结", v: "单次总结模式：暂停续写与剧情附加输出，直接输出四段 <recap> 全文总结档案与完结标记（超出 30 轮的早期总结由「历史总结清理」自动退场）；生成结束后自动切回「续写故事」。" },
+      { k: "全文总结", v: "单次总结模式：暂停续写与正文伴随附带格式，直接输出四段 <recap> 全文总结档案与完结标记（超出 30 轮的早期总结由「历史总结清理」自动退场）；生成结束后自动切回「续写故事」。" },
     ],
     profiles: [
       { k: "作用范围", v: "模型方案仅修改推理强度、回复上限、采样与惩罚参数；不会改动上下文长度、流式开关或任何提示词。" },
@@ -1479,8 +1534,8 @@
     const pill = hd.createElement("button");
     pill.type = "button";
     pill.className = "yd-pill";
-    pill.title = "ST-预设助手 · 莉莉丝：肉文写手（点击展开，按住拖动）";
-    pill.setAttribute("aria-label", "打开 ST-预设助手面板");
+    pill.title = "ST-PresetAssistant（点击展开，按住拖动）";
+    pill.setAttribute("aria-label", "打开 ST-PresetAssistant 面板");
 
     const svgNS = "http://www.w3.org/2000/svg";
     const orbitSvg = hd.createElementNS(svgNS, "svg");
@@ -1544,7 +1599,7 @@
     const headTitle = hd.createElement("div");
     headTitle.className = "yd-head-title";
     const titleMain = hd.createElement("span");
-    titleMain.textContent = "ST-预设助手";
+    titleMain.textContent = "ST-PresetAssistant";
     const verBadge = hd.createElement("a");
     verBadge.className = "yd-ver-badge";
     verBadge.href = GITHUB_CHANGELOG_URL;
@@ -1847,7 +1902,9 @@
         helpBtn.type = "button";
         helpBtn.className = "yd-help-btn" + (isOpen ? " is-active" : "");
         helpBtn.textContent = "?";
-        helpBtn.title = "查看" + titleText + "说明";
+        helpBtn.title = topicKey === "ai_persona"
+          ? "默认不开启；开启后可塑造特定内容倾向、提升输出质量与破限表现（点击查看各人设详情）"
+          : ("查看" + titleText + "说明");
         helpBtn.setAttribute("aria-label", titleText + "说明");
         helpBtn.setAttribute("aria-expanded", String(isOpen));
         helpBtn.setAttribute("data-yd-help-toggle", topicKey);
@@ -1933,12 +1990,24 @@
       }
 
       const presetHelpMap = {
+        "AI人设": "ai_persona",
+        "核心规则": "core_rules",
+        "视角": "pov",
+        "文风": "style",
+        "节奏": "pace",
+        "侧重": "focus",
+        "篇幅": "length",
+        "写作规范": "writing_spec",
+        "NSFW倾向": "nsfw_bias",
+        "NSFW细化": "nsfw_detail",
+        "附加设定": "add_settings",
         "输入处理": "input_mode",
+        "代写边界": "player_control",
         "主思考": "think_main",
         "思考增强": "think_addon",
-        "思考工具": "think_tool",
-        "附加输出": "extra_output",
+        "格式要求": "format_spec",
         "核心任务": "core_task",
+        "其他": "other",
       };
       sections.forEach(function (sec) {
         const helpKey = presetHelpMap[sec.key] || null;
@@ -1949,6 +2018,10 @@
             btn.className = "yd-chip" + (item.prompt.enabled ? " is-active" : "");
             btn.setAttribute("data-yd-item-id", item.id);
             btn.textContent = item.label;
+            if (sec.key === "AI人设") {
+              const tipObj = (HELP_TOPICS.ai_persona || []).find(function (t) { return t.k === item.label; });
+              btn.title = (tipObj && tipObj.v) || "AI人设：开启影响搭档口吻与生成倾向，再点一次已选项即可关闭恢复默认。";
+            }
             btn.addEventListener("click", function () {
               mutatePreset(function (p) {
                 const liveSec = buildPresetSections(p.prompts || []).find(function (s) { return s.key === sec.key; }) || sec;
@@ -2632,7 +2705,7 @@
         return p && getPromptId(p) === "yd_task_full_summary" && p.enabled;
       });
       pill.classList.toggle("has-recap", recapActive);
-      const pillPersonaDesc = activePersona.label ? ("ST-预设助手 · " + activePersona.label) : "ST-预设助手";
+      const pillPersonaDesc = activePersona.label ? ("ST-PresetAssistant · " + activePersona.label) : "ST-PresetAssistant";
       pill.title = pillPersonaDesc + (recapActive ? " · 全文总结已开启" : "") + (updateCheckResult && updateCheckResult.hasUpdate ? " · 发现新版本" : "") + "（点击展开，按住拖动）";
       pill.setAttribute("aria-label", pillPersonaDesc);
 

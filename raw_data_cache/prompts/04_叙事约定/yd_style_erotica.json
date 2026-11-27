@@ -6,7 +6,7 @@
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,
-  "enabled": true,
+  "enabled": false,
   "injection_position": 0,
   "injection_depth": 4,
   "injection_order": 100

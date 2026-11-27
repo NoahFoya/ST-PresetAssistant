@@ -2,7 +2,7 @@
   "identifier": "yd_length_long",
   "name": "[篇幅] 较长 (1200-1800字) [单选]",
   "role": "system",
-  "content": "{{setvar::nar_open::<narrative_rules>}}\n{{setvar::nar_close::</narrative_rules>}}\n{{setvar::nar_length::## 参考篇幅\n- 多方互动或复杂场景信息量充沛时正文以 1200~1800 字为展开参考，通过对话层次、行动博弈与实质进展充实画面；场景信息量较轻或抵达玩家决策节点时直接短收，不靠堆砌景物或同义扩写凑字数。}}",
+  "content": "{{setvar::nar_open::<narrative_rules>}}\n{{setvar::nar_close::</narrative_rules>}}\n{{setvar::nar_length::## 参考篇幅\n- 多方互动或复杂场景信息量充沛时正文以 1200~1800 字为展开参考，通过对话层次、行动博弈与实质进展充实画面；场景信息量较轻时直接短收，不靠堆砌景物或同义扩写凑字数。}}",
   "system_prompt": false,
   "marker": false,
   "forbid_overrides": false,

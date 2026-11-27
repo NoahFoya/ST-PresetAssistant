@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_add_settings_render",
+  "name": "🧩 附加设定 - 汇总",
+  "role": "system",
+  "content": "{{getvar::add_open}}\n{{getvar::add_self_romance}}\n\n{{getvar::add_dihua}}\n\n{{getvar::add_shura}}\n\n{{getvar::add_coincidence}}\n\n{{getvar::add_comedy}}\n{{getvar::add_close}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": true,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

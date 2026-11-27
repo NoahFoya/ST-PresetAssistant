@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_add_dihua",
+  "name": "[附加设定] 全员迪化脑补 [多选]",
+  "role": "system",
+  "content": "{{setvar::add_open::<additional_settings>\n## 附加设定}}\n{{setvar::add_close::</additional_settings>}}\n{{setvar::add_dihua::### 全员迪化脑补\n- 周围角色默认 {{user}} 深不可测、举止别有深意：无论 {{user}} 只是随口接话、随意行事还是单纯沉默旁观，都容易被对方反复拆解成高人布局、暗中敲打或精妙试探。\n- 角色会在心里自行补全整套严丝合缝的逻辑链条，在敬畏、紧张或佩服中主动配合，把普通场面脑补出暗流涌动或高深莫测的戏剧感。}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": false,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}

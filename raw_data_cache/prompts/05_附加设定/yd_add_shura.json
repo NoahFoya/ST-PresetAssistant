@@ -1,0 +1,13 @@
+{
+  "identifier": "yd_add_shura",
+  "name": "[附加设定] 修罗场暗涌 [多选]",
+  "role": "system",
+  "content": "{{setvar::add_open::<additional_settings>\n## 附加设定}}\n{{setvar::add_close::</additional_settings>}}\n{{setvar::add_shura::### 修罗场暗涌\n- 多位与 {{user}} 存在交集的角色内心皆暗藏独一份的占有欲或偏执好感；同场共处或提及彼此动向时，空气里天然浮动着不动声色的醋意、试探与较劲。\n- 角色之间在维持自身体面与表面分寸的同时，会在话锋机锋、视线停留、站位贴近或顺手争夺 {{user}} 注意力的小动作里暗暗压过对方一头。}}",
+  "system_prompt": false,
+  "marker": false,
+  "forbid_overrides": false,
+  "enabled": false,
+  "injection_position": 0,
+  "injection_depth": 4,
+  "injection_order": 100
+}
